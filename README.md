@@ -1,2 +1,2 @@
 # Loja do Igor
-Site CRUD de uma loja feito com nodejs e mysql.
+RESTful API de uma loja feito com nodejs e mysql.
