@@ -1,2 +1,2 @@
 # Loja do Igor
-Site de uma loja feito com nodejs.
+Site CRUD de uma loja feito com nodejs e mysql.
