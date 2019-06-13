@@ -4,50 +4,20 @@ const FuncionariosDAO = require("../DAO/FuncionariosDAO")
 const bcrypt = require("bcrypt")
 
 module.exports = (app) => {
-    app.post("/cadastro/funcionario", (req, res) => {
+    app.post("api/cadastro/funcionario", (req, res) => {
         console.log("Cadastrando Funcionario...")
 
-        req.assert("cpf", "É necessário informar o cpf.").notEmpty()
-        req.assert("cpf", "O CPF deve ser um número inteiro.").isInt()
-        req.assert("cpf", "O CPF deve conter apenas 14 caractéres.").isLength({
-            min: 11,
-            max: 11
-        })
+        validaCPF(req)
+        validaNome(req)
+        validaEmail(req)
+        validaSenha(req)
+        validaSalario(req)
+        validaCidade(req)
+        validaNivelAcesso(req)
+        validaEndereco(req)
+        validaTelefone(req)
+        validaDataNasc(req)
 
-        req.assert("nome", "É necessário informar o nome.").notEmpty()
-
-        req.assert("email", "É necessário informar o email.").notEmpty()
-        req.assert("email", "O email informado está em um formato inválido.").isEmail()
-
-        req.assert("senha", "É necessário informar a senha.").notEmpty()
-        req.assert("senha", "A senha deve ter ao menos 8 caractéres.").isLength({
-            min: 8
-        })
-
-        req.assert("salario", "É necessário informar o salário.").notEmpty()
-        req.assert("salario", "O salário deve estar no formato decimal, exemplo: 1.2 ou 452.12").isDecimal()
-
-        req.assert("cidade", "É necessário informar o nome da cidade.").notEmpty()
-        req.assert("cidade", "O nome da cidade deve conter apenas lentras.").isAlpha()
-
-        req.assert("nivelAcesso", "É necessário informar o nível de acesso.").notEmpty()
-        req.assert("nivelAcesso", "O nível de acesso deve ser um número inteiro.").isInt()
-
-        if (req.body.endereco) {
-            req.assert("endereco", "O endereço pode conter no máximo 255 caractéres.").isLength({
-                max: 255
-            })
-        }
-
-        if (req.body.telefone) {
-            req.assert("telefone", "O número de telefone pode conter no máximo 15 caractéres.").isLength({
-                max: 15
-            })
-        }
-
-        if (req.body.dataNasc) {
-            req.assert("dataNasc", "A data de nascimento deve estar no formato aaaa-mm-dd.").isISO8601()
-        }
 
         const errosValidacao = req.validationErrors()
         if (errosValidacao) {
@@ -60,13 +30,13 @@ module.exports = (app) => {
 
         const hashSenha = ""
         hashingSenha(req.body.senha)
-        .then(
-            (hash)=>{
-                hashSenha = hash
-            }
-        )
+            .then(
+                (hash) => {
+                    hashSenha = hash
+                }
+            )
         cacth(
-            (erro)=>{
+            (erro) => {
                 res.status(500).json({
                     sucesso: false,
                     erro
@@ -84,8 +54,6 @@ module.exports = (app) => {
             return
         }
 
-        const dataDeHoje = dataDeHojeParaMySQL()
-
         const funcionario = {
             cpf: req.body.cpf,
             nome: req.body.nome,
@@ -94,8 +62,8 @@ module.exports = (app) => {
             salario: req.body.salario,
             idCidade: cidadeID,
             nivelAcesso: req.body.nivelAcesso,
-            dataCriacao: dataDeHoje,
-            dataAlteracao: dataDeHoje,
+            dataCriacao: dataDeHoje(),
+            dataAlteracao: dataDeHoje(),
             endereco: req.body.endereco,
             telefone: req.body.telefone,
             dataNasc: req.body.dataNasc,
@@ -131,16 +99,15 @@ function hashingSenha(senha) {
             if (err) {
                 console.log(err)
                 reject(new Error("Erro no hashing."))
-            }
-            else{
+            } else {
                 resolve(hash)
             }
         });
     })
 }
 
-function dataDeHojeParaMySQL() {
-    return new Date().toISOString().slice(0, 19).replace('T', ' ')
+function dataDeHoje() {
+    return new Date().toISOString()
 }
 
 function idCidadePeloNome(nomeCidade) {
@@ -157,4 +124,113 @@ function idCidadePeloNome(nomeCidade) {
                 return null
             }
         )
+}
+
+function validaNotNull(req, atributo){
+    req.assert(atributo, `É necessário informar o atributo ${atributo}.`).notEmpty()
+}
+
+function validaFixoChars(req, atributo, valor){
+    req.assert(atributo, `O atributo ${atributo} deve conter ${valor} caractéres.`).isLength({
+        min: valor,
+        max: valor
+    })
+}   
+
+function validaMaxChars(req, atributo, maximo) {
+    req.assert(atributo, `O atributo ${atributo} deve conter no máximo ${maximo} caractéres.`).isLength({
+        max: maximo
+    })
+}
+
+function validaMinMaxChars(req, atributo, minimo){
+    req.assert(atributo, `O atributo ${atributo} deve conter no mínimo ${minimo} e no máximo ${maximo} caractéres.`).isLength({
+        min: minimo,
+        max: maximo
+    })
+}
+
+function validaDecimal(req, atributo, minimo, maximo) {
+    if (!minimo) {
+        minimo = -1.79769e+308
+    }
+
+    if (!maximo) {
+        maximo = 1.79769e+308
+    }
+
+    req.assert(atributo, `O atributo ${atributo} deve ser um número de ponto flutuante, com um "." separando a parte inteira da parte decimal, e conter um valor entre ${minimo} e ${maximo}`).isFloat({
+        min: minimo,
+        max: maximo
+    })
+}
+
+function validaInteiro(req, atributo, minimo, maximo) {
+    if (!minimo) {
+        minimo = -9223372036854775808
+    }
+
+    if (!maximo) {
+        maximo = 9223372036854775808
+    }
+
+    req.assert(atributo, `O atributo ${atributo} deve ser um número inteiro e conter um valor entre ${minimo} e ${maximo}`).isFloat({
+        min: minimo,
+        max: maximo
+    })
+}
+
+function validaCPF(req) {
+    validaNotNull(req, "cpf")
+    validaFixoChars(req, "cpf", 14)
+}
+
+function validaNome(req) {
+    validaNotNull(req, "nome")
+    validaMaxChars(req, "nome", 100)
+}
+
+function validaEmail(req) {
+    validaNotNull(req, "email")
+    validaMaxChars(req, "email", 255)
+    req.assert("email", "O atributo email informado está em um formato inválido.").isEmail()
+}
+
+function validaSenha(req) {
+    validaNotNull(req, "senha")
+    validaMinMaxChars(req, "senha", 8, 255)
+}
+
+function validaSalario(req) {
+    validaNotNull(req, "salario")
+    validaDecimal(req, "salario", 0)
+}
+
+function validaCidade(req) {
+    validaNotNull(req, "cidade")    
+    validaMaxChars(req, "cidade", 30)
+}
+
+function validaNivelAcesso(req) {
+    validaNotNull(req, "nivelAcesso")    
+    validaInteiro(req, "nivelAcesso", 0, 2)
+}
+
+function validaEndereco(req) {
+    if (req.body.endereco) {
+        validaMaxChars(req, "endereco", 255)
+    }
+}
+
+function validaTelefone(req) {
+    if (req.body.telefone) {
+       validaMaxChars(req, "telefone", 15)
+    }
+}
+
+function validaDataNasc(req) {
+    if (req.body.dataNasc) {
+        req.assert("dataNasc", "O atributo dataNasc deve estar no formato aaaa-mm-dd.").isISO8601()
+        validaMaxChars(req, "dataNasc", 10)
+    }
 }
