@@ -17,7 +17,6 @@ CREATE TABLE `clientes` (
     `CPF` VARCHAR(14) NOT NULL,
     `nome` VARCHAR(100) NOT NULL,
     `email` VARCHAR(255) NOT NULL,
-	`senha` VARCHAR(255) NOT NULL,
     `idCidade` INT(11) NOT NULL,
 	`dataAlteracao` DATE NOT NULL,
 	`dataCriacao` DATE NOT NULL,
