@@ -1,7 +1,16 @@
-const dbConnection = require("../db")
+const bcrypt = require("bcrypt")
+
+const dbConnection = require("../Banco de Dados")
+
 const CidadesDAO = require("../DAO/CidadesDAO")
 const FuncionariosDAO = require("../DAO/FuncionariosDAO")
-const bcrypt = require("bcrypt")
+
+const Cidades = 
+
+const { check } = require('express-validator/check');
+const customValidation = [
+
+]
 
 module.exports = (app) => {
     app.post("api/cadastro/funcionario", (req, res) => {
@@ -18,7 +27,6 @@ module.exports = (app) => {
         validaTelefone(req)
         validaDataNasc(req)
 
-
         const errosValidacao = req.validationErrors()
         if (errosValidacao) {
             res.status(400).json({
@@ -28,28 +36,20 @@ module.exports = (app) => {
             return
         }
 
-        const hashSenha = ""
-        hashingSenha(req.body.senha)
-            .then(
-                (hash) => {
-                    hashSenha = hash
-                }
-            )
-        cacth(
-            (erro) => {
-                res.status(500).json({
-                    sucesso: false,
-                    erro
-                })
-                return
-            }
-        )
+        let hashSenha = ""
 
-        const cidadeID = idCidadePeloNome(req.body.cidade)
-        if (!cidadeID) {
+        const cidade = (buscarCidade(req.body.cidade)).id
+        if (cidade == null) {
             res.status(500).json({
                 sucesso: false,
                 erro: "Erro ao buscar a cidade."
+            })
+            return
+        }
+        else if(cidade.length == 0){
+            res.status(400).json({
+                sucesso: false,
+                erro: "Cidade não está cadastrada."
             })
             return
         }
@@ -82,7 +82,7 @@ module.exports = (app) => {
             )
             .catch(
                 (erro) => {
-                    console.log(erro)
+                    console.error(erro)
                     res.send(500).json({
                         sucesso: false,
                         erro: "Erro ao cadastrar o funcionario."
@@ -93,49 +93,36 @@ module.exports = (app) => {
     })
 }
 
-function hashingSenha(senha) {
-    return new Promise((resolve, reject) => {
-        bcrypt.hash(senha, 10, (err, hash) => {
-            if (err) {
-                console.log(err)
-                reject(new Error("Erro no hashing."))
-            } else {
-                resolve(hash)
-            }
-        });
-    })
-}
-
 function dataDeHoje() {
     return new Date().toISOString()
 }
 
-function idCidadePeloNome(nomeCidade) {
+function buscarCidade(nome) {
     const cidadesDAO = new CidadesDAO(dbConnection)
-    cidadesDAO.getID(nomeCidade)
+    cidadesDAO.busca(nome)
         .then(
-            (id) => {
-                return id
+            (cidade) => {
+                return cidade
             }
         )
         .catch(
             (erro) => {
-                console.log(erro)
+                console.error(erro)
                 return null
             }
         )
 }
 
-function validaNotNull(req, atributo){
+function validaNotNull(req, atributo) {
     req.assert(atributo, `É necessário informar o atributo ${atributo}.`).notEmpty()
 }
 
-function validaFixoChars(req, atributo, valor){
+function validaFixoChars(req, atributo, valor) {
     req.assert(atributo, `O atributo ${atributo} deve conter ${valor} caractéres.`).isLength({
         min: valor,
         max: valor
     })
-}   
+}
 
 function validaMaxChars(req, atributo, maximo) {
     req.assert(atributo, `O atributo ${atributo} deve conter no máximo ${maximo} caractéres.`).isLength({
@@ -143,7 +130,7 @@ function validaMaxChars(req, atributo, maximo) {
     })
 }
 
-function validaMinMaxChars(req, atributo, minimo){
+function validaMinMaxChars(req, atributo, minimo) {
     req.assert(atributo, `O atributo ${atributo} deve conter no mínimo ${minimo} e no máximo ${maximo} caractéres.`).isLength({
         min: minimo,
         max: maximo
@@ -207,12 +194,12 @@ function validaSalario(req) {
 }
 
 function validaCidade(req) {
-    validaNotNull(req, "cidade")    
+    validaNotNull(req, "cidade")
     validaMaxChars(req, "cidade", 30)
 }
 
 function validaNivelAcesso(req) {
-    validaNotNull(req, "nivelAcesso")    
+    validaNotNull(req, "nivelAcesso")
     validaInteiro(req, "nivelAcesso", 0, 2)
 }
 
@@ -224,7 +211,7 @@ function validaEndereco(req) {
 
 function validaTelefone(req) {
     if (req.body.telefone) {
-       validaMaxChars(req, "telefone", 15)
+        validaMaxChars(req, "telefone", 15)
     }
 }
 

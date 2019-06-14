@@ -3,17 +3,17 @@ module.exports = class CidadesDAO {
         this._connection = connection
     }
 
-    getID(name) {
+    busca(nome) {
         return new Promise((resolve, reject) => {
-            this._connection.query("SELECT id FROM cidades WHERE name=?",
-                [name],
-                (error, results) => {
-                    if (error) {
-                        reject(new Error(error))
+            this._connection.query("SELECT * FROM cidades WHERE nome=?",
+                [nome],
+                (erro, cidade) => {
+                    if (erro) {
+                        reject(new Error(erro))
                         return
                     }
 
-                    resolve(results)
+                    resolve(cidade)
                 })
         })
     }
