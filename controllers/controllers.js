@@ -118,7 +118,7 @@ function validaDataNasc() {
     let validacoes = []
     validacoes.push(validaNotNull("dataNasc"))
     validacoes.push(validaMaxChars("dataNasc", 10))
-    validacoes.push(body("dataNasc", "O atributo dataNasc deve estar no formato aaaa-mm-dd").isISO8601())
+    validacoes.push(validaDataISO8601("dataNasc"))
     return validacoes
 }
 
@@ -174,4 +174,8 @@ function validaInteiro(atributo, minimo, maximo) {
         min: minimo,
         max: maximo
     })
+}
+
+function validaDataISO8601(atributo){
+    return body(abtributo, `O atributo ${atributo} deve estar no formato aaaa-mm-dd, onde a é o ano, m é o mês e d é o dia.`).isISO8601()
 }

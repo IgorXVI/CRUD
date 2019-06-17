@@ -2,8 +2,8 @@ const bcrypt = require("bcrypt")
 
 const dbConnection = require("../Banco de Dados")
 
-const CidadesDAO = require("./DAO/CidadesDAO")
-const FuncionariosDAO = require("./DAO/FuncionariosDAO")
+const CidadesDAO = require("../DAO/CidadesDAO")
+const FuncionariosDAO = require("../DAO/FuncionariosDAO")
 
 router.post("/cadastro/funcionario", (req, res) => {
     console.log("Cadastrando Funcionario...")
