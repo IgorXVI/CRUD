@@ -3,9 +3,9 @@ module.exports = class CidadesDAO {
         this._connection = connection
     }
 
-    busca(nome) {
+    buscaPorNome(nome) {
         return new Promise((resolve, reject) => {
-            this._connection.query("SELECT * FROM cidades WHERE nome=?",
+            this._connection.get("SELECT * FROM cidades WHERE nome=?",
                 [nome],
                 (erro, cidade) => {
                     if (erro) {

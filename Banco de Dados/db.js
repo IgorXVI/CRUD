@@ -27,9 +27,12 @@ CREATE TABLE IF NOT EXISTS clientes (
     idCidade INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-    endereco VARCHAR(255),
-    telefone VARCHAR(15),
-    dataNasc VARCHAR(10),
+    bairro VARCHAR(25) NOT NULL,
+    rua VARCHAR(25) NOT NULL,
+    numeroCasa INTEGER NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    dataNasc VARCHAR(10) NOT NULL,
+    complemento VARCHAR(255),
     FOREIGN KEY (idCidade) REFERENCES cidades(id)
 )
 `
@@ -45,9 +48,12 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     nivelAcesso INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-    endereco VARCHAR(255),
-    telefone VARCHAR(15),
-    dataNasc VARCHAR(10),
+    bairro VARCHAR(25) NOT NULL,
+    rua VARCHAR(25) NOT NULL,
+    numeroCasa INTEGER NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    dataNasc VARCHAR(10) NOT NULL,
+    complemento VARCHAR(255),
     FOREIGN KEY (idCidade) REFERENCES cidades(id)
 )
 `
@@ -60,8 +66,11 @@ CREATE TABLE IF NOT EXISTS fornecedores (
 	idCidade INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-    endereco VARCHAR(255),
-    telefone VARCHAR(15),
+    telefone VARCHAR(15) NOT NULL,
+    bairro VARCHAR(25) NOT NULL,
+    rua VARCHAR(25) NOT NULL,
+    numeroCasa INTEGER NOT NULL,
+    complemento VARCHAR(255),
 	FOREIGN KEY (idCidade) REFERENCES cidades(id)
 )
 `
@@ -76,9 +85,9 @@ CREATE TABLE IF NOT EXISTS produtos (
 	dataCriacao VARCHAR(24) NOT NULL,
 	imagem BLOB NOT NULL,
     descricao TEXT NOT NULL,
-    garantia INTEGER,
-	dataFabric VARCHAR(10),
-	dataValidade VARCHAR(10),
+    garantia INTEGER NOT NULL,
+	dataFabric VARCHAR(10) NOT NULL,
+	dataValidade VARCHAR(10) NOT NULL,
 	FOREIGN KEY (idFornecedor) REFERENCES fornecedores(id)
 )
 `
