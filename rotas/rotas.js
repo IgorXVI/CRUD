@@ -1,75 +1,66 @@
+const express = require('express');
 const bcrypt = require("bcrypt")
 
-const dbConnection = require("../Banco de Dados")
-
 const CidadesDAO = require("../DAO/CidadesDAO")
-const FuncionariosDAO = require("../DAO/FuncionariosDAO")
+const funcionarioController = require("../controllers/funcionariosController")
 
-router.post("/cadastro/funcionario", (req, res) => {
+const router = express.Router();
+
+router.post("/cadastro/funcionarios", funcionarioController.validaCadastro(), (req, res) => {
     console.log("Cadastrando Funcionario...")
 
     const errosValidacao = req.validationErrors()
-    if (errosValidacao) {
+    if(errosValidacao){
         res.status(400).json({
-            sucesso: false,
             errosValidacao
         })
+        fim()
         return
     }
 
-    let hashSenha = ""
+    res.status(200).end()
+    fim()
 
-    const cidade = (buscarCidade(req.body.cidade)).id
-    if (cidade == null) {
-        res.status(500).json({
-            sucesso: false,
-            erro: "Erro ao buscar a cidade."
-        })
-        return
-    } else if (cidade.length == 0) {
-        res.status(400).json({
-            sucesso: false,
-            erro: "Cidade não está cadastrada."
-        })
-        return
-    }
+    // let hashSenha = ""
 
-    const funcionario = {
-        cpf: req.body.cpf,
-        nome: req.body.nome,
-        email: req.body.email,
-        senha: hashSenha,
-        salario: req.body.salario,
-        idCidade: cidadeID,
-        nivelAcesso: req.body.nivelAcesso,
-        dataCriacao: dataDeHoje(),
-        dataAlteracao: dataDeHoje(),
-        endereco: req.body.endereco,
-        telefone: req.body.telefone,
-        dataNasc: req.body.dataNasc,
-    }
+    // const cidade = (buscarCidade(req.body.cidade)).id
+    // if (cidade == null) {
+    //     res.status(500).json({
+    //         sucesso: false,
+    //         erro: "Erro ao buscar a cidade."
+    //     })
+    //     return
+    // } else if (cidade.length == 0) {
+    //     res.status(400).json({
+    //         sucesso: false,
+    //         erro: "Cidade não está cadastrada."
+    //     })
+    //     return
+    // }
 
-    const funcionariosDAO = new FuncionariosDAO(dbConnection)
-    funcionariosDAO.add(funcionario)
-        .then(
-            (funcionarioCadastrado) => {
-                res.send(201).json({
-                    sucesso: true,
-                    funcionarioCadastrado
-                })
-                return
-            }
-        )
-        .catch(
-            (erro) => {
-                console.error(erro)
-                res.send(500).json({
-                    sucesso: false,
-                    erro: "Erro ao cadastrar o funcionario."
-                })
-                return
-            }
-        )
+    // const funcionario = req.body
+
+    // const funcionariosDAO = new FuncionariosDAO(dbConnection)
+    // funcionariosDAO.add(funcionario)
+    //     .then(
+    //         (funcionarioCadastrado) => {
+    //             res.send(201).json({
+    //                 sucesso: true,
+    //                 funcionarioCadastrado
+    //             })
+    //             return
+    //         }
+    //     )
+    //     .catch(
+    //         (erro) => {
+    //             console.error(erro)
+    //             res.send(500).json({
+    //                 sucesso: false,
+    //                 erro: "Erro ao cadastrar o funcionario."
+    //             })
+    //             return
+    //         }
+    //     )
 })
 
 function dataDeHoje() {
@@ -91,3 +82,10 @@ function buscarCidade(nome) {
             }
         )
 }
+
+function fim(){
+    console.log("fim")
+}
+
+module.exports = router
+
