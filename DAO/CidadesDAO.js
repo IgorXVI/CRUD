@@ -3,18 +3,31 @@ module.exports = class CidadesDAO {
         this._connection = connection
     }
 
-    buscaPorNome(nome) {
-        return new Promise((resolve, reject) => {
-            this._connection.get("SELECT * FROM cidades WHERE nome=?",
-                [nome],
-                (erro, cidade) => {
-                    if (erro) {
-                        reject(new Error(erro))
-                        return
-                    }
+    buscaIdPeloNome(nome){
+        const sql = `SELECT id FROM cidades WHERE nome = ?`
+        
+        return new Promise((resolve, reject)=>{
+            this._connection.get(sql, [nome], (erro, id)=>{
+                if(erro){
+                    reject(new Error(erro))
+                    return
+                }
+                resolve(id)
+            })
+        })
+    }
 
-                    resolve(cidade)
-                })
+    buscaTodosNomes(){
+        const sql = `SELECT nome FROM cidades`
+
+        return new Promise((resolve, reject)=>{
+            this._connection.all(sql, (erro, nomes)=>{
+                if(erro){
+                    reject(new Error(erro))
+                    return
+                }
+                resolve(nomes)
+            })
         })
     }
 }
