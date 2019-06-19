@@ -1,17 +1,16 @@
 module.exports = class FuncionariosDAO {
-    constructor(connection){
+    constructor(connection) {
         this._connection = connection
     }
 
-    adiciona(funcionario){
+    adiciona(funcionario) {
         const valoresFuncionario = Object.values(funcionario)
-        const placeholders = valoresFuncionario.map((valor) => '(?)').join(',')
-        const colunas = `CPF, nome, email, senha, salario, idCidade, nivelAcesso, dataAlteracao, dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento`
-        const sql = `INSERT INTO funcionarios (${colunas}) SET ${placeholders}`
-
-        return new Promise((resolve, reject)=>{
-            this._connection.run(sql, valoresFuncionario,(erro)=>{
-                if(erro){
+        const placeholders = valoresFuncionario.map((valor) => '?').join(',')
+        const sql = `INSERT INTO funcionarios (CPF, nome, email, senha, salario, idCidade, nivelAcesso, dataAlteracao, 
+            dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento) VALUES (${placeholders})`
+        return new Promise((resolve, reject) => {
+            this._connection.run(sql, valoresFuncionario, (erro) => {
+                if (erro) {
                     reject(new Error(erro))
                     return
                 }
@@ -20,13 +19,12 @@ module.exports = class FuncionariosDAO {
         })
     }
 
-    buscaPorEmail(email){
-        const valorEmail = [email]
-        const sql = `SELECT id FROM funcionarios WHERE email = ?`
-        
-        return new Promise((resolve, reject)=>{
-            this._connection.get(sql, valorEmail, (erro, funcionario)=>{
-                if(erro){
+    buscaPorEmail(email) {
+        const sql = `SELECT * FROM funcionarios WHERE email = ?`
+
+        return new Promise((resolve, reject) => {
+            this._connection.get(sql, [email], (erro, funcionario) => {
+                if (erro) {
                     reject(new Error(erro))
                     return
                 }
@@ -35,16 +33,16 @@ module.exports = class FuncionariosDAO {
         })
     }
 
-    buscaTodosEmails(){
-        const sql = `SELECT email FROM funcionarios`
+    buscaTodos() {
+        const sql = `SELECT * FROM funcionarios`
 
-        return new Promise((resolve, reject)=>{
-            this._connection.all(sql, (erro, emails)=>{
-                if(erro){
+        return new Promise((resolve, reject) => {
+            this._connection.all(sql, (erro, todos) => {
+                if (erro) {
                     reject(new Error(erro))
                     return
                 }
-                resolve(emails)
+                resolve(todos)
             })
         })
     }

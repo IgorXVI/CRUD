@@ -96,6 +96,20 @@ function validaDataNasc() {
     return validacoes
 }
 
+function validaUF(){
+    let validacoes = new Array()
+    validacoes.push(validaNotNull("UF"))
+    validacoes.push(validaFixoChars("UF", 2))
+    return validacoes
+}
+
+function validaCEP(){
+    let validacoes = new Array()
+    validacoes.push(validaNotNull("CEP"))
+    validacoes.push(validaFixoChars("CEP", 9))
+    return validacoes
+}
+
 function validaNotNull(atributo) {
     return body(atributo, `É necessário informar o atributo ${atributo}.`).exists()
 }
@@ -167,5 +181,7 @@ module.exports = {
     validaRua,
     validaSalario,
     validaSenha,
-    validaTelefone
+    validaTelefone,
+    validaUF,
+    validaCEP
 }
