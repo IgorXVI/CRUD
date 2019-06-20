@@ -28,7 +28,7 @@ module.exports = class CidadesDAO {
                     reject(new Error(erro))
                     return
                 }
-                resolve(resultado.id)
+                resolve(resultado)
             })
         })
     }
