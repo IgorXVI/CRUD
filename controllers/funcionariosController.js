@@ -70,12 +70,12 @@ router.post("/funcionario", validacao(true), (req, res) => {
         .then(
             (hash) => {
                 objeto.senha = hash
-                return cidadesDAO.buscaIdPeloNome(req.body.cidade)
+                return cidadesDAO.buscaPeloNome(req.body.cidade)
             }
         )
         .then(
-            (id) => {
-                objeto.idCidade = id.id
+            (cidade) => {
+                objeto.idCidade = cidade.id
                 c.adicionaUm(req, res, objeto, DAO)
             }
         )
@@ -107,10 +107,10 @@ router.post("/funcionario/:id", validacao(false), (req, res) => {
                 (hash) => {
                     objeto.senha = hash
                     if (req.body.cidade) {
-                        cidadesDAO.buscaIdPeloNome(req.body.cidade)
+                        cidadesDAO.buscaPeloNome(req.body.cidade)
                             .then(
-                                (id) => {
-                                    objeto.idCidade = id
+                                (cidade) => {
+                                    objeto.idCidade = cidade.id
                                     c.atualizaUm(req, res, objeto, DAO)
                                 }
                             )
@@ -121,10 +121,10 @@ router.post("/funcionario/:id", validacao(false), (req, res) => {
             )
     } else {
         if (req.body.cidade) {
-            cidadesDAO.buscaIdPeloNome(req.body.cidade)
+            cidadesDAO.buscaPeloNome(req.body.cidade)
                 .then(
-                    (id) => {
-                        objeto.idCidade = id
+                    (cidade) => {
+                        objeto.idCidade = cidade.id
                         c.atualizaUm(req, res, objeto, DAO)
                     }
                 )

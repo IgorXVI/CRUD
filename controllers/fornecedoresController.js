@@ -53,10 +53,10 @@ router.post("/fornecedor", validacao(true), (req, res) => {
     const DAO = new c.FornecedoresDAO(c.dbConnection)
     const cidadesDAO = new c.FornecedoresDAO(c.dbConnection)
 
-    cidadesDAO.buscaIdPeloNome(req.body.cidade)
+    cidadesDAO.buscaPeloNome(req.body.cidade)
         .then(
-            (id) => {
-                objeto.idCidade = id.id
+            (cidade) => {
+                objeto.idCidade = cidade.id
                 c.adicionaUm(req, res, objeto, DAO)
             }
         )
@@ -83,10 +83,10 @@ router.post("/fornecedor/:id", validacao(false), (req, res) => {
     const cidadesDAO = new c.CidadesDAO(c.dbConnection)
 
     if (req.body.cidade) {
-        cidadesDAO.buscaIdPeloNome(req.body.cidade)
+        cidadesDAO.buscaPeloNome(req.body.cidade)
             .then(
-                (id) => {
-                    objeto.idCidade = id
+                (cidade) => {
+                    objeto.idCidade = cidade.id
                     c.atualizaUm(req, res, objeto, DAO)
                 }
             )

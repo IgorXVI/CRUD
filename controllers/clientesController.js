@@ -55,10 +55,10 @@ router.post("/cliente", validacao(true), (req, res) => {
     const DAO = new c.ClientesDAO(c.dbConnection)
     const cidadesDAO = new c.CidadesDAO(c.dbConnection)
 
-    cidadesDAO.buscaIdPeloNome(req.body.cidade)
+    cidadesDAO.buscaPeloNome(req.body.cidade)
         .then(
-            (id) => {
-                objeto.idCidade = id.id
+            (cidade) => {
+                objeto.idCidade = cidade.id
                 c.adicionaUm(req, res, objeto, DAO)
             }
         )
@@ -85,10 +85,10 @@ router.post("/cliente/:id", validacao(false), (req, res) => {
     const cidadesDAO = new c.CidadesDAO(c.dbConnection)
 
     if (req.body.cidade) {
-        cidadesDAO.buscaIdPeloNome(req.body.cidade)
+        cidadesDAO.buscaPeloNome(req.body.cidade)
             .then(
-                (id) => {
-                    objeto.idCidade = id
+                (cidade) => {
+                    objeto.idCidade = cidade.id
                     c.atualizaUm(req, res, objeto, DAO)
                 }
             )

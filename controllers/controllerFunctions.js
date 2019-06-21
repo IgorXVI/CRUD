@@ -68,8 +68,8 @@ function validaCidade(obrigatorio) {
     validacoes.push(validaMaxChars("cidade", 30).optional())
     validacoes.push(body("cidade").custom(nome => {
         const cidadesDAO = new CidadesDAO(dbConnection)
-        return cidadesDAO.buscaIdPeloNome(nome).then(id => {
-            if (!id) {
+        return cidadesDAO.buscaPeloNome(nome).then(objeto => {
+            if (!objeto) {
                 return Promise.reject('A cidade informada não está cadastrada.');
             }
         });
@@ -186,8 +186,8 @@ function validaProduto(obrigatorio){
     validacoes.push(validaMaxChars("produto", 100).optional())
     validacoes.push(body("produto").custom(nome => {
         const produtosDAO = new ProdutosDAO(dbConnection)
-        return produtosDAO.buscaIdPeloNome(nome).then(id => {
-            if (!id) {
+        return produtosDAO.buscaPeloNome(nome).then(objeto => {
+            if (!objeto) {
                 return Promise.reject('O produto informado não está cadastrada.');
             }
         });
@@ -268,7 +268,7 @@ function checkErros(req, res){
             success: false,
             errosValidacao
         })
-        g.fim()
+        fim()
         return
     }
 }
@@ -281,7 +281,7 @@ function buscaTodos(req, res, DAO){
                     success: true,
                     buscado: objeto
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -292,7 +292,7 @@ function buscaTodos(req, res, DAO){
                     success: false,
                     erro: "Erro no servidor."
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -307,7 +307,7 @@ function deletaUm(req, res, DAO){
                         success: false,
                         erro: "O id informado não é válido."
                     })
-                    g.fim()
+                    fim()
                     return
                 }
                 return DAO.deletaPorID(req.params.id)
@@ -318,7 +318,7 @@ function deletaUm(req, res, DAO){
                 res.status(200).json({
                     success: true
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -329,7 +329,7 @@ function deletaUm(req, res, DAO){
                     success: false,
                     erro: "Erro no servidor."
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -344,7 +344,7 @@ function buscaUm(req, res, DAO){
                         success: false,
                         erro: "O id informado não é válido."
                     })
-                    g.fim()
+                    fim()
                     return
                 }
 
@@ -352,7 +352,7 @@ function buscaUm(req, res, DAO){
                     success: true,
                     buscado: objeto
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -363,7 +363,7 @@ function buscaUm(req, res, DAO){
                     success: false,
                     erro: "Erro no servidor."
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -377,7 +377,7 @@ function adicionaUm(req, res, objeto, DAO){
                     success: true,
                     adicionado: objeto
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -388,7 +388,7 @@ function adicionaUm(req, res, objeto, DAO){
                     success: false,
                     erro: "Erro no servidor."
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -405,7 +405,7 @@ function atualizaUm(req, res, objeto, DAO){
                         success: false,
                         erro: "O id informado não é válido."
                     })
-                    g.fim()
+                    fim()
                     return
                 }
 
@@ -424,7 +424,7 @@ function atualizaUm(req, res, objeto, DAO){
                     success: true,
                     atualizado: objeto
                 })
-                g.fim()
+                fim()
                 return
             }
         )
@@ -435,7 +435,7 @@ function atualizaUm(req, res, objeto, DAO){
                     success: false,
                     erro: "Erro no servidor."
                 })
-                g.fim()
+                fim()
                 return
             }
         )

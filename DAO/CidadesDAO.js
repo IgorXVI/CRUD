@@ -1,25 +1,17 @@
-module.exports = class CidadesDAO {
+const DAO = require("./DAO")
+
+module.exports = class CidadesDAO extends DAO{
     constructor(connection) {
-        this._connection = connection
+        super(connection)
     }
 
     adiciona(cidade){
-        const valoresCidade = Object.values(cidade)
-        const placeholders = valoresCidade.map((valor) => '?').join(',')
-        const sql = `INSERT INTO cidades (nome, UF, CEP, dataAlteracao, dataCriacao) VALUES (${placeholders})`
-
-        return new Promise((resolve, reject)=>{
-            this._connection.run(sql, valoresCidade, (erro)=>{
-                if(erro){
-                    reject(new Error(erro))
-                    return
-                }
-                resolve()
-            })
-        })
+        return super.adiciona(cidade, `cidades`, `nome, UF, CEP, dataAlteracao, dataCriacao`)
     }
 
     buscaIdPeloNome(nome){
+        
+
         const sql = `SELECT id FROM cidades WHERE nome = ?`
         
         return new Promise((resolve, reject)=>{
