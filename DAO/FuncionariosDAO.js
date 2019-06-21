@@ -1,94 +1,35 @@
-module.exports = class FuncionariosDAO {
+const DAO = require("./DAO")
+
+module.exports = class FuncionariosDAO extends DAO {
     constructor(connection) {
-        this._connection = connection
+        super(connection)
     }
 
     adiciona(funcionario) {
-        const valoresFuncionario = Object.values(funcionario)
-        const placeholders = valoresFuncionario.map((valor) => '?').join(',')
-        const sql = `INSERT INTO funcionarios (CPF, nome, email, senha, salario, idCidade, nivelAcesso, dataAlteracao, 
-            dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento) VALUES (${placeholders})`
-        return new Promise((resolve, reject) => {
-            this._connection.run(sql, valoresFuncionario, (erro) => {
-                if (erro) {
-                    reject(new Error(erro))
-                    return
-                }
-                resolve()
-            })
-        })
+        super.adiciona(funcionario, `funcionarios`, `CPF, nome, email, senha, salario, idCidade, nivelAcesso, 
+        dataAlteracao, dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento`)
     }
 
     atualizaPorID(funcionario, id){
-        const valoresFuncionario = Object.values(funcionario)
-        valoresFuncionario.push(id)
-        const sql = `UPDATE funcionarios SET CPF = ?, nome = ?, email = ?, senha = ?, salario = ?, idCidade = ?, nivelAcesso = ?, dataAlteracao = ?, 
-            dataCriacao = ?, bairro = ?, rua = ?, numeroCasa = ?, telefone = ?, dataNasc = ?, complemento = ? WHERE id = ?`
-        return new Promise((resolve, reject) => {
-            this._connection.run(sql, valoresFuncionario, (erro) => {
-                if (erro) {
-                    reject(new Error(erro))
-                    return
-                }
-                resolve()
-            })
-        })
+        super.atualizaPorColuna(funcionario, id, `id`, `funcionarios`, `CPF = ?, nome = ?, email = ?, senha = ?, 
+        salario = ?, idCidade = ?, nivelAcesso = ?, dataAlteracao = ?, dataCriacao = ?, bairro = ?, rua = ?, 
+        numeroCasa = ?, telefone = ?, dataNasc = ?, complemento = ?`)
     }
 
     deletaPorID(id){
-        const sql = `DELETE FROM funcionarios WHERE id = ?`
-
-        return new Promise((resolve, reject) => {
-            this._connection.run(sql, [id], (erro) => {
-                if (erro) {
-                    reject(new Error(erro))
-                    return
-                }
-                resolve()
-            })
-        })
+        super.deletaPorColuna(id, `id`, `funcionarios`)
     }
 
     buscaPorEmail(email) {
-        const sql = `SELECT * FROM funcionarios WHERE email = ?`
-
-        return new Promise((resolve, reject) => {
-            this._connection.get(sql, [email], (erro, funcionario) => {
-                if (erro) {
-                    reject(new Error(erro))
-                    return
-                }
-                resolve(funcionario)
-            })
-        })
+        super.buscaPorColuna(email, `email`, `funcionarios`)
     }
 
     buscaPorID(id) {
-        const sql = `SELECT * FROM funcionarios WHERE id = ?`
-
-        return new Promise((resolve, reject) => {
-            this._connection.get(sql, [id], (erro, funcionario) => {
-                if (erro) {
-                    reject(new Error(erro))
-                    return
-                }
-                resolve(funcionario)
-            })
-        })
+        super.buscaPorColuna(id, `id`, `funcionarios`)
     }
 
     buscaTodos() {
-        const sql = `SELECT * FROM funcionarios`
-
-        return new Promise((resolve, reject) => {
-            this._connection.all(sql, (erro, todos) => {
-                if (erro) {
-                    reject(new Error(erro))
-                    return
-                }
-                resolve(todos)
-            })
-        })
+        super.buscaTodos(`funcionarios`)
     }
 
 }
