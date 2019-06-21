@@ -18,12 +18,10 @@ module.exports = class DAO {
         })
     }
 
-    atualizaPorID(objeto, id, colunas){
+    atualizaPorColuna(objeto, colunaValor, colunaNome, tabela, colunasEPlaceholders){
         const valores = Object.values(objeto)
-        valores.push(id)
-        const sql = `UPDATE produtos SET CPF = ?, nome = ?, categoria = ?, precoUnidade = ?, idFornecedor = ?, 
-        dataAlteracao = ?, dataCriacao = ?, imagem = ?, descricao = ?, garantia = ?, dataFabric = ?, 
-        dataValidade = ? WHERE id = ?`
+        valores.push(colunaValor)
+        const sql = `UPDATE ${tabela} SET ${colunasEPlaceholders} WHERE ${colunaNome} = ?`
         return new Promise((resolve, reject) => {
             this._connection.run(sql, valores, (erro) => {
                 if (erro) {
@@ -35,11 +33,11 @@ module.exports = class DAO {
         })
     }
 
-    deletaPorID(id){
-        const sql = `DELETE FROM produtos WHERE id = ?`
+    deletaPorColuna(colunaValor, colunaNome, tabela){
+        const sql = `DELETE FROM ${tabela} WHERE ${colunaNome} = ?`
 
         return new Promise((resolve, reject) => {
-            this._connection.run(sql, [id], (erro) => {
+            this._connection.run(sql, [colunaValor], (erro) => {
                 if (erro) {
                     reject(new Error(erro))
                     return
@@ -49,11 +47,11 @@ module.exports = class DAO {
         })
     }
 
-    buscaPorID(id) {
-        const sql = `SELECT * FROM produtos WHERE id = ?`
+    buscaPorColuna(colunaValor, colunaNome, tabela) {
+        const sql = `SELECT * FROM ${tabela} WHERE ${colunaNome} = ?`
 
         return new Promise((resolve, reject) => {
-            this._connection.get(sql, [id], (erro, objeto) => {
+            this._connection.get(sql, [colunaValor], (erro, objeto) => {
                 if (erro) {
                     reject(new Error(erro))
                     return
@@ -63,8 +61,8 @@ module.exports = class DAO {
         })
     }
 
-    buscaTodos() {
-        const sql = `SELECT * FROM produtos`
+    buscaTodos(tabela) {
+        const sql = `SELECT * FROM ${tabela}`
 
         return new Promise((resolve, reject) => {
             this._connection.all(sql, (erro, todos) => {
