@@ -1,25 +1,25 @@
 const bcrypt = require("bcrypt")
 const secret = require("../config/secret")
 const jwt = require('jsonwebtoken')
-const g = require("./globalFunctions")
+const c = require("./controllerFunctions")
 
 const {
     body
 } = require("express-validator/check")
 
-const router = g.express.Router()
+const router = c.express.Router()
 
 router.post("/login", [
-    g.validaEmail(true),
+    c.validaEmail(true),
     body("email").custom(email => {
-        const DAO = new g.FuncionariosDAO(g.dbConnection)
+        const DAO = new c.FuncionariosDAO(c.dbConnection)
         return DAO.buscaPorEmail(email).then(funcionario => {
             if (!funcionario) {
                 return Promise.reject('O email informado não está cadastrado.');
             }
         });
     }).optional(),
-    g.validaSenha(true)
+    c.validaSenha(true)
 ], (req, res) => {
     console.log("realizando login de funcionario...")
 
@@ -29,7 +29,7 @@ router.post("/login", [
             success: false,
             errosValidacao
         })
-        g.fim()
+        c.fim()
         return
     }
 
@@ -38,7 +38,7 @@ router.post("/login", [
 
     let funcionario = {}
 
-    const funcionariosDAO = new g.FuncionariosDAO(g.dbConnection)
+    const funcionariosDAO = new c.FuncionariosDAO(c.dbConnection)
     funcionariosDAO.buscaPorEmail(email)
         .then(
             (resultado) => {
@@ -53,7 +53,7 @@ router.post("/login", [
                         success: false,
                         erro: "Senha inválida."
                     })
-                    g.fim()
+                    c.fim()
                     return
                 }
                 const token = jwt.sign({
@@ -68,7 +68,7 @@ router.post("/login", [
                     success: true,
                     token
                 })
-                g.fim()
+                c.fim()
                 return
             }
         )
@@ -79,7 +79,7 @@ router.post("/login", [
                     success: false,
                     erro: "Erro no servidor."
                 })
-                g.fim()
+                c.fim()
                 return
             }
         )

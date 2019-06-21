@@ -2,6 +2,12 @@ const express = require("express")
 const dbConnection = require("../config/db")
 const CidadesDAO = require("../DAO/CidadesDAO")
 const FuncionariosDAO = require("../DAO/FuncionariosDAO")
+const ClientesDAO = require("../DAO/ClientesDAO")
+const FornecedoresDAO = require("../DAO/Fornecedores")
+const ProdutosDAO = require("../DAO/ProdutosDAO")
+const EstoqueDAO = require("../DAO/EstoqueDAO")
+const VendasDAO = require("../DAO/VendasDAO")
+const ItensVendaDAO = require("../DAO/ItensVendaDAO")
 
 const {
     body
@@ -154,6 +160,41 @@ function validaCEP(obrigatorio) {
     return validacoes
 }
 
+function validaCNPJ(obrigatorio){
+    let validacoes = new Array()
+    if (obrigatorio) {
+        validacoes.push(validaNotNull("CNPJ"))
+    }
+    validacoes.push(validaFixoChars("CNPJ", 18).optional())
+    return validacoes
+}
+
+function validaQuantidade(obrigatorio){
+    let validacoes = new Array()
+    if (obrigatorio) {
+        validacoes.push(validaNotNull("quantidade"))
+    }
+    validacoes.push(validaInteiro("quantidade", 0))
+    return validacoes
+}
+
+function validaProduto(obrigatorio){
+    let validacoes = new Array()
+    if (obrigatorio) {
+        validacoes.push(validaNotNull("produto"))
+    }
+    validacoes.push(validaMaxChars("produto", 100).optional())
+    validacoes.push(body("produto").custom(nome => {
+        const produtosDAO = new ProdutosDAO(dbConnection)
+        return produtosDAO.buscaIdPeloNome(nome).then(id => {
+            if (!id) {
+                return Promise.reject('O produto informado não está cadastrada.');
+            }
+        });
+    }).optional())
+    return validacoes
+}
+
 function validaNotNull(atributo) {
     return body(atributo, `É necessário informar o atributo ${atributo}.`).exists()
 }
@@ -220,6 +261,186 @@ function fim() {
     console.log("fim")
 }
 
+function checkErros(req, res){
+    const errosValidacao = req.validationErrors()
+    if (errosValidacao) {
+        res.status(400).json({
+            success: false,
+            errosValidacao
+        })
+        g.fim()
+        return
+    }
+}
+
+function buscaTodos(req, res, DAO){
+   DAO.buscaTodos()
+        .then(
+            (objeto) => {
+                res.status(201).json({
+                    success: true,
+                    buscado: objeto
+                })
+                g.fim()
+                return
+            }
+        )
+        .catch(
+            (erro) => {
+                console.log(erro)
+                res.status(500).json({
+                    success: false,
+                    erro: "Erro no servidor."
+                })
+                g.fim()
+                return
+            }
+        )
+}
+
+function deletaUm(req, res, DAO){
+    DAO.buscaPorID(req.params.id)
+        .then(
+            (objeto) => {
+                if (!objeto) {
+                    res.status(400).json({
+                        success: false,
+                        erro: "O id informado não é válido."
+                    })
+                    g.fim()
+                    return
+                }
+                return DAO.deletaPorID(req.params.id)
+            }
+        )
+        .then(
+            () => {
+                res.status(200).json({
+                    success: true
+                })
+                g.fim()
+                return
+            }
+        )
+        .catch(
+            (erro) => {
+                console.log(erro)
+                res.status(500).json({
+                    success: false,
+                    erro: "Erro no servidor."
+                })
+                g.fim()
+                return
+            }
+        )
+}
+
+function buscaUm(req, res, DAO){
+    DAO.buscaPorID(req.params.id)
+        .then(
+            (objeto) => {
+                if (!objeto) {
+                    res.status(400).json({
+                        success: false,
+                        erro: "O id informado não é válido."
+                    })
+                    g.fim()
+                    return
+                }
+
+                res.status(200).json({
+                    success: true,
+                    buscado: objeto
+                })
+                g.fim()
+                return
+            }
+        )
+        .catch(
+            (erro) => {
+                console.log(erro)
+                res.status(500).json({
+                    success: false,
+                    erro: "Erro no servidor."
+                })
+                g.fim()
+                return
+            }
+        )
+}
+
+function adicionaUm(req, res, objeto, DAO){
+    DAO.adiciona(objeto)
+        .then(
+            () => {
+                res.status(201).json({
+                    success: true,
+                    adicionado: objeto
+                })
+                g.fim()
+                return
+            }
+        )
+        .catch(
+            (erro) => {
+                console.log(erro)
+                res.status(500).json({
+                    success: false,
+                    erro: "Erro no servidor."
+                })
+                g.fim()
+                return
+            }
+        )
+}
+
+function atualizaUm(req, res, objeto, DAO){
+    objeto.dataCriacao = undefined
+
+    DAO.buscaPorID(req.params.id)
+        .then(
+            (objetoDB) => {
+                if (!objetoDB) {
+                    res.status(400).json({
+                        success: false,
+                        erro: "O id informado não é válido."
+                    })
+                    g.fim()
+                    return
+                }
+
+                const keys = Object.keys(objeto)
+                for (let i = 0; i < keys.length; i++) {
+                    if (!objeto[keys[i]]) {
+                        objeto[keys[i]] = objetoDB[keys[i]]
+                    }
+                }
+                return DAO.atualizaPorID(objeto, req.params.id)
+            }
+        )
+        .then(
+            () => {
+                res.status(200).json({
+                    success: true,
+                    atualizado: objeto
+                })
+                g.fim()
+                return
+            }
+        )
+        .catch(
+            (erro) => {
+                console.log(erro)
+                res.status(500).json({
+                    success: false,
+                    erro: "Erro no servidor."
+                })
+                g.fim()
+                return
+            }
+        )
+}
+
 module.exports = {
     express,
     dbConnection,
@@ -241,5 +462,14 @@ module.exports = {
     validaUF,
     validaCEP,
     dataDeHoje,
-    fim
+    fim,
+    checkErros,
+    buscaTodos,
+    buscaUm,
+    adicionaUm,
+    atualizaUm,
+    deletaUm,
+    validaCNPJ,
+    validaQuantidade,
+    validaProduto
 }

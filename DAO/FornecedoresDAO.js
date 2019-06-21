@@ -1,15 +1,15 @@
-module.exports = class FuncionariosDAO {
+module.exports = class FornecedoresDAO {
     constructor(connection) {
         this._connection = connection
     }
 
-    adiciona(funcionario) {
-        const valoresFuncionario = Object.values(funcionario)
-        const placeholders = valoresFuncionario.map((valor) => '?').join(',')
-        const sql = `INSERT INTO funcionarios (CPF, nome, email, senha, salario, idCidade, nivelAcesso, dataAlteracao, 
-            dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento) VALUES (${placeholders})`
+    adiciona(fornecedor) {
+        const valoresFornecedor = Object.values(fornecedor)
+        const placeholders = valoresFornecedor.map((valor) => '?').join(',')
+        const sql = `INSERT INTO fornecedores (CNPJ, nome, email, idCidade, dataAlteracao, 
+            dataCriacao, telefone, bairro, rua, numeroCasa, complemento) VALUES (${placeholders})`
         return new Promise((resolve, reject) => {
-            this._connection.run(sql, valoresFuncionario, (erro) => {
+            this._connection.run(sql, valoresFornecedor, (erro) => {
                 if (erro) {
                     reject(new Error(erro))
                     return
@@ -19,13 +19,13 @@ module.exports = class FuncionariosDAO {
         })
     }
 
-    atualizaPorID(funcionario, id){
-        const valoresFuncionario = Object.values(funcionario)
-        valoresFuncionario.push(id)
-        const sql = `UPDATE funcionarios SET CPF = ?, nome = ?, email = ?, senha = ?, salario = ?, idCidade = ?, nivelAcesso = ?, dataAlteracao = ?, 
-            dataCriacao = ?, bairro = ?, rua = ?, numeroCasa = ?, telefone = ?, dataNasc = ?, complemento = ? WHERE id = ?`
+    atualizaPorID(fornecedor, id){
+        const valoresFornecedor = Object.values(fornecedor)
+        valoresFornecedor.push(id)
+        const sql = `UPDATE fornecedores SET CNPJ = ?, nome = ?, email = ?, idCidade = ?, dataAlteracao = ?, 
+            dataCriacao = ?, telefone = ?, bairro = ?, rua = ?, numeroCasa = ?, complemento = ? WHERE id = ?`
         return new Promise((resolve, reject) => {
-            this._connection.run(sql, valoresFuncionario, (erro) => {
+            this._connection.run(sql, valoresFornecedor, (erro) => {
                 if (erro) {
                     reject(new Error(erro))
                     return
@@ -36,7 +36,7 @@ module.exports = class FuncionariosDAO {
     }
 
     deletaPorID(id){
-        const sql = `DELETE FROM funcionarios WHERE id = ?`
+        const sql = `DELETE FROM fornecedores WHERE id = ?`
 
         return new Promise((resolve, reject) => {
             this._connection.run(sql, [id], (erro) => {
@@ -50,35 +50,35 @@ module.exports = class FuncionariosDAO {
     }
 
     buscaPorEmail(email) {
-        const sql = `SELECT * FROM funcionarios WHERE email = ?`
+        const sql = `SELECT * FROM fornecedores WHERE email = ?`
 
         return new Promise((resolve, reject) => {
-            this._connection.get(sql, [email], (erro, funcionario) => {
+            this._connection.get(sql, [email], (erro, fornecedor) => {
                 if (erro) {
                     reject(new Error(erro))
                     return
                 }
-                resolve(funcionario)
+                resolve(fornecedor)
             })
         })
     }
 
     buscaPorID(id) {
-        const sql = `SELECT * FROM funcionarios WHERE id = ?`
+        const sql = `SELECT * FROM fornecedores WHERE id = ?`
 
         return new Promise((resolve, reject) => {
-            this._connection.get(sql, [id], (erro, funcionario) => {
+            this._connection.get(sql, [id], (erro, fornecedor) => {
                 if (erro) {
                     reject(new Error(erro))
                     return
                 }
-                resolve(funcionario)
+                resolve(fornecedor)
             })
         })
     }
 
     buscaTodos() {
-        const sql = `SELECT * FROM funcionarios`
+        const sql = `SELECT * FROM fornecedores`
 
         return new Promise((resolve, reject) => {
             this._connection.all(sql, (erro, todos) => {

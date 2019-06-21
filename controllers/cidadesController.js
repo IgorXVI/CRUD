@@ -1,83 +1,57 @@
-const g = require("./globalFunctions")
+const c = require("./controllerFunctions")
 
-const router = g.express.Router()
+const router = c.express.Router()
 
-router.get("/", (req, res)=>{
-    console.log("buscando todas as cidades...")
-    const cidadesDAO = new g.CidadesDAO(g.dbConnection)
-    cidadesDAO.buscaTodos()
-        .then(
-            (cidades) => {
-                res.status(200).json({
-                    success: true,
-                    cidades
-                })
-                g.fim()
-                return
-            }
-        )
-        .catch(
-            (erro) => {
-                console.log(erro)
-                res.status(500).json({
-                    success: false,
-                    erro: "Erro no servidor."
-                })
-                g.fim()
-                return
-            }
-        )
-})
-
-router.post("/cidade", [
-    g.validaNome(1),
-    g.validaUF(1),
-    g.validaCEP(1)
-], (req, res) => {
-    console.log("cadastrando cidade...")
-
-    const errosValidacao = req.validationErrors()
-    if (errosValidacao) {
-        res.status(400).json({
-            success: false,
-            errosValidacao
-        })
-        g.fim()
-        return
-    }
-
-    const cidade = {
+function formato(req) {
+    return cidade = {
         nome: req.body.nome,
         UF: req.body.UF,
         CEP: req.body.CEP,
-        dataAlteracao: g.dataDeHoje(),
-        dataCriacao: g.dataDeHoje()
+        dataAlteracao: c.dataDeHoje(),
+        dataCriacao: c.dataDeHoje()
     }
+}
 
-    const cidadesDAO = new g.CidadesDAO(g.dbConnection)
-    cidadesDAO.adiciona(cidade)
-        .then(
-            () => {
-                res.status(201).json({
-                    success: true,
-                    cidade
-                })
-                g.fim()
-                return
-            }
-        )
-        .catch(
-            (erro) => {
-                console.log(erro)
-                res.status(500).json({
-                    success: false,
-                    erro: "Erro no servidor."
-                })
-                g.fim()
-                return
-            }
-        )
+function validacao(notNULL) {
+    return [
+        c.validaNome(notNULL),
+        c.validaUF(notNULL),
+        c.validaCEP(notNULL)
+    ]
+}
 
+router.get("/", (req, res) => {
+    console.log("buscando todas as cidades...")
+    const DAO = new c.CidadesDAO(c.dbConnection)
+    c.buscaTodos(req, res, DAO)
+})
+
+router.post("/cidade", validacao(true), (req, res) => {
+    console.log("cadastrando cidade...")
+    c.checkErros(req, res)
+    let objeto = formato(req)
+    const DAO = new c.CidadesDAO(c.dbConnection)
+    c.adicionaUm(req, res, objeto, DAO)
+})
+
+router.get("/cidade/:id", (req, res) => {
+    console.log(`buscando cidade com id: ${req.params.id}...`)
+    const DAO = new c.CidadesDAO(c.dbConnection)
+    c.buscaUm(req, res, DAO)
+})
+
+router.delete("/cidade/:id", (req, res) => {
+    console.log(`deletando a cidade com id: ${req.params.id}...`)
+    const DAO = new c.CidadesDAO(c.dbConnection)
+    c.deletaUm(req, res, DAO)
+})
+
+router.post("/ciadade/:id", validacao(false), (req, res) => {
+    console.log(`atualizando cidade com id: ${req.params.id}...`)
+    c.checkErros()
+    let objeto = formato(req)
+    const DAO = new c.CidadesDAO(c.dbConnection)
+    c.atualizaUm(req, res, objeto, DAO)
 })
 
 module.exports = router
