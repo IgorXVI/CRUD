@@ -1,20 +1,25 @@
 const express = require("express")
+
 const dbConnection = require("../config/db")
+
 const CidadesDAO = require("../DAO/CidadesDAO")
 const FuncionariosDAO = require("../DAO/FuncionariosDAO")
 const ClientesDAO = require("../DAO/ClientesDAO")
-const FornecedoresDAO = require("../DAO/Fornecedores")
+const FornecedoresDAO = require("../DAO/FornecedoresDAO")
 const ProdutosDAO = require("../DAO/ProdutosDAO")
 const EstoqueDAO = require("../DAO/EstoqueDAO")
 const VendasDAO = require("../DAO/VendasDAO")
 const ItensVendaDAO = require("../DAO/ItensVendaDAO")
+const UsuariosDAO = require("../DAO/UsuariosDAO")
+
 const {
     body
 } = require("express-validator/check")
 
 module.exports = class Controller {
-    constructor(nomeSingular, atributos) {
+    constructor(nome, nomeSingular, atributos, gerarTodasRotas, masterDAO) {
         this.router = express.Router()
+
         this.cidadesDAO = new CidadesDAO(dbConnection)
         this.funcionariosDAO = new FuncionariosDAO(dbConnection)
         this.clientesDAO = new ClientesDAO(dbConnection)
@@ -23,39 +28,65 @@ module.exports = class Controller {
         this.estoqueDAO = new EstoqueDAO(dbConnection)
         this.vendasDAO = new VendasDAO(dbConnection)
         this.itensVendaDAO = new ItensVendaDAO(dbConnection)
+        this.usuariosDAO = new UsuariosDAO(dbConnection)
+
+        this.masterDAO = masterDAO
+
+        this.foreignKeys = {}
+
         this.atributos = atributos
-        this.nome = nomeSingular
+        this.nome = nome
+        this.nomeSingular = nomeSingular
+
+        if (gerarTodasRotas) {
+            this.gerarRotaBuscaTodos()
+            this.gerarRotaBuscaUm()
+            this.gerarRotaAdicionaUm()
+            this.gerarRotaAtualizaUm()
+            this.gerarRotaDeletaUm()
+        }
+
     }
 
-    gerarRotaBuscaTodos(){
-        this.router.get(`/${this.nome}s`, (req, res) => {
+    gerarRotaBuscaTodos() {
+        this.router.get("/", (req, res) => {
+            this.inicio(req, res, `Buscando ${this.nome}...`)
             this.buscaTodos(req, res)
         })
     }
 
-    gerarRotaAdicionaUm(){
-        this.router.post(`/${this.nome}s/${this.nome}`, validacao(true), (req, res) => {
-            let objeto = this.gerarFormato(req)
-            const DAO = new c.ClientesDAO(c.dbConnection)
-            const cidadesDAO = new c.CidadesDAO(c.dbConnection)
-        
-            cidadesDAO.buscaPeloNome(req.body.cidade)
-                .then(
-                    (cidade) => {
-                        objeto.idCidade = cidade.id
-                        c.adicionaUm(req, res, objeto, DAO)
-                    }
-                )
-        
+    gerarRotaAdicionaUm() {
+        this.router.post(`/${this.nomeSingular}`, this.gerarValidacao(true), (req, res) => {
+            this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+            const objeto = this.gerarObjeto()
+            this.adicionaUm(req, res, objeto)
+        })
+    }
+
+    gerarRotaBuscaUm() {
+        this.router.get(`/${this.nomeSingular}/:id`, (req, res) => {
+            this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
+            this.buscaUm(req, res)
+        })
+    }
+
+    gerarRotaDeletaUm() {
+        this.router.delete(`/${this.nomeSingular}/:id`, (req, res) => {
+            this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
+            this.deletaUm(req, res)
+        })
+    }
+
+    gerarRotaAtualizaUm() {
+        this.router.post(`/${this.nomeSingular}/:id`, this.gerarValidacao(false), (req, res) => {
+            this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
+            const objeto = this.gerarObjeto()
+            this.atualizaUm(req, res, objeto)
         })
     }
 
     buscaTodos(req, res) {
-        console.log(`buscando todos os ${this.nome}s...`)
-
-        this.checkErros(req, res)
-
-        const DAO = this[`${this.nome}sDAO`]
+        const DAO = this.masterDAO
 
         DAO.buscaTodos()
             .then(
@@ -64,7 +95,7 @@ module.exports = class Controller {
                         success: true,
                         buscado: objeto
                     })
-                    fim()
+                    this.fim()
                 }
             )
             .catch(
@@ -73,11 +104,7 @@ module.exports = class Controller {
     }
 
     deletaUm(req, res) {
-        console.log(`deletando o ${this.nome} com id = ${req.params.id}...`)
-
-        this.checkErros(req, res)
-
-        const DAO = this[`${this.nome}sDAO`]
+        const DAO = this.masterDAO
 
         DAO.buscaPorID(req.params.id)
             .then(
@@ -85,9 +112,9 @@ module.exports = class Controller {
                     if (!objeto) {
                         res.status(400).json({
                             success: false,
-                            erro: "O id informado não é válido."
+                            erro: "O atributo id informado não é válido."
                         })
-                        fim()
+                        this.fim()
                     }
                     return DAO.deletaPorID(req.params.id)
                 }
@@ -97,7 +124,7 @@ module.exports = class Controller {
                     res.status(200).json({
                         success: true
                     })
-                    fim()
+                    this.fim()
                 }
             )
             .catch(
@@ -106,11 +133,7 @@ module.exports = class Controller {
     }
 
     buscaUm(req, res) {
-        console.log(`buscando o ${this.nome} com id = ${req.params.id}...`)
-
-        this.checkErros(req, res)
-
-        const DAO = this[`${this.nome}sDAO`]
+        const DAO = this.masterDAO
 
         DAO.buscaPorID(req.params.id)
             .then(
@@ -120,14 +143,14 @@ module.exports = class Controller {
                             success: false,
                             erro: "O id informado não é válido."
                         })
-                        fim()
+                        this.fim()
                     }
 
                     res.status(200).json({
                         success: true,
                         buscado: objeto
                     })
-                    fim()
+                    this.fim()
                 }
             )
             .catch(
@@ -136,11 +159,7 @@ module.exports = class Controller {
     }
 
     adicionaUm(req, res, objeto) {
-        console.log(`adicionando um ${this.nome}...`)
-
-        this.checkErros(req, res)
-
-        const DAO = this[`${this.nome}sDAO`]
+        const DAO = this.masterDAO
 
         DAO.adiciona(objeto)
             .then(
@@ -149,7 +168,7 @@ module.exports = class Controller {
                         success: true,
                         adicionado: objeto
                     })
-                    fim()
+                    this.fim()
                 }
             )
             .catch(
@@ -158,11 +177,7 @@ module.exports = class Controller {
     }
 
     atualizaUm(req, res, objeto) {
-        console.log(`atualizando o ${this.nome} com id = ${req.params.id}...`)
-
-        this.checkErros(req, res)
-
-        const DAO = this[`${this.nome}sDAO`]
+        const DAO = this.masterDAO
 
         delete objeto.dataCriacao
 
@@ -174,7 +189,7 @@ module.exports = class Controller {
                             success: false,
                             erro: "O id informado não é válido."
                         })
-                        fim()
+                        this.fim()
                     }
 
                     const keys = Object.keys(objeto)
@@ -192,7 +207,7 @@ module.exports = class Controller {
                         success: true,
                         atualizado: objeto
                     })
-                    fim()
+                    this.fim()
                 }
             )
             .catch(
@@ -207,7 +222,7 @@ module.exports = class Controller {
                 success: false,
                 errosValidacao
             })
-            fim()
+            this.fim()
         }
     }
 
@@ -220,31 +235,55 @@ module.exports = class Controller {
         this.fim()
     }
 
+    inicio(req, res, mensagem) {
+        console.log(mensagem)
+        this.checkErros(req, res)
+    }
+
     fim() {
         console.log("fim")
         return
     }
 
-    gerarFormato(req) {
-        let formato = {}
-        const atributosArr = this.atributos.split(",")
-        for (let i = 0; i < atributosArr.length; i++) {
-            formato[atributosArr[i]] = req.body[atributosArr[i]]
-        }
-        formato.dataAlteracao = this.dataDeHoje()
-        formato.dataCriacao = this.dataDeHoje()
-        return formato
-    }
-
     gerarValidacao(obrigatorio, excecoes) {
-        const atributosArr = this.atributos.split(",").map(atributo => atributo.charAt(0).toUpperCase() + atributo.slice(1))
-        let validacao = new Array()
+        if(!excecoes){
+            excecoes = new String()
+        }
+
+        const atributosArr = this.atributos.split(",").map(atributo => (atributo).replace(/\s/g,'')).map(atributo => `${atributo.charAt(0).toUpperCase()}${atributo.slice(1)}`)
+        let validacao = new Array() 
         for (let i = 0; i < atributosArr.length; i++) {
-            if (!(atributosArr[i] in excecoes)) {
-                validacao.push(this[`valida${atributosArr[i]}`](obrigatorio))
+
+            if(!("DataAlteracao, DataCriacao".includes(atributosArr[i]))){
+
+                if ((excecoes.includes(atributosArr[i]))) {
+                    validacao.push(this[`valida${atributosArr[i]}`](!obrigatorio))
+                } else {
+                    validacao.push(this[`valida${atributosArr[i]}`](obrigatorio))
+                }
+
             }
+
         }
         return validacao
+    }
+
+    gerarObjeto(req) {
+        let objeto = {}
+        const atributosArr = this.atributos.split(",").map(atributo => (atributo).replace(/\s/g,''))
+        const foreignKeysArr = Object.keys(this.foreignKeys)
+        for (let i = 0; i < atributosArr.length; i++) {
+
+            if (foreignKeysArr.indexOf(atributosArr[i]) > -1) {
+                objeto[atributosArr[i]] = this.foreignKeys[atributosArr[i]]
+            } else {
+                objeto[atributosArr[i]] = req.body[atributosArr[i]]
+            }
+
+        }
+        objeto.dataAlteracao = this.dataDeHoje()
+        objeto.dataCriacao = this.dataDeHoje()
+        return objeto
     }
 
     validaCPF(obrigatorio) {
@@ -273,13 +312,6 @@ module.exports = class Controller {
         }
         validacoes.push(this.validaMaxChars("email", 255).optional())
         validacoes.push(body("email", "O atributo email informado está em um formato inválido.").isEmail().optional())
-        validacoes.push(body("email").custom(email => {
-            return this[`${this.nome}sDAO`].buscaPorEmail(email).then(objeto => {
-                if (objeto) {
-                    return Promise.reject('O email informado ja está cadastrado.');
-                }
-            });
-        }).optional())
         return validacoes
     }
 
@@ -310,7 +342,9 @@ module.exports = class Controller {
         validacoes.push(body("cidade").custom(nome => {
             return this.cidadesDAO.buscaPeloNome(nome).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('A cidade informada não está cadastrada.');
+                    return Promise.reject('O atributo cidade informado não está cadastrado.');
+                } else {
+                    this.foreignKeys.cidade = objeto.id
                 }
             });
         }).optional())
@@ -425,12 +459,131 @@ module.exports = class Controller {
         }
         validacoes.push(this.validaMaxChars("produto", 100).optional())
         validacoes.push(body("produto").custom(nome => {
-            return this.produtosDAO.buscaPeloNome(nome).then(objeto => {
+            return this.produtosDAO.buscaPorNome(nome).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('O produto informado não está cadastrada.');
+                    return Promise.reject('O atributo produto informado não está cadastrado.');
+                } else {
+                    this.foreignKeys.produto = objeto.id
                 }
             });
         }).optional())
+        return validacoes
+    }
+
+    validaValorTotal(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("valorTotal"))
+        }
+        validacoes.push(this.validaDecimal("valorTotal", 0))
+        return validacoes
+    }
+
+    validaFuncionario(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("funcionario"))
+        }
+        validacoes.push(body("funcionario", "O atributo funcionario informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("funcionario").custom(email => {
+            return this.funcionariosDAO.buscaPorEmail(email).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O atributo funcionario informado não está cadastrado.');
+                } else {
+                    this.foreignKeys.funcionario = objeto.id
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
+    validaCliente(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("cliente"))
+        }
+        validacoes.push(body("cliente", "O atributo cliente informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("cliente").custom(email => {
+            return this.clientesDAO.buscaPorEmail(email).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O atributo cliente informado não está cadastrado.');
+                } else {
+                    this.foreignKeys.cliente = objeto.id
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
+    validaFornecedor(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("fornecedor"))
+        }
+        validacoes.push(body("fornecedor", "O atributo fornecedor informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("fornecedor").custom(email => {
+            return this.fornecedoresDAO.buscaPorEmail(email).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O atributo fornecedor informado não está cadastrado.');
+                } else {
+                    this.foreignKeys.cliente = objeto.id
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
+    validaCategoria(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("categoria"))
+        }
+        validacoes.push(this.validaMaxChars("categoria", 100))
+        return validacoes
+    }
+
+    validaPrecoUnidade(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("precoUnidade"))
+        }
+        validacoes.push(this.validaDecimal("precoUnidade", 0))
+        return validacoes
+    }
+
+    validaDescricao(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("descricao"))
+        }
+        validacoes.push(this.validaMaxChars("descricao", 255))
+        return validacoes
+    }
+
+    validaGarantia(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("garantia"))
+        }
+        validacoes.push(this.validaInteiro("garantia", 0))
+        return validacoes
+    }
+
+    validaDataFabric(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("dataFrabric"))
+        }
+        validacoes.push(this.validaDataISO8601("dataFabric").optional())
+        return validacoes
+    }
+
+    validaDataValidade(obrigatorio){
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("dataValidade"))
+        }
+        validacoes.push(this.validaDataISO8601("dataValidade").optional())
         return validacoes
     }
 

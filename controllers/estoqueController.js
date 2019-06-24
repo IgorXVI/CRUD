@@ -1,21 +1,9 @@
-const c = require("./controllerFunctions")
+const Controller = require("./Controller")
 
-const router = c.express.Router()
+module.exports = class EstoqueController extends Controller{
+    constructor(){
+        super(`estoque`, `produto-estocado`, `quantidade, produto, dataAlteracao, dataCriacao`, true)
 
-function formato(req) {
-    return cidade = {
-        quantidade: req.body.quantidade,
-        idProduto: undefined,
-        dataAlteracao: c.dataDeHoje(),
-        dataCriacao: c.dataDeHoje()
+        this.masterDAO = this.estoqueDAO
     }
 }
-
-function validacao(notNULL) {
-    return [
-        c.validaQuantidade(notNULL),
-        c.validaProduto(notNULL)
-    ]
-}
-
-module.exports = router
