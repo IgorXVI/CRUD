@@ -8,6 +8,18 @@ const db = new sqlite3.Database("./data.db", (erro) => {
     console.log("Conectado ao banco de dados SQLite data.db")
 })
 
+const USUARIOS_SCHEMA = `
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome VARCHAR(30) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    nivelAcesso INTEGER NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+    dataCriacao VARCHAR(24) NOT NULL
+)
+`
+
 const CIDADES_SCHEMA = `
 CREATE TABLE IF NOT EXISTS cidades (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,10 +54,8 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     CPF VARCHAR(14) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    senha VARCHAR(255) NOT NULL,
 	salario REAL NOT NULL,
     idCidade INTEGER NOT NULL,
-    nivelAcesso INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     bairro VARCHAR(25) NOT NULL,
@@ -83,7 +93,6 @@ CREATE TABLE IF NOT EXISTS produtos (
     idFornecedor INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-	imagem BLOB NOT NULL,
     descricao TEXT NOT NULL,
     garantia INTEGER NOT NULL,
 	dataFabric VARCHAR(10) NOT NULL,
@@ -131,6 +140,7 @@ CREATE TABLE IF NOT EXISTS itensVenda (
 
 db.serialize(() => {
     db.run("PRAGMA foreign_keys = ON")
+    db.run(USUARIOS_SCHEMA)
     db.run(CIDADES_SCHEMA)
     db.run(CLIENTES_SCHEMA)
     db.run(FUNCIONARIOS_SCHEMA)

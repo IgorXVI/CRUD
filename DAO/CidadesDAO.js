@@ -2,40 +2,26 @@ const DAO = require("./DAO")
 
 module.exports = class CidadesDAO extends DAO{
     constructor(connection) {
-        super(connection)
+        super(connection, `cidades`)
     }
 
-    adiciona(cidade){
-        return super.adiciona(cidade, `cidades`, `nome, UF, CEP, dataAlteracao, dataCriacao`)
+    adiciona(cidade) {
+        return super.adiciona(cidade, `nome, UF, CEP, dataAlteracao, dataCriacao`)
     }
 
-    buscaIdPeloNome(nome){
-        
-
-        const sql = `SELECT id FROM cidades WHERE nome = ?`
-        
-        return new Promise((resolve, reject)=>{
-            this._connection.get(sql, [nome], (erro, resultado)=>{
-                if(erro){
-                    reject(new Error(erro))
-                    return
-                }
-                resolve(resultado)
-            })
-        })
+    atualizaPorID(cidade, id){
+        return super.atualizaPorColuna(cidade, id, `id`, `nome, UF, CEP, dataAlteracao`)
     }
 
-    buscaTodos(){
-        const sql = `SELECT * FROM cidades`
+    deletaPorID(id){
+        return super.deletaPorColuna(id, `id`)
+    }
 
-        return new Promise((resolve, reject)=>{
-            this._connection.all(sql, (erro, todos)=>{
-                if(erro){
-                    reject(new Error(erro))
-                    return
-                }
-                resolve(todos)
-            })
-        })
+    buscaPorNome(nome) {
+        return super.buscaPorColuna(nome, `nome`)
+    }
+
+    buscaPorID(id) {
+        return super.buscaPorColuna(id, `id`)
     }
 }
