@@ -28,8 +28,25 @@ module.exports = class Controller {
     }
 
     gerarRotaBuscaTodos(){
-        this.router.get("/", (req, res) => {
+        this.router.get(`/${this.nome}s`, (req, res) => {
             this.buscaTodos(req, res)
+        })
+    }
+
+    gerarRotaAdicionaUm(){
+        this.router.post(`/${this.nome}s/${this.nome}`, validacao(true), (req, res) => {
+            let objeto = this.gerarFormato(req)
+            const DAO = new c.ClientesDAO(c.dbConnection)
+            const cidadesDAO = new c.CidadesDAO(c.dbConnection)
+        
+            cidadesDAO.buscaPeloNome(req.body.cidade)
+                .then(
+                    (cidade) => {
+                        objeto.idCidade = cidade.id
+                        c.adicionaUm(req, res, objeto, DAO)
+                    }
+                )
+        
         })
     }
 
@@ -256,6 +273,13 @@ module.exports = class Controller {
         }
         validacoes.push(this.validaMaxChars("email", 255).optional())
         validacoes.push(body("email", "O atributo email informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("email").custom(email => {
+            return this[`${this.nome}sDAO`].buscaPorEmail(email).then(objeto => {
+                if (objeto) {
+                    return Promise.reject('O email informado ja está cadastrado.');
+                }
+            });
+        }).optional())
         return validacoes
     }
 
