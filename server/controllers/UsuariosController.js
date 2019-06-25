@@ -30,15 +30,15 @@ module.exports = class UsuariosController extends Controller {
             body("email").custom(email => {
                 return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
                     if (!usuario) {
-                        return Promise.reject('O atributo email informado não está cadastrado.');
+                        return Promise.reject('O valor informado não está cadastrado.');
                     } else {
                         dadosBanco = usuario
                     }
                 });
             }).optional(),
             super.validaSenha(true),
-            body("tokenEmJSON").isBoolean().withMessage("O atributo tokenEmJSON deve ser booleano."),
-            body("tokenEmJSON").exists().withMessage("O atributo tokenEmJSON deve ser informado.")
+            body("tokenEmJSON").isBoolean().withMessage("O valor deve ser booleano."),
+            body("tokenEmJSON").exists().withMessage("O valor deve ser informado.")
         ], (req, res) => {
             if (super.inicio(req, res, "Fazendo login de usuario...")) {
                 return
@@ -48,8 +48,14 @@ module.exports = class UsuariosController extends Controller {
                 .then(
                     (senhaEhValida) => {
                         if (!senhaEhValida) {
+                            const erro = {
+                                location: "body",
+                                param: "senha",
+                                msg: "O valor não é válido.",
+                                value: req.body.senha
+                            }
                             res.status(400).json({
-                                erro: "O atributo senha é inválido."
+                                erro
                             })
                             super.fim()
                         }
@@ -91,7 +97,7 @@ module.exports = class UsuariosController extends Controller {
             body("email").custom(email => {
                 return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
                     if (usuario) {
-                        return Promise.reject('O atributo email informado já está cadastrado.');
+                        return Promise.reject('O valor informado já está cadastrado.');
                     }
                 });
             }).optional(),
@@ -121,7 +127,7 @@ module.exports = class UsuariosController extends Controller {
             body("email").custom(email => {
                 return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
                     if (usuario) {
-                        return Promise.reject('O atributo email informado já está cadastrado.');
+                        return Promise.reject('O valor informado já está cadastrado.');
                     }
                 });
             }).optional(),
@@ -151,7 +157,7 @@ module.exports = class UsuariosController extends Controller {
             body("email").custom(email => {
                 return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
                     if (usuario) {
-                        return Promise.reject('O atributo email informado já está cadastrado.');
+                        return Promise.reject('O valor informado já está cadastrado.');
                     }
                 });
             }).optional(),

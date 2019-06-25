@@ -20,7 +20,7 @@ module.exports = class ProdutosController extends Controller {
         validacao.push(this.body("nome").custom(nome => {
             return this.produtosDAO.buscaPorNome(nome).then(produto => {
                 if (produto) {
-                    return Promise.reject('O atributo nome informado já está cadastrado.');
+                    return Promise.reject('O valor informado já está cadastrado.');
                 }
             });
         }).optional())

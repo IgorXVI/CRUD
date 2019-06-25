@@ -20,7 +20,16 @@ module.exports = class LoginService {
                         resolve()
                     },
                     (response) => {
-                        reject(response.erro)
+                        response.erro.map(erro => {
+                            let msg = ``
+                            if(erro.param){
+                                msg = `${erro.param}: ${erro.msg}`
+                            }
+                            else{
+                                msg = erro.msg
+                            }
+                            reject(msg)
+                        })
                     }
                 )
                 .catch(
@@ -32,7 +41,7 @@ module.exports = class LoginService {
         })
     }
 
-    fazerSignup(email, senha, nome){
+    fazerSignup(email, senha, nome) {
         const objeto = {
             email,
             senha,

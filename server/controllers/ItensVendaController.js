@@ -25,8 +25,14 @@ module.exports = class ItensVendaController extends Controller {
                     (existem) => {
                         console.log("passou primeiro")
                         if (!existem) {
+                            const erro = [{
+                                location: "body",
+                                param: "produto",
+                                msg: "Não existem produtos suficientes estocados para realizar essa venda.",
+                                value: req.body.produto
+                            }]
                             res.status(400).json({
-                                erro: "Não existem produtos suficientes estocados para realizar essa venda."
+                                erro
                             })
                             super.fim()
                             return "fim"
@@ -40,8 +46,7 @@ module.exports = class ItensVendaController extends Controller {
                         if (valorTotal != "fim") {
                             objeto.valorTotal = valorTotal
                             return this.atualizaVenda(objeto)
-                        }
-                        else {
+                        } else {
                             return "fim"
                         }
                     }
@@ -93,8 +98,7 @@ module.exports = class ItensVendaController extends Controller {
                             delete estoque.dataCriacao
 
                             return this.estoqueDAO.atualizaPorID(estoque, id)
-                        }
-                        else {
+                        } else {
                             resolve(false)
                             return "fim"
                         }

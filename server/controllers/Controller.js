@@ -121,8 +121,14 @@ module.exports = class Controller {
             .then(
                 (objeto) => {
                     if (!objeto) {
+                        const erro = [{
+                            location: "url",
+                            param: "id",
+                            msg: "O valor informado não é válido.",
+                            value: req.params.id
+                        }]
                         res.status(400).json({
-                            erro: "O atributo id informado não é válido."
+                            erro
                         })
                         this.fim()
                         return "fim"
@@ -142,8 +148,14 @@ module.exports = class Controller {
             .catch(
                 (erro) => {
                     if (erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
+                        const erro = [{
+                            location: "url",
+                            param: "id",
+                            msg: "O valor informado está sendo usado como foreign key.",
+                            value: req.params.id
+                        }]
                         res.status(400).json({
-                            erro: `O ${this.nomeSingular} com id = ${req.params.id} está sendo usado como foreign key, portanto não pode ser deletado.`
+                            erro
                         })
                         this.fim()
                     } else {
@@ -160,8 +172,14 @@ module.exports = class Controller {
             .then(
                 (objeto) => {
                     if (!objeto) {
+                        const erro = [{
+                            location: "url",
+                            param: "id",
+                            msg: "O valor informado não é válido.",
+                            value: req.params.id
+                        }]
                         res.status(400).json({
-                            erro: "O id informado não é válido."
+                            erro
                         })
                         this.fim()
                     } else {
@@ -201,8 +219,14 @@ module.exports = class Controller {
             .then(
                 (objetoDB) => {
                     if (!objetoDB) {
+                        const erro = [{
+                            location: "url",
+                            param: "id",
+                            msg: "O valor informado não é válido.",
+                            value: req.params.id
+                        }]
                         res.status(400).json({
-                            erro: "O id informado não é válido."
+                            erro
                         })
                         this.fim()
                         return "fim"
@@ -234,11 +258,10 @@ module.exports = class Controller {
     }
 
     checkErros(req, res) {
-        const errosValidacao = req.validationErrors()
-        if (errosValidacao) {
+        const erro = req.validationErrors()
+        if (erro) {
             res.status(400).json({
-                success: false,
-                errosValidacao
+                erro
             })
             this.fim()
             return true
@@ -248,8 +271,11 @@ module.exports = class Controller {
 
     erroServidor(erro, res) {
         console.error(erro)
+        const erro = [{
+            msg: "Erro no servidor."
+        }]
         res.status(500).json({
-            erro: "Erro no servidor."
+            erro
         })
         this.fim()
     }
@@ -310,7 +336,7 @@ module.exports = class Controller {
             validacoes.push(this.validaNotNull("CPF"))
         }
         validacoes.push(this.validaFixoChars("CPF", 14).optional())
-        validacoes.push(body("CPF", "O atributo cpf deve estar no formato xxx.xxx.xxx-xx, onde x é um dígito.").matches(/^[0-9]{3}\.[0-9]{3}\.[0-9]{3}\-[0-9]{2}$/).optional())
+        validacoes.push(body("CPF", "O valor deve estar no formato xxx.xxx.xxx-xx, onde x é um dígito.").matches(/^[0-9]{3}\.[0-9]{3}\.[0-9]{3}\-[0-9]{2}$/).optional())
         return validacoes
     }
 
@@ -329,7 +355,7 @@ module.exports = class Controller {
             validacoes.push(this.validaNotNull("email"))
         }
         validacoes.push(this.validaMaxChars("email", 255).optional())
-        validacoes.push(body("email", "O atributo email informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("email", "O valor informado está em um formato inválido.").isEmail().optional())
         return validacoes
     }
 
@@ -360,7 +386,7 @@ module.exports = class Controller {
         validacoes.push(body("cidade").custom(nome => {
             return this.cidadesDAO.buscaPorNome(nome).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('O atributo cidade informado não está cadastrado.');
+                    return Promise.reject('O valor informado não está cadastrado.');
                 } else {
                     this.foreignKeys.cidade = objeto.id
                 }
@@ -420,7 +446,7 @@ module.exports = class Controller {
             validacoes.push(this.validaNotNull("telefone"))
         }
         validacoes.push(this.validaMaxChars("telefone", 15).optional())
-        validacoes.push(body("telefone", "O atributo telefone deve estar no formato (xx) xxxxx-xxxx, onde x é um dígito.").matches(/^\([1-9]{2}\) (?:[2-8]|9[1-9])[0-9]{3}\-[0-9]{4}$/).optional())
+        validacoes.push(body("telefone", "O valor deve estar no formato (xx) xxxxx-xxxx, onde x é um dígito.").matches(/^\([1-9]{2}\) (?:[2-8]|9[1-9])[0-9]{3}\-[0-9]{4}$/).optional())
         return validacoes
     }
 
@@ -479,7 +505,7 @@ module.exports = class Controller {
         validacoes.push(body("produto").custom(nome => {
             return this.produtosDAO.buscaPorNome(nome).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('O atributo produto informado não está cadastrado.');
+                    return Promise.reject('O valor informado não está cadastrado.');
                 } else {
                     this.foreignKeys.produto = objeto.id
                 }
@@ -502,11 +528,11 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("funcionario"))
         }
-        validacoes.push(body("funcionario", "O atributo funcionario informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("funcionario", "O  valor informado está em um formato inválido.").isEmail().optional())
         validacoes.push(body("funcionario").custom(email => {
             return this.funcionariosDAO.buscaPorEmail(email).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('O atributo funcionario informado não está cadastrado.');
+                    return Promise.reject('O valor informado não está cadastrado.');
                 } else {
                     this.foreignKeys.funcionario = objeto.id
                 }
@@ -520,11 +546,11 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("cliente"))
         }
-        validacoes.push(body("cliente", "O atributo cliente informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("cliente", "O valor informado está em um formato inválido.").isEmail().optional())
         validacoes.push(body("cliente").custom(email => {
             return this.clientesDAO.buscaPorEmail(email).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('O atributo cliente informado não está cadastrado.');
+                    return Promise.reject('O valor informado não está cadastrado.');
                 } else {
                     this.foreignKeys.cliente = objeto.id
                 }
@@ -538,11 +564,11 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("fornecedor"))
         }
-        validacoes.push(body("fornecedor", "O atributo fornecedor informado está em um formato inválido.").isEmail().optional())
+        validacoes.push(body("fornecedor", "O valor informado está em um formato inválido.").isEmail().optional())
         validacoes.push(body("fornecedor").custom(email => {
             return this.fornecedoresDAO.buscaPorEmail(email).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('O atributo fornecedor informado não está cadastrado.');
+                    return Promise.reject('O valor informado não está cadastrado.');
                 } else {
                     this.foreignKeys.fornecedor = objeto.id
                 }
@@ -613,7 +639,7 @@ module.exports = class Controller {
         validacoes.push(body("idVenda").custom(id => {
             return this.fornecedoresDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
-                    return Promise.reject('O atributo venda informado não está cadastrado.');
+                    return Promise.reject('O valor informado não está cadastrado.');
                 }
             });
         }).optional())
@@ -621,24 +647,24 @@ module.exports = class Controller {
     }
 
     validaNotNull(atributo) {
-        return body(atributo, `É necessário informar o atributo ${atributo}.`).exists()
+        return body(atributo, `É necessário informar o valor.`).exists()
     }
 
     validaFixoChars(atributo, valor) {
-        return body(atributo, `O atributo ${atributo} deve conter ${valor} caractéres.`).isLength({
+        return body(atributo, `O valor deve conter ${valor} caractéres.`).isLength({
             min: valor,
             max: valor
         })
     }
 
     validaMaxChars(atributo, maximo) {
-        return body(atributo, `O atributo ${atributo} deve conter no máximo ${maximo} caractéres.`).isLength({
+        return body(atributo, `O valor deve conter no máximo ${maximo} caractéres.`).isLength({
             max: maximo
         })
     }
 
     validaMinMaxChars(atributo, minimo, maximo) {
-        return body(atributo, `O atributo ${atributo} deve conter no mínimo ${minimo} e no máximo ${maximo} caractéres.`).isLength({
+        return body(atributo, `O valor deve conter no mínimo ${minimo} e no máximo ${maximo} caractéres.`).isLength({
             min: minimo,
             max: maximo
         })
@@ -653,7 +679,7 @@ module.exports = class Controller {
             maximo = 1.79769e+308
         }
 
-        return body(atributo, `O atributo ${atributo} deve ser um número de ponto flutuante, com um ponto separando a parte inteira da parte decimal, e conter um valor entre ${minimo} e ${maximo}`).isFloat({
+        return body(atributo, `O valor deve ser um número de ponto flutuante, com um ponto separando a parte inteira da parte decimal, e estar entre ${minimo} e ${maximo}`).isFloat({
             min: minimo,
             max: maximo
         })
@@ -668,14 +694,14 @@ module.exports = class Controller {
             maximo = 9223372036854775808
         }
 
-        return body(atributo, `O atributo ${atributo} deve ser um número inteiro e conter um valor entre ${minimo} e ${maximo}`).isFloat({
+        return body(atributo, `O valor deve ser um número inteiro e estar entre ${minimo} e ${maximo}`).isFloat({
             min: minimo,
             max: maximo
         })
     }
 
     validaDataISO8601(atributo) {
-        return body(atributo, `O atributo ${atributo} deve estar no formato aaaa-mm-dd, onde a é o ano, m é o mês e d é o dia.`).isISO8601()
+        return body(atributo, `O valor deve estar no formato aaaa-mm-dd, onde a é o ano, m é o mês e d é o dia.`).isISO8601()
     }
 
     dataDeHoje() {

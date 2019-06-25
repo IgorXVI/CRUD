@@ -19,7 +19,7 @@ module.exports = class CidadesController extends Controller {
         validacao.push(this.body("nome").custom(nome => {
             return this.cidadesDAO.buscaPorNome(nome).then(cidade => {
                 if (cidade) {
-                    return Promise.reject('O atributo nome informado já está cadastrado.');
+                    return Promise.reject('O valor informado já está cadastrado.');
                 }
             });
         }).optional())

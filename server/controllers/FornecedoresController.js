@@ -20,7 +20,7 @@ module.exports = class FornecedoresController extends Controller{
         validacao.push(this.body("email").custom(email => {
             return this.fornecedoresDAO.buscaPorEmail(email).then(fornecedor => {
                 if (fornecedor) {
-                    return Promise.reject('O atributo email informado já está cadastrado.');
+                    return Promise.reject('O valor informado já está cadastrado.');
                 }
             });
         }).optional())
