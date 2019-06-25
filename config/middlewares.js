@@ -33,8 +33,7 @@ function checkToken(req, res, next) {
       })
       return
     }
-  }
-  else{
+  } else {
     next()
   }
 }
@@ -42,17 +41,21 @@ function checkToken(req, res, next) {
 function checkNivel(nivel, metodos) {
 
   return (req, res, next) => {
-    const usuarioNaoPermitido = req.decoded.nivelAcesso > nivel
-    const metodoNaoPermitido = req.decoded.nivelAcesso == nivel && !(metodos.includes(req.method))
-    if (usuarioNaoPermitido || metodoNaoPermitido) {
-      res.status(401).json({
-        success: false,
-        erro: "Acesso negado."
-      })
-      return
+    if (!podePassar(req)) {
+      const usuarioNaoPermitido = req.decoded.nivelAcesso > nivel
+      const metodoNaoPermitido = req.decoded.nivelAcesso == nivel && !(metodos && metodos.includes(req.method))
+      if (usuarioNaoPermitido || metodoNaoPermitido) {
+        res.status(401).json({
+          success: false,
+          erro: "Acesso negado."
+        })
+      } else {
+        next()
+      }
+    } else {
+      next()
     }
 
-    next()
   }
 
 }

@@ -38,7 +38,7 @@ module.exports = class UsuariosController extends Controller {
             }).optional(),
             super.validaSenha(true)
         ], (req, res) => {
-            if(super.inicio(req, res, "Fazendo login de usuario...")){
+            if (super.inicio(req, res, "Fazendo login de usuario...")) {
                 return
             }
 
@@ -86,12 +86,12 @@ module.exports = class UsuariosController extends Controller {
             }).optional(),
             super.validaSenha(true)
         ], (req, res) => {
-            if(super.inicio(req, res, "Fazendo signup de usuario...")){
+            if (super.inicio(req, res, "Fazendo signup de usuario...")) {
                 return
             }
 
             const dadosSignup = super.gerarObjeto(req)
-            dadosSignup.nivelAcesso = 3
+            dadosSignup.nivelAcesso = 2
 
             bcrypt.hash(dadosSignup.senha, 10)
                 .then(
@@ -104,8 +104,20 @@ module.exports = class UsuariosController extends Controller {
     }
 
     gerarRotaAdicionaUm() {
-        this.router.post(`/usuario`, super.gerarValidacao(true), (req, res) => {
-            if(super.inicio(req, res, "Adicionando usuario...")){
+        this.router.post(`/usuario`, [
+            super.validaNome(true),
+            super.validaEmail(true),
+            body("email").custom(email => {
+                return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
+                    if (usuario) {
+                        return Promise.reject('O atributo email informado já está cadastrado.');
+                    }
+                });
+            }).optional(),
+            super.validaSenha(true),
+            super.validaNivelAcesso(true)
+        ], (req, res) => {
+            if (super.inicio(req, res, "Adicionando usuario...")) {
                 return
             }
 
@@ -123,19 +135,19 @@ module.exports = class UsuariosController extends Controller {
 
     gerarRotaAtualizaUm() {
         this.router.post(`/usuario/:id`, [
-        super.validaNome(false),
-        super.validaEmail(false),
-        body("email").custom(email => {
-            return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
-                if (usuario) {
-                    return Promise.reject('O atributo email informado já está cadastrado.');
-                }
-            });
-        }).optional(),
-        super.validaSenha(false),
-        super.validaNivelAcesso(false)
-    ], (req, res) => {
-            if(super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)){
+            super.validaNome(false),
+            super.validaEmail(false),
+            body("email").custom(email => {
+                return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
+                    if (usuario) {
+                        return Promise.reject('O atributo email informado já está cadastrado.');
+                    }
+                });
+            }).optional(),
+            super.validaSenha(false),
+            super.validaNivelAcesso(false)
+        ], (req, res) => {
+            if (super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)) {
                 return
             }
 
@@ -149,8 +161,7 @@ module.exports = class UsuariosController extends Controller {
                             super.atualizaUm(req, res, objeto)
                         }
                     )
-            }
-            else{
+            } else {
                 super.atualizaUm(req, res, objeto)
             }
         })
