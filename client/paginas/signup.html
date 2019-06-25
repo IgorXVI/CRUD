@@ -5,43 +5,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="/css/bootstrap.css">
+    <link rel="stylesheet" href="/bootstrap-css/bootstrap.css">
     <title>Registrar</title>
 </head>
 
 <body>
 
     <div class="container">
-        <div class="jumbotron">
-            <h1>Loja Do Igor</h1>
-            <p>Registre-se como um usuário observador, que vai poder gerar relátorios mas não cadastrar.</p>
-        </div>
-    </div>
 
-    <div class="container">
         <ul id="msgView"></ul>
+
+        <div class="card">
+            <h5 class="card-header">Registrar</h5>
+            <div class="card-body">
+                <form onsubmit="signupController.registrar(event)">
+                    <div class="form-group">
+                        <label for="inputNome">Nome</label>
+                        <input type="text" class="form-control" id="inputNome" placeholder="Nome Sobrenome">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEmail">Email</label>
+                        <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
+                            placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="inputSenha">Senha</label>
+                        <input type="password" class="form-control" id="inputSenha" placeholder="adminadmin">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                    <button type="button" type="button" onclick="signupController.entrar(event)" class="btn btn-primary"
+                        id="btnEntrar">Entrar</button>
+                </form>
+            </div>
+        </div>
+
     </div>
 
-    <div class="container">
-        <form onsubmit="signupController.registrar(event)">
-            <div class="form-group">
-                <label for="inputNome">Nome</label>
-                <input type="text" class="form-control" id="inputNome" placeholder="Nome Sobrenome">
-            </div>
-            <div class="form-group">
-                <label for="inputEmail">Email</label>
-                <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
-                    placeholder="seu@email.com">
-            </div>
-            <div class="form-group">
-                <label for="inputSenha">Senha</label>
-                <input type="password" class="form-control" id="inputSenha" placeholder="adminadmin">
-            </div>
-            <button type="submit" class="btn btn-primary">Registrar</button>
-            <button type="button" type="button" onclick="signupController.entrar(event)" class="btn btn-primary"
-                id="btnEntrar">Entrar</button>
-        </form>
-    </div>
 </body>
 
 <script src="js/ApiService.js"></script>

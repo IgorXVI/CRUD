@@ -20,7 +20,7 @@ class LoginController extends Controller {
         service.post("/usuarios/usuario/login", dadosLogin)
             .then(
                 () => {
-                    location.href = "/dashboard"
+                    location.href = "/produtos"
                 },
                 (erros) => {
                     super.mostrarMsgErros(erros)

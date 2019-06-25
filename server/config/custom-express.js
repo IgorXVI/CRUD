@@ -38,6 +38,6 @@ app.use("/signup", express.static(path.join(__dirname, "../..", "client/paginas/
 app.use("/produtos", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/produtos.html")))
 
 //rotas de outros arquivos
-app.use("/css", express.static(path.join(__dirname, "../..", "node_modules/bootstrap/dist/css")))
+app.use("/bootstrap-css", express.static(path.join(__dirname, "../..", "node_modules/bootstrap/dist/css")))
 
 module.exports = app
