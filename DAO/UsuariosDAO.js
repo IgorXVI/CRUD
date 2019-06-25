@@ -10,7 +10,7 @@ module.exports = class UsuariosDAO extends DAO {
     }
 
     atualizaPorID(usuario, id){
-        return super.atualizaPorColuna(usuario, id, `id`, `nome, email, senha, nivelAcesso, dataAlteracao, dataCriacao`)
+        return super.atualizaPorColuna(usuario, id, `id`, `nome, email, senha, nivelAcesso, dataAlteracao`)
     }
 
     deletaPorID(id){

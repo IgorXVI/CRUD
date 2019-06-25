@@ -50,37 +50,47 @@ module.exports = class Controller {
 
     gerarRotaBuscaTodos() {
         this.router.get("/", (req, res) => {
-            this.inicio(req, res, `Buscando ${this.nome}...`)
+            if (this.inicio(req, res, `Buscando ${this.nome}...`)) {
+                return
+            }
             this.buscaTodos(req, res)
         })
     }
 
     gerarRotaAdicionaUm() {
         this.router.post(`/${this.nomeSingular}`, this.gerarValidacao(true), (req, res) => {
-            this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-            const objeto = this.gerarObjeto()
+            if (this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)) {
+                return
+            }
+            const objeto = this.gerarObjeto(req)
             this.adicionaUm(req, res, objeto)
         })
     }
 
     gerarRotaBuscaUm() {
         this.router.get(`/${this.nomeSingular}/:id`, (req, res) => {
-            this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
+            if (this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)) {
+                return
+            }
             this.buscaUm(req, res)
         })
     }
 
     gerarRotaDeletaUm() {
         this.router.delete(`/${this.nomeSingular}/:id`, (req, res) => {
-            this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
+            if (this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)) {
+                return
+            }
             this.deletaUm(req, res)
         })
     }
 
     gerarRotaAtualizaUm() {
         this.router.post(`/${this.nomeSingular}/:id`, this.gerarValidacao(false), (req, res) => {
-            this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
-            const objeto = this.gerarObjeto()
+            if (this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)) {
+                return
+            }
+            const objeto = this.gerarObjeto(req)
             this.atualizaUm(req, res, objeto)
         })
     }
@@ -96,6 +106,7 @@ module.exports = class Controller {
                         buscado: objeto
                     })
                     this.fim()
+                    return
                 }
             )
             .catch(
@@ -115,8 +126,11 @@ module.exports = class Controller {
                             erro: "O atributo id informado não é válido."
                         })
                         this.fim()
+                        return
                     }
-                    return DAO.deletaPorID(req.params.id)
+                    else{
+                        return DAO.deletaPorID(req.params.id)
+                    }
                 }
             )
             .then(
@@ -125,10 +139,22 @@ module.exports = class Controller {
                         success: true
                     })
                     this.fim()
+                    return
                 }
             )
             .catch(
-                erro => this.erroServidor(erro, res)
+                (erro) =>{
+                    if(erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")){
+                        res.status(400).json({
+                            success: false,
+                            erro: `O ${this.nomeSingular} com id = ${req.params.id} está sendo usado como foreign key, portanto não pode ser deletado.`
+                        })
+                        this.fim()
+                    }
+                    else{
+                        this.erroServidor()
+                    }
+                }
             )
     }
 
@@ -144,13 +170,15 @@ module.exports = class Controller {
                             erro: "O id informado não é válido."
                         })
                         this.fim()
+                        return
+                    } else {
+                        res.status(200).json({
+                            success: true,
+                            buscado: objeto
+                        })
+                        this.fim()
+                        return
                     }
-
-                    res.status(200).json({
-                        success: true,
-                        buscado: objeto
-                    })
-                    this.fim()
                 }
             )
             .catch(
@@ -169,6 +197,7 @@ module.exports = class Controller {
                         adicionado: objeto
                     })
                     this.fim()
+                    return
                 }
             )
             .catch(
@@ -190,15 +219,16 @@ module.exports = class Controller {
                             erro: "O id informado não é válido."
                         })
                         this.fim()
-                    }
-
-                    const keys = Object.keys(objeto)
-                    for (let i = 0; i < keys.length; i++) {
-                        if (!objeto[keys[i]]) {
-                            objeto[keys[i]] = objetoDB[keys[i]]
+                        return
+                    } else {
+                        const keys = Object.keys(objeto)
+                        for (let i = 0; i < keys.length; i++) {
+                            if (!objeto[keys[i]]) {
+                                objeto[keys[i]] = objetoDB[keys[i]]
+                            }
                         }
+                        return DAO.atualizaPorID(objeto, req.params.id)
                     }
-                    return DAO.atualizaPorID(objeto, req.params.id)
                 }
             )
             .then(
@@ -208,6 +238,7 @@ module.exports = class Controller {
                         atualizado: objeto
                     })
                     this.fim()
+                    return
                 }
             )
             .catch(
@@ -223,7 +254,9 @@ module.exports = class Controller {
                 errosValidacao
             })
             this.fim()
+            return true
         }
+        return false
     }
 
     erroServidor(erro, res) {
@@ -237,24 +270,23 @@ module.exports = class Controller {
 
     inicio(req, res, mensagem) {
         console.log(mensagem)
-        this.checkErros(req, res)
+        return this.checkErros(req, res)
     }
 
     fim() {
         console.log("fim")
-        return
     }
 
     gerarValidacao(obrigatorio, excecoes) {
-        if(!excecoes){
+        if (!excecoes) {
             excecoes = new String()
         }
 
-        const atributosArr = this.atributos.split(",").map(atributo => (atributo).replace(/\s/g,'')).map(atributo => `${atributo.charAt(0).toUpperCase()}${atributo.slice(1)}`)
-        let validacao = new Array() 
+        const atributosArr = this.atributos.split(",").map(atributo => (atributo).replace(/\s/g, '')).map(atributo => `${atributo.charAt(0).toUpperCase()}${atributo.slice(1)}`)
+        let validacao = new Array()
         for (let i = 0; i < atributosArr.length; i++) {
 
-            if(!("DataAlteracao, DataCriacao".includes(atributosArr[i]))){
+            if (!("DataAlteracao, DataCriacao".includes(atributosArr[i]))) {
 
                 if ((excecoes.includes(atributosArr[i]))) {
                     validacao.push(this[`valida${atributosArr[i]}`](!obrigatorio))
@@ -270,7 +302,7 @@ module.exports = class Controller {
 
     gerarObjeto(req) {
         let objeto = {}
-        const atributosArr = this.atributos.split(",").map(atributo => (atributo).replace(/\s/g,''))
+        const atributosArr = this.atributos.split(",").map(atributo => (atributo).replace(/\s/g, ''))
         const foreignKeysArr = Object.keys(this.foreignKeys)
         for (let i = 0; i < atributosArr.length; i++) {
 
@@ -340,7 +372,7 @@ module.exports = class Controller {
         }
         validacoes.push(this.validaMaxChars("cidade", 30).optional())
         validacoes.push(body("cidade").custom(nome => {
-            return this.cidadesDAO.buscaPeloNome(nome).then(objeto => {
+            return this.cidadesDAO.buscaPorNome(nome).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O atributo cidade informado não está cadastrado.');
                 } else {
@@ -470,7 +502,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaValorTotal(obrigatorio){
+    validaValorTotal(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("valorTotal"))
@@ -479,7 +511,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaFuncionario(obrigatorio){
+    validaFuncionario(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("funcionario"))
@@ -497,7 +529,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaCliente(obrigatorio){
+    validaCliente(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("cliente"))
@@ -515,7 +547,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaFornecedor(obrigatorio){
+    validaFornecedor(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("fornecedor"))
@@ -533,7 +565,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaCategoria(obrigatorio){
+    validaCategoria(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("categoria"))
@@ -542,7 +574,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaPrecoUnidade(obrigatorio){
+    validaPrecoUnidade(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("precoUnidade"))
@@ -551,7 +583,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaDescricao(obrigatorio){
+    validaDescricao(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("descricao"))
@@ -560,7 +592,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaGarantia(obrigatorio){
+    validaGarantia(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("garantia"))
@@ -569,7 +601,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaDataFabric(obrigatorio){
+    validaDataFabric(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("dataFrabric"))
@@ -578,7 +610,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaDataValidade(obrigatorio){
+    validaDataValidade(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("dataValidade"))

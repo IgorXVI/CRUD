@@ -12,7 +12,7 @@ module.exports = class FuncionariosDAO extends DAO {
 
     atualizaPorID(funcionario, id){
         return super.atualizaPorColuna(funcionario, id, `id`, `CPF, nome, email, salario, idCidade, dataAlteracao, 
-        dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento`)
+        bairro, rua, numeroCasa, telefone, dataNasc, complemento`)
     }
 
     deletaPorID(id){

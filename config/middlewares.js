@@ -1,32 +1,41 @@
 let jwt = require('jsonwebtoken')
 const secret = require('./secret')
 
-function checkToken(req, res, next) {
-  let token = req.headers['x-access-token'] || req.headers['authorization'] // Express headers are auto converted to lowercase
-  if (token) {
-    if (token.startsWith('Bearer ')) {
-      // Remove Bearer from string
-      token = token.slice(7, token.length)
-    }
+function podePassar(req) {
+  return (`${req.baseUrl}${req.url}` == "/api/usuarios/usuario/login" || `${req.baseUrl}${req.url}` == "/api/usuarios/usuario/signup")
+}
 
-    jwt.verify(token, secret, (err, decoded) => {
-      if (err) {
-        res.status(401).json({
-          success: false,
-          message: 'Token não é válido.'
-        })
-        return
-      } else {
-        req.decoded = decoded
-        next()
+function checkToken(req, res, next) {
+  if (!podePassar(req)) {
+    let token = req.headers['x-access-token'] || req.headers['authorization'] // Express headers are auto converted to lowercase
+    if (token) {
+      if (token.startsWith('Bearer ')) {
+        // Remove Bearer from string
+        token = token.slice(7, token.length)
       }
-    });
-  } else {
-    res.status(401).json({
-      success: false,
-      message: 'Token de autorização não foi informado no header.'
-    })
-    return
+
+      jwt.verify(token, secret, (err, decoded) => {
+        if (err) {
+          res.status(401).json({
+            success: false,
+            message: 'Token não é válido.'
+          })
+          return
+        } else {
+          req.decoded = decoded
+          next()
+        }
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: 'Token de autorização não foi informado no header.'
+      })
+      return
+    }
+  }
+  else{
+    next()
   }
 }
 

@@ -38,7 +38,9 @@ module.exports = class UsuariosController extends Controller {
             }).optional(),
             super.validaSenha(true)
         ], (req, res) => {
-            super.inicio(req, res, "Fazendo login de usuario...")
+            if(super.inicio(req, res, "Fazendo login de usuario...")){
+                return
+            }
 
             bcrypt.compare(req.body.senha, dadosBanco.senha)
                 .then(
@@ -84,7 +86,9 @@ module.exports = class UsuariosController extends Controller {
             }).optional(),
             super.validaSenha(true)
         ], (req, res) => {
-            super.inicio(req, res, "Fazendo signup de usuario...")
+            if(super.inicio(req, res, "Fazendo signup de usuario...")){
+                return
+            }
 
             const dadosSignup = super.gerarObjeto(req)
             dadosSignup.nivelAcesso = 3
@@ -101,7 +105,9 @@ module.exports = class UsuariosController extends Controller {
 
     gerarRotaAdicionaUm() {
         this.router.post(`/usuario`, super.gerarValidacao(true), (req, res) => {
-            super.inicio(req, res, "Adicionando usuario...")
+            if(super.inicio(req, res, "Adicionando usuario...")){
+                return
+            }
 
             const objeto = super.gerarObjeto(req)
 
@@ -116,8 +122,22 @@ module.exports = class UsuariosController extends Controller {
     }
 
     gerarRotaAtualizaUm() {
-        this.router.post(`/usuario/:id`, super.gerarValidacao(false), (req, res) => {
-            super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)
+        this.router.post(`/usuario/:id`, [
+        super.validaNome(false),
+        super.validaEmail(false),
+        body("email").custom(email => {
+            return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
+                if (usuario) {
+                    return Promise.reject('O atributo email informado já está cadastrado.');
+                }
+            });
+        }).optional(),
+        super.validaSenha(false),
+        super.validaNivelAcesso(false)
+    ], (req, res) => {
+            if(super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)){
+                return
+            }
 
             const objeto = super.gerarObjeto(req)
 
