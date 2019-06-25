@@ -20,4 +20,9 @@ module.exports = class EstoqueDAO extends DAO {
     buscaPorID(id) {
         return super.buscaPorColuna(id, `id`)
     }
+
+    buscaPorIDdeProduto(id){
+        return super.buscaPorColuna(id, `idProduto`)
+    }
+
 }

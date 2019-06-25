@@ -9,46 +9,23 @@ module.exports = class ClientesController extends Controller {
 
         super.gerarRotaBuscaTodos()
         super.gerarRotaBuscaUm()
-        this.gerarRotaAdicionaUm()
-        this.gerarRotaAtualizaUm()
+        super.gerarRotaAdicionaUm(this.validacaoCustomizada(true))
+        super.gerarRotaAtualizaUm(this.validacaoCustomizada(false))
         super.gerarRotaDeletaUm()
     }
 
-    validacaoCustomizada(obrigatorio){
-        let validaEmailJaCadastrado = body("email").custom(email => {
+    validacaoCustomizada(obrigatorio) {
+        let validacao = super.gerarValidacao(obrigatorio)
+
+        validacao.push(this.body("email").custom(email => {
             return this.clientesDAO.buscaPorEmail(email).then(cliente => {
                 if (cliente) {
                     return Promise.reject('O atributo email informado já está cadastrado.');
                 }
             });
-        }).optional()
+        }).optional())
 
-        let validacao = super.gerarValidacao(obrigatorio)
-        validacao.push(validaEmailJaCadastrado)
         return validacao
-    }
-
-    gerarRotaAdicionaUm() {
-        this.router.post("/cliente", this.validacaoCustomizada(true), (req, res) => {
-            if (super.inicio(req, res, `Adicionando cliente...`)) {
-                return
-            }
-
-            const objeto = super.gerarObjeto(req)
-            super.adicionaUm(req, res, objeto)
-        })
-    }
-
-    gerarRotaAtualizaUm() {
-
-        this.router.post("/cliente/:id", this.validacaoCustomizada(false), (req, res) => {
-            if (super.inicio(req, res, `Atualizando cliente com id = ${req.params.id}...`)) {
-                return
-            }
-
-            const objeto = super.gerarObjeto(req)
-            super.atualizaUm(req, res, objeto)
-        })
     }
 
 }

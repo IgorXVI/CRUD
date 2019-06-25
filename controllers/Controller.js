@@ -2,15 +2,15 @@ const express = require("express")
 
 const dbConnection = require("../config/db")
 
-const CidadesDAO = require("../DAO/CidadesDAO")
-const FuncionariosDAO = require("../DAO/FuncionariosDAO")
-const ClientesDAO = require("../DAO/ClientesDAO")
-const FornecedoresDAO = require("../DAO/FornecedoresDAO")
-const ProdutosDAO = require("../DAO/ProdutosDAO")
-const EstoqueDAO = require("../DAO/EstoqueDAO")
-const VendasDAO = require("../DAO/VendasDAO")
-const ItensVendaDAO = require("../DAO/ItensVendaDAO")
-const UsuariosDAO = require("../DAO/UsuariosDAO")
+const CidadesDAO = require("../DAOs/CidadesDAO")
+const FuncionariosDAO = require("../DAOs/FuncionariosDAO")
+const ClientesDAO = require("../DAOs/ClientesDAO")
+const FornecedoresDAO = require("../DAOs/FornecedoresDAO")
+const ProdutosDAO = require("../DAOs/ProdutosDAO")
+const EstoqueDAO = require("../DAOs/EstoqueDAO")
+const VendasDAO = require("../DAOs/VendasDAO")
+const ItensVendaDAO = require("../DAOs/ItensVendaDAO")
+const UsuariosDAO = require("../DAOs/UsuariosDAO")
 
 const {
     body
@@ -38,11 +38,13 @@ module.exports = class Controller {
         this.nome = nome
         this.nomeSingular = nomeSingular
 
+        this.body = body
+
         if (gerarTodasRotas) {
             this.gerarRotaBuscaTodos()
             this.gerarRotaBuscaUm()
-            this.gerarRotaAdicionaUm()
-            this.gerarRotaAtualizaUm()
+            this.gerarRotaAdicionaUm(this.gerarValidacao(true))
+            this.gerarRotaAtualizaUm(this.gerarValidacao(false))
             this.gerarRotaDeletaUm()
         }
 
@@ -57,8 +59,8 @@ module.exports = class Controller {
         })
     }
 
-    gerarRotaAdicionaUm() {
-        this.router.post(`/${this.nomeSingular}`, this.gerarValidacao(true), (req, res) => {
+    gerarRotaAdicionaUm(validacao) {
+        this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
             if (this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)) {
                 return
             }
@@ -85,8 +87,8 @@ module.exports = class Controller {
         })
     }
 
-    gerarRotaAtualizaUm() {
-        this.router.post(`/${this.nomeSingular}/:id`, this.gerarValidacao(false), (req, res) => {
+    gerarRotaAtualizaUm(validacao) {
+        this.router.post(`/${this.nomeSingular}/:id`, validacao, (req, res) => {
             if (this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)) {
                 return
             }
@@ -127,8 +129,7 @@ module.exports = class Controller {
                         })
                         this.fim()
                         return
-                    }
-                    else{
+                    } else {
                         return DAO.deletaPorID(req.params.id)
                     }
                 }
@@ -143,15 +144,14 @@ module.exports = class Controller {
                 }
             )
             .catch(
-                (erro) =>{
-                    if(erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")){
+                (erro) => {
+                    if (erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
                         res.status(400).json({
                             success: false,
                             erro: `O ${this.nomeSingular} com id = ${req.params.id} está sendo usado como foreign key, portanto não pode ser deletado.`
                         })
                         this.fim()
-                    }
-                    else{
+                    } else {
                         this.erroServidor()
                     }
                 }
@@ -222,11 +222,14 @@ module.exports = class Controller {
                         return
                     } else {
                         const keys = Object.keys(objeto)
+                        let keysDB = Object.keys(objetoDB)
+                        keysDB.shift()
                         for (let i = 0; i < keys.length; i++) {
                             if (!objeto[keys[i]]) {
-                                objeto[keys[i]] = objetoDB[keys[i]]
+                                objeto[keys[i]] = objetoDB[keysDB[i]]
                             }
                         }
+
                         return DAO.atualizaPorID(objeto, req.params.id)
                     }
                 }
@@ -286,7 +289,7 @@ module.exports = class Controller {
         let validacao = new Array()
         for (let i = 0; i < atributosArr.length; i++) {
 
-            if (!("DataAlteracao, DataCriacao".includes(atributosArr[i]))) {
+            if (!(atributosArr[i] == "DataCriacao" || atributosArr[i] == "DataAlteracao")) {
 
                 if ((excecoes.includes(atributosArr[i]))) {
                     validacao.push(this[`valida${atributosArr[i]}`](!obrigatorio))
@@ -480,7 +483,7 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("quantidade"))
         }
-        validacoes.push(this.validaInteiro("quantidade", 0))
+        validacoes.push(this.validaInteiro("quantidade", 0).optional())
         return validacoes
     }
 
@@ -507,7 +510,7 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("valorTotal"))
         }
-        validacoes.push(this.validaDecimal("valorTotal", 0))
+        validacoes.push(this.validaDecimal("valorTotal", 0).optional())
         return validacoes
     }
 
@@ -558,7 +561,7 @@ module.exports = class Controller {
                 if (!objeto) {
                     return Promise.reject('O atributo fornecedor informado não está cadastrado.');
                 } else {
-                    this.foreignKeys.cliente = objeto.id
+                    this.foreignKeys.fornecedor = objeto.id
                 }
             });
         }).optional())
@@ -570,7 +573,7 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("categoria"))
         }
-        validacoes.push(this.validaMaxChars("categoria", 100))
+        validacoes.push(this.validaMaxChars("categoria", 100).optional())
         return validacoes
     }
 
@@ -579,7 +582,7 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("precoUnidade"))
         }
-        validacoes.push(this.validaDecimal("precoUnidade", 0))
+        validacoes.push(this.validaDecimal("precoUnidade", 0).optional())
         return validacoes
     }
 
@@ -588,7 +591,7 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("descricao"))
         }
-        validacoes.push(this.validaMaxChars("descricao", 255))
+        validacoes.push(this.validaMaxChars("descricao", 255).optional())
         return validacoes
     }
 
@@ -597,14 +600,14 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("garantia"))
         }
-        validacoes.push(this.validaInteiro("garantia", 0))
+        validacoes.push(this.validaInteiro("garantia", 0).optional())
         return validacoes
     }
 
     validaDataFabric(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("dataFrabric"))
+            validacoes.push(this.validaNotNull("dataFabric"))
         }
         validacoes.push(this.validaDataISO8601("dataFabric").optional())
         return validacoes
@@ -616,6 +619,21 @@ module.exports = class Controller {
             validacoes.push(this.validaNotNull("dataValidade"))
         }
         validacoes.push(this.validaDataISO8601("dataValidade").optional())
+        return validacoes
+    }
+
+    validaIdVenda(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("idVenda"))
+        }
+        validacoes.push(body("idVenda").custom(id => {
+            return this.fornecedoresDAO.buscaPorID(id).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O atributo venda informado não está cadastrado.');
+                }
+            });
+        }).optional())
         return validacoes
     }
 

@@ -19,6 +19,10 @@ module.exports = class ProdutosDAO extends DAO {
         return super.deletaPorColuna(id, `id`)
     }
 
+    buscaPorNome(nome){
+        return super.buscaPorColuna(nome, `nome`)
+    }
+
     buscaPorID(id) {
         return super.buscaPorColuna(id, `id`)
     }
