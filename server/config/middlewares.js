@@ -7,7 +7,7 @@ function podePassar(req) {
 
 function checkToken(req, res, next) {
   if (!podePassar(req)) {
-    let token = req.headers['x-access-token'] || req.headers['authorization'] // Express headers are auto converted to lowercase
+    let token = req.headers['x-access-token'] || req.headers['authorization'] || req.cookies.auth // Express headers are auto converted to lowercase
     if (token) {
       if (token.startsWith('Bearer ')) {
         // Remove Bearer from string
@@ -17,8 +17,7 @@ function checkToken(req, res, next) {
       jwt.verify(token, secret, (err, decoded) => {
         if (err) {
           res.status(401).json({
-            success: false,
-            message: 'Token não é válido.'
+            erro: "Token não é válido."
           })
           return
         } else {
@@ -28,8 +27,7 @@ function checkToken(req, res, next) {
       });
     } else {
       res.status(401).json({
-        success: false,
-        message: 'Token de autorização não foi informado no header.'
+        erro: "Token de autorização não foi informado no header."
       })
       return
     }
@@ -46,7 +44,6 @@ function checkNivel(nivel, metodos) {
       const metodoNaoPermitido = req.decoded.nivelAcesso == nivel && !(metodos && metodos.includes(req.method))
       if (usuarioNaoPermitido || metodoNaoPermitido) {
         res.status(401).json({
-          success: false,
           erro: "Acesso negado."
         })
       } else {

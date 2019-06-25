@@ -26,7 +26,6 @@ module.exports = class ItensVendaController extends Controller {
                         console.log("passou primeiro")
                         if (!existem) {
                             res.status(400).json({
-                                success: false,
                                 erro: "Não existem produtos suficientes estocados para realizar essa venda."
                             })
                             super.fim()

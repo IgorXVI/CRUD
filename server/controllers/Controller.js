@@ -103,9 +103,8 @@ module.exports = class Controller {
         DAO.buscaTodos()
             .then(
                 (objeto) => {
-                    res.status(201).json({
-                        success: true,
-                        buscado: objeto
+                    res.status(200).json({
+                        resultado: objeto
                     })
                     this.fim()
                 }
@@ -123,7 +122,6 @@ module.exports = class Controller {
                 (objeto) => {
                     if (!objeto) {
                         res.status(400).json({
-                            success: false,
                             erro: "O atributo id informado não é válido."
                         })
                         this.fim()
@@ -136,9 +134,7 @@ module.exports = class Controller {
             .then(
                 (retorno) => {
                     if (retorno != "fim") {
-                        res.status(200).json({
-                            success: true
-                        })
+                        res.status(202).end()
                         this.fim()
                     }
                 }
@@ -147,7 +143,6 @@ module.exports = class Controller {
                 (erro) => {
                     if (erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
                         res.status(400).json({
-                            success: false,
                             erro: `O ${this.nomeSingular} com id = ${req.params.id} está sendo usado como foreign key, portanto não pode ser deletado.`
                         })
                         this.fim()
@@ -166,14 +161,12 @@ module.exports = class Controller {
                 (objeto) => {
                     if (!objeto) {
                         res.status(400).json({
-                            success: false,
                             erro: "O id informado não é válido."
                         })
                         this.fim()
                     } else {
                         res.status(200).json({
-                            success: true,
-                            buscado: objeto
+                            resultado: objeto
                         })
                         this.fim()
                     }
@@ -190,10 +183,7 @@ module.exports = class Controller {
         DAO.adiciona(objeto)
             .then(
                 () => {
-                    res.status(201).json({
-                        success: true,
-                        adicionado: objeto
-                    })
+                    res.status(201).end()
                     this.fim()
                 }
             )
@@ -212,7 +202,6 @@ module.exports = class Controller {
                 (objetoDB) => {
                     if (!objetoDB) {
                         res.status(400).json({
-                            success: false,
                             erro: "O id informado não é válido."
                         })
                         this.fim()
@@ -234,10 +223,7 @@ module.exports = class Controller {
             .then(
                 (retorno) => {
                     if (retorno != "fim") {
-                        res.status(200).json({
-                            success: true,
-                            atualizado: objeto
-                        })
+                        res.status(201).end()
                         this.fim()
                     }
                 }
@@ -263,7 +249,6 @@ module.exports = class Controller {
     erroServidor(erro, res) {
         console.error(erro)
         res.status(500).json({
-            success: false,
             erro: "Erro no servidor."
         })
         this.fim()

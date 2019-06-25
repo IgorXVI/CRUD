@@ -36,7 +36,9 @@ module.exports = class UsuariosController extends Controller {
                     }
                 });
             }).optional(),
-            super.validaSenha(true)
+            super.validaSenha(true),
+            body("tokenEmJSON").isBoolean().withMessage("O atributo tokenEmJSON deve ser booleano."),
+            body("tokenEmJSON").exists().withMessage("O atributo tokenEmJSON deve ser informado.")
         ], (req, res) => {
             if (super.inicio(req, res, "Fazendo login de usuario...")) {
                 return
@@ -47,7 +49,6 @@ module.exports = class UsuariosController extends Controller {
                     (senhaEhValida) => {
                         if (!senhaEhValida) {
                             res.status(400).json({
-                                success: false,
                                 erro: "O atributo senha é inválido."
                             })
                             super.fim()
@@ -60,10 +61,20 @@ module.exports = class UsuariosController extends Controller {
                                 expiresIn: "1h"
                             }
                         )
-                        res.status(202).json({
-                            success: true,
-                            token
-                        })
+
+                        const tokenEmJSON = (req.body.tokenEmJSON == "true")
+                        if(tokenEmJSON){
+                            res.status(201).json({
+                                token
+                            })
+                        }
+                        else{
+                            res.status(201).cookie("auth", token, {
+                                expires: new Date(Date.now() + 3500000),
+                                httpOnly: true
+                            })
+                            res.end()
+                        }
                         super.fim()
                     }
                 )
