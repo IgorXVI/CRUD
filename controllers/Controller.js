@@ -108,7 +108,6 @@ module.exports = class Controller {
                         buscado: objeto
                     })
                     this.fim()
-                    return
                 }
             )
             .catch(
@@ -128,19 +127,20 @@ module.exports = class Controller {
                             erro: "O atributo id informado não é válido."
                         })
                         this.fim()
-                        return
+                        return "fim"
                     } else {
                         return DAO.deletaPorID(req.params.id)
                     }
                 }
             )
             .then(
-                () => {
-                    res.status(200).json({
-                        success: true
-                    })
-                    this.fim()
-                    return
+                (retorno) => {
+                    if (retorno != "fim") {
+                        res.status(200).json({
+                            success: true
+                        })
+                        this.fim()
+                    }
                 }
             )
             .catch(
@@ -170,14 +170,12 @@ module.exports = class Controller {
                             erro: "O id informado não é válido."
                         })
                         this.fim()
-                        return
                     } else {
                         res.status(200).json({
                             success: true,
                             buscado: objeto
                         })
                         this.fim()
-                        return
                     }
                 }
             )
@@ -197,7 +195,6 @@ module.exports = class Controller {
                         adicionado: objeto
                     })
                     this.fim()
-                    return
                 }
             )
             .catch(
@@ -219,7 +216,7 @@ module.exports = class Controller {
                             erro: "O id informado não é válido."
                         })
                         this.fim()
-                        return
+                        return "fim"
                     } else {
                         const keys = Object.keys(objeto)
                         let keysDB = Object.keys(objetoDB)
@@ -235,13 +232,14 @@ module.exports = class Controller {
                 }
             )
             .then(
-                () => {
-                    res.status(200).json({
-                        success: true,
-                        atualizado: objeto
-                    })
-                    this.fim()
-                    return
+                (retorno) => {
+                    if (retorno != "fim") {
+                        res.status(200).json({
+                            success: true,
+                            atualizado: objeto
+                        })
+                        this.fim()
+                    }
                 }
             )
             .catch(

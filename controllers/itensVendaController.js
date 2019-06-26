@@ -23,13 +23,14 @@ module.exports = class ItensVendaController extends Controller {
             this.produtosSuficientesEstocados(objeto)
                 .then(
                     (existem) => {
+                        console.log("passou primeiro")
                         if (!existem) {
                             res.status(400).json({
                                 success: false,
                                 erro: "Não existem produtos suficientes estocados para realizar essa venda."
                             })
                             super.fim()
-                            return
+                            return "fim"
                         } else {
                             return this.calculaValorTotal(objeto)
                         }
@@ -37,13 +38,20 @@ module.exports = class ItensVendaController extends Controller {
                 )
                 .then(
                     (valorTotal) => {
-                        objeto.valorTotal = valorTotal
-                        return this.atualizaVenda(objeto)
+                        if (valorTotal != "fim") {
+                            objeto.valorTotal = valorTotal
+                            return this.atualizaVenda(objeto)
+                        }
+                        else {
+                            return "fim"
+                        }
                     }
                 )
                 .then(
-                    () => {
-                        super.adicionaUm(req, res, objeto)
+                    (retorno) => {
+                        if (retorno != "fim") {
+                            super.adicionaUm(req, res, objeto)
+                        }
                     }
                 )
                 .catch(
@@ -78,20 +86,26 @@ module.exports = class ItensVendaController extends Controller {
             this.estoqueDAO.buscaPorIDdeProduto(objeto.produto)
                 .then(
                     (estoque) => {
-                        if (estoque && estoque.quantidade <= objeto.quantidade) {
-                            estoque.quantidade -= objeto.quantidade
+                        if (estoque && estoque.quantidade >= objeto.quantidade) {
+                            estoque.quantidade = estoque.quantidade - objeto.quantidade
                             const id = estoque.id
+
                             delete estoque.id
+                            delete estoque.dataCriacao
+
                             return this.estoqueDAO.atualizaPorID(estoque, id)
                         }
-                        resolve(false)
-                        return
+                        else {
+                            resolve(false)
+                            return "fim"
+                        }
                     }
                 )
                 .then(
-                    () => {
-                        resolve(true)
-                        return
+                    (retorno) => {
+                        if (retorno != "fim") {
+                            resolve(true)
+                        }
                     }
                 )
                 .catch(
@@ -111,7 +125,10 @@ module.exports = class ItensVendaController extends Controller {
                     (venda) => {
                         venda.valorTotal += objeto.valorTotal
                         const id = venda.id
+
                         delete venda.id
+                        delete venda.dataCriacao
+
                         return this.vendasDAO.atualizaPorID(venda, id)
                     }
                 )

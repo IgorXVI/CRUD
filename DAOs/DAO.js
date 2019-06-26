@@ -21,6 +21,7 @@ module.exports = class DAO {
 
     atualizaPorColuna(objeto, colunaValor, colunaNome, colunas){
         const valores = Object.values(objeto)
+
         valores.push(colunaValor)
         const colunasEPlaceholders = colunas.split(",").map(nome => `${nome} = ?`).join(",")
 
