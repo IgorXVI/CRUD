@@ -1,7 +1,7 @@
-module.exports = class HttpService {
+class ApiService {
 
     constructor(){
-        this.host = `http://127.0.0.1:6663/`
+        this.host = `http://127.0.0.1:6663/api`
     }
 
     get(url) {
@@ -15,7 +15,7 @@ module.exports = class HttpService {
                     if(xhr.status == 200) {
                         resolve(JSON.parse(xhr.responseText))
                     } else {
-                        reject(JSON.parse(xhr.responseText))
+                        reject(this.tratarErrosDaAPI(JSON.parse(xhr.responseText)))
                     }
                 }
             }
@@ -37,7 +37,7 @@ module.exports = class HttpService {
                     if (xhr.status == 201) {
                         resolve()
                     } else {
-                        reject(JSON.parse(xhr.responseText))
+                        reject(this.tratarErrosDaAPI(JSON.parse(xhr.responseText)))
                     }
                 }
             };
@@ -58,7 +58,7 @@ module.exports = class HttpService {
                     if (xhr.status == 202) {
                         resolve()
                     } else {
-                        reject(JSON.parse(xhr.responseText))
+                        reject(this.tratarErrosDaAPI(JSON.parse(xhr.responseText)))
                     }
                 }
             };
@@ -66,6 +66,20 @@ module.exports = class HttpService {
 
         });
 
+    }
+
+    tratarErrosDaAPI(resposta) {
+        let erros = resposta.erro
+        let resultado = erros.map(erro => {
+            let msg = ``
+            if (erro.param) {
+                msg = `${erro.param}: ${erro.msg}`
+            } else {
+                msg = erro.msg
+            }
+            return msg
+        })
+        return resultado
     }
 
 }

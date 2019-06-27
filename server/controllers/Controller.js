@@ -122,7 +122,7 @@ module.exports = class Controller {
                 (objeto) => {
                     if (!objeto) {
                         const erro = [{
-                            location: "url",
+                            location: "params",
                             param: "id",
                             msg: "O valor informado não é válido.",
                             value: req.params.id
@@ -149,7 +149,7 @@ module.exports = class Controller {
                 (erro) => {
                     if (erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
                         const erro = [{
-                            location: "url",
+                            location: "params",
                             param: "id",
                             msg: "O valor informado está sendo usado como foreign key.",
                             value: req.params.id
@@ -173,7 +173,7 @@ module.exports = class Controller {
                 (objeto) => {
                     if (!objeto) {
                         const erro = [{
-                            location: "url",
+                            location: "params",
                             param: "id",
                             msg: "O valor informado não é válido.",
                             value: req.params.id
@@ -220,7 +220,7 @@ module.exports = class Controller {
                 (objetoDB) => {
                     if (!objetoDB) {
                         const erro = [{
-                            location: "url",
+                            location: "params",
                             param: "id",
                             msg: "O valor informado não é válido.",
                             value: req.params.id

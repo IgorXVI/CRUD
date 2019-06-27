@@ -23,7 +23,6 @@ module.exports = class ItensVendaController extends Controller {
             this.produtosSuficientesEstocados(objeto)
                 .then(
                     (existem) => {
-                        console.log("passou primeiro")
                         if (!existem) {
                             const erro = [{
                                 location: "body",

@@ -48,12 +48,12 @@ module.exports = class UsuariosController extends Controller {
                 .then(
                     (senhaEhValida) => {
                         if (!senhaEhValida) {
-                            const erro = {
+                            const erro = [{
                                 location: "body",
                                 param: "senha",
                                 msg: "O valor não é válido.",
                                 value: req.body.senha
-                            }
+                            }]
                             res.status(400).json({
                                 erro
                             })
