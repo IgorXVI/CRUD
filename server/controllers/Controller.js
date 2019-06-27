@@ -345,7 +345,7 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("nome"))
         }
-        validacoes.push(this.validaMaxChars("nome", 100).optional())
+        validacoes.push(this.validaMinMaxChars("nome", 5, 100).optional())
         return validacoes
     }
 

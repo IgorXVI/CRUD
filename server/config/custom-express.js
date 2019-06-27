@@ -34,6 +34,8 @@ app.use("/api/vendas", middlewares.checkToken, middlewares.checkNivel(2, "GET"),
 
 //rotas das paginas
 app.use("/", express.static(path.join(__dirname, "../..", "client")))
+app.use("/signup", express.static(path.join(__dirname, "../..", "client/paginas/signup.html")))
+app.use("/produtos", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/produtos.html")))
 
 //rotas de outros arquivos
 app.use("/css", express.static(path.join(__dirname, "../..", "node_modules/bootstrap/dist/css")))

@@ -1,26 +1,29 @@
-class LoginController extends Controller {
+class SignupController extends Controller {
 
     constructor() {
         super()
         let $ = document.querySelector.bind(document)
         this.inputEmail = $("#inputEmail")
         this.inputSenha = $("#inputSenha")
+        this.inputNome = $("#inputNome")
     }
 
-    entrar(event) {
+    registrar(event) {
         event.preventDefault();
 
-        const dadosLogin = {
+        const dadosSignup = {
             email: this.inputEmail.value,
             senha: this.inputSenha.value,
-            tokenEmJSON: false
+            nome: this.inputNome.value
         }
 
+        console.log(dadosSignup)
+
         const service = new ApiService()
-        service.post("/usuarios/usuario/login", dadosLogin)
+        service.post("/usuarios/usuario/signup", dadosSignup)
             .then(
                 () => {
-                    location.href = "/dashboard"
+                    super.mostrarMsgAcertos(["Registro realizado com sucesso."])
                 },
                 (erros) => {
                     super.mostrarMsgErros(erros)
@@ -34,8 +37,8 @@ class LoginController extends Controller {
             )
     }
 
-    registrar(event){
+    entrar(event){
         event.preventDefault();
-        location.href = "/signup"
+        location.href = "/"
     }
 }
