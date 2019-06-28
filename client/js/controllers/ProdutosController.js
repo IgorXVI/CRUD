@@ -10,6 +10,34 @@ class ProdutosController extends Controller {
         this.btnBuscaTodos = $("#btnBuscaTodos")
         this.btnBuscaTodos.onclick = event => this.buscarTodos(event)
         this.adicionarTrInput()
+        this.eventosOrdenaTabela()
+        this.campoFiltro = $("#filtrar-tabela")
+        this.campoFiltro.oninput = event => this.filtraCampo(event)
+    }
+
+    filtraCampo(event) {
+        let registros = document.querySelectorAll(".trDados")
+        if (event.target.value.length > 0) {
+            for (let j = 0; j < registros.length; j++) {
+                let registro = registros[j]
+                var tds = registro.querySelectorAll(".tdDados")
+                for (let i = 0; i < tds.length; i++) {
+                    let txt = tds[i].textContent
+                    let expressao = new RegExp(event.target.value, "i");
+                    if (!expressao.test(txt)) {
+                        registro.classList.add("invisivel");
+                    } else {
+                        registro.classList.remove("invisivel");
+                        break
+                    }
+                }
+            }
+        } else {
+            registros.forEach(registro => {
+                registro.classList.remove("invisivel");
+            });
+        }
+
     }
 
     buscarTodos(event) {
@@ -158,7 +186,7 @@ class ProdutosController extends Controller {
 
     adicionarNaTabela(objeto) {
         const tr = this.montaTr(objeto)
-        this.tabela.appendChild(tr)
+        this.tabela.prepend(tr)
 
         document.querySelector(`#id${objeto.id}`).contentEditable = false
         document.querySelector(`#dataCriacao${objeto.id}`).contentEditable = false
@@ -173,6 +201,7 @@ class ProdutosController extends Controller {
         }
 
         tr.id = `tr${objeto.id}`
+        tr.className = "trDados"
 
         tr.appendChild(this.montaBotoes(objeto.id))
 
@@ -184,6 +213,7 @@ class ProdutosController extends Controller {
         td.textContent = dado
         td.contentEditable = true
         td.id = `${nomeDado}${id}`
+        td.className = "tdDados"
         return td
     }
 
@@ -219,7 +249,7 @@ class ProdutosController extends Controller {
 
         let btnCadastra = document.createElement("button")
         btnCadastra.textContent = "Cadastrar"
-        btnCadastra.className = "btn btn-primary btn-sm container"
+        btnCadastra.className = "btn btn-success btn-sm container"
         btnCadastra.type = "button"
         btnCadastra.id = `btnCadastra`
         btnCadastra.setAttribute("onclick", "produtosController.adicionaUm(event)")
@@ -231,7 +261,7 @@ class ProdutosController extends Controller {
 
         tr.id = "trCadastro"
 
-        this.tabela.appendChild(tr)
+        this.tabela.prepend(tr)
 
         document.querySelector(`#id0`).contentEditable = false
         document.querySelector(`#dataCriacao0`).contentEditable = false
@@ -257,6 +287,68 @@ class ProdutosController extends Controller {
                     console.log(erro)
                 }
             )
+    }
+
+    eventosOrdenaTabela() {
+        const ths = document.querySelectorAll(".nomesColunasTabela")
+        for (let i = 0; i < ths.length; i++) {
+            ths[i].onclick = event => this.sortTable(i)
+        }
+    }
+
+    sortTable(n) {
+        var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+        table = this.tabela;
+        switching = true;
+        // Set the sorting direction to ascending:
+        dir = "asc";
+        /* Make a loop that will continue until
+        no switching has been done: */
+        while (switching) {
+            // Start by saying: no switching is done:
+            switching = false;
+            rows = table.rows;
+            /* Loop through all table rows (except the
+            first, which contains table headers): */
+            for (i = 1; i < (rows.length - 1); i++) {
+                // Start by saying there should be no switching:
+                shouldSwitch = false;
+                /* Get the two elements you want to compare,
+                one from current row and one from the next: */
+                x = rows[i].getElementsByTagName("TD")[n];
+                y = rows[i + 1].getElementsByTagName("TD")[n];
+                /* Check if the two rows should switch place,
+                based on the direction, asc or desc: */
+                if (dir == "asc") {
+                    if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                        // If so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
+                } else if (dir == "desc") {
+                    if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                        // If so, mark as a switch and break the loop:
+                        shouldSwitch = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                /* If a switch has been marked, make the switch
+                and mark that a switch has been done: */
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+                // Each time a switch is done, increase this count by 1:
+                switchcount++;
+            } else {
+                /* If no switching has been done AND the direction is "asc",
+                set the direction to "desc" and run the while loop again. */
+                if (switchcount == 0 && dir == "asc") {
+                    dir = "desc";
+                    switching = true;
+                }
+            }
+        }
     }
 
 }
