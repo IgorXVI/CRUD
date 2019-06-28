@@ -12,6 +12,9 @@ class Controller {
             let li = document.createElement("li");
             li.textContent = erros[i];
             li.className = "alert alert-danger"
+            li.ondblclick = (event) => {
+                event.target.remove()
+            }
             this.msgView.appendChild(li);
         }
     }
@@ -23,6 +26,9 @@ class Controller {
             let li = document.createElement("li");
             li.textContent = acertos[i];
             li.className = "alert alert-info"
+            li.ondblclick = (event) => {
+                event.target.remove()
+            }
             this.msgView.appendChild(li);
         }
     }

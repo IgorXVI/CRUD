@@ -4,10 +4,11 @@ class ProdutosController extends Controller {
         super()
         let $ = document.querySelector.bind(document)
         this.tabela = $("#tabela")
+        this.atributos = ["id", "nome", "categoria", "precoUnidade", "idFornecedor", "descricao", "garantia", "dataFabric", "dataValidade", "dataCriacao", "dataAlteracao"]
     }
 
     buscarTodos(event) {
-        event.preventDefault();
+        event.preventDefault()
 
         const service = new ApiService()
         service.get("/produtos")
@@ -29,10 +30,11 @@ class ProdutosController extends Controller {
     }
 
     deletaUm(event) {
-        event.preventDefault();
+        event.preventDefault()
 
         let id = event.target.id
-        id = id.substr(1);
+        id = id.substr(1)
+
         const service = new ApiService()
         service.delete(`/produtos/produto/${id}`)
             .then(
@@ -54,6 +56,31 @@ class ProdutosController extends Controller {
     editaUm(event) {
         event.preventDefault();
 
+        let id = event.target.id
+        id = id.substr(1)
+
+        let objeto = {}
+        for (let i = 0; i < this.atributos.length; i++) {
+            objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+        }
+
+        console.log(objeto)
+
+        const service = new ApiService()
+        service.post(`/produtos/produto/${id}`, objeto)
+            .then(
+                () => {
+                    super.mostrarMsgAcertos(["Editado com sucesso."])                },
+                (erros) => {
+                    super.mostrarMsgErros(erros)
+                }
+            )
+            .catch(
+                (erro) => {
+                    super.mostrarMsgErros(["Erro ao conectar com a API."])
+                    console.log(erro)
+                }
+            )
     }
 
     adicionarVariosNaTabela(objetos) {
@@ -69,24 +96,20 @@ class ProdutosController extends Controller {
 
     montaTr(objeto) {
         let tr = document.createElement("tr")
-        tr.appendChild(this.montaTd(objeto.id))
-        tr.appendChild(this.montaTd(objeto.nome))
-        tr.appendChild(this.montaTd(objeto.categoria))
-        tr.appendChild(this.montaTd(objeto.precoUnidade))
-        tr.appendChild(this.montaTd(objeto.idFornecedor))
-        tr.appendChild(this.montaTd(objeto.descricao))
-        tr.appendChild(this.montaTd(objeto.garantia))
-        tr.appendChild(this.montaTd(objeto.dataFabric))
-        tr.appendChild(this.montaTd(objeto.dataValidade))
-        tr.appendChild(this.montaTd(objeto.dataCriacao))
-        tr.appendChild(this.montaTd(objeto.dataAlteracao))
+
+        for (let i = 0; i < this.atributos.length; i++) {
+            tr.appendChild(this.montaTd(objeto[this.atributos[i]], objeto.id, this.atributos[i]))
+        }
+
         tr.appendChild(this.montaBotoes(objeto.id))
         return tr
     }
 
-    montaTd(dado) {
+    montaTd(dado, id, nomeDado) {
         let td = document.createElement("td")
         td.textContent = dado
+        td.contentEditable = true
+        td.id = `${nomeDado}${id}`
         return td
     }
 
