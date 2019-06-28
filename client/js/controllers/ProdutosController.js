@@ -7,6 +7,8 @@ class ProdutosController extends Controller {
         this.atributos = ["id", "nome", "categoria", "precoUnidade", "idFornecedor", "descricao", "garantia", "dataFabric", "dataValidade", "dataCriacao", "dataAlteracao"]
         this.btnSair = $("#btnSair")
         this.btnSair.onclick = event => this.sair(event)
+        this.btnBuscaTodos = $("#btnBuscaTodos")
+        this.btnBuscaTodos.onclick = event => this.buscarTodos(event)
         this.adicionarTrInput()
     }
 
@@ -67,8 +69,6 @@ class ProdutosController extends Controller {
         for (let i = 0; i < this.atributos.length; i++) {
             objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
         }
-
-        objeto.nome = undefined
 
         const service = new ApiService()
         service.post(`/produtos/produto/${id}`, objeto)
@@ -161,7 +161,6 @@ class ProdutosController extends Controller {
         this.tabela.appendChild(tr)
 
         document.querySelector(`#id${objeto.id}`).contentEditable = false
-        document.querySelector(`#nome${objeto.id}`).contentEditable = false
         document.querySelector(`#dataCriacao${objeto.id}`).contentEditable = false
         document.querySelector(`#dataAlteracao${objeto.id}`).contentEditable = false
     }

@@ -191,6 +191,7 @@ module.exports = class UsuariosController extends Controller {
             }
             res.status(202).clearCookie("auth")
             res.end()
+            super.fim()
         })
     }
 
