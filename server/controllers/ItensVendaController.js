@@ -2,7 +2,7 @@ const Controller = require("./Controller")
 
 module.exports = class ItensVendaController extends Controller {
     constructor() {
-        super(`itens-venda`, `item`, `valorTotal, quantidade, produto, idVenda, dataAlteracao, dataCriacao`, false)
+        super(`itens-venda`, `item`, `valorTotal, quantidade, idProduto, idVenda, dataAlteracao, dataCriacao`, false)
 
         this.masterDAO = this.itensVendaDAO
 

@@ -17,6 +17,7 @@ module.exports = class UsuariosController extends Controller {
         this.gerarRotaSignup()
         this.gerarRotaAdicionaUm()
         this.gerarRotaAtualizaUm()
+        this.gerarRotaLogout()
         super.gerarRotaBuscaTodos()
         super.gerarRotaBuscaUm()
         super.gerarRotaDeletaUm()
@@ -69,12 +70,11 @@ module.exports = class UsuariosController extends Controller {
                         )
 
                         const tokenEmJSON = (req.body.tokenEmJSON == "true")
-                        if(tokenEmJSON){
+                        if (tokenEmJSON) {
                             res.status(201).json({
                                 token
                             })
-                        }
-                        else{
+                        } else {
                             res.status(201).cookie("auth", token, {
                                 expires: new Date(Date.now() + 3500000),
                                 httpOnly: true
@@ -183,4 +183,15 @@ module.exports = class UsuariosController extends Controller {
             }
         })
     }
+
+    gerarRotaLogout() {
+        this.router.delete(`/usuario/logout`, (req, res) => {
+            if (this.inicio(req, res, `Fazendo logout de usuario...`)) {
+                return
+            }
+            res.status(202).clearCookie("auth")
+            res.end()
+        })
+    }
+
 }

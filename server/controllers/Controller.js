@@ -32,8 +32,6 @@ module.exports = class Controller {
 
         this.masterDAO = masterDAO
 
-        this.foreignKeys = {}
-
         this.atributos = atributos
         this.nome = nome
         this.nomeSingular = nomeSingular
@@ -239,7 +237,6 @@ module.exports = class Controller {
                                 objeto[keys[i]] = objetoDB[keysDB[i]]
                             }
                         }
-
                         return DAO.atualizaPorID(objeto, req.params.id)
                     }
                 }
@@ -299,13 +296,11 @@ module.exports = class Controller {
         for (let i = 0; i < atributosArr.length; i++) {
 
             if (!(atributosArr[i] == "DataCriacao" || atributosArr[i] == "DataAlteracao")) {
-
                 if ((excecoes.includes(atributosArr[i]))) {
                     validacao.push(this[`valida${atributosArr[i]}`](!obrigatorio))
                 } else {
                     validacao.push(this[`valida${atributosArr[i]}`](obrigatorio))
                 }
-
             }
 
         }
@@ -315,15 +310,8 @@ module.exports = class Controller {
     gerarObjeto(req) {
         let objeto = {}
         const atributosArr = this.atributos.split(",").map(atributo => (atributo).replace(/\s/g, ''))
-        const foreignKeysArr = Object.keys(this.foreignKeys)
         for (let i = 0; i < atributosArr.length; i++) {
-
-            if (foreignKeysArr.indexOf(atributosArr[i]) > -1) {
-                objeto[atributosArr[i]] = this.foreignKeys[atributosArr[i]]
-            } else {
-                objeto[atributosArr[i]] = req.body[atributosArr[i]]
-            }
-
+            objeto[atributosArr[i]] = req.body[atributosArr[i]]
         }
         objeto.dataAlteracao = this.dataDeHoje()
         objeto.dataCriacao = this.dataDeHoje()
@@ -345,7 +333,7 @@ module.exports = class Controller {
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("nome"))
         }
-        validacoes.push(this.validaMinMaxChars("nome", 5, 100).optional())
+        validacoes.push(this.validaMinMaxChars("nome", 1, 100).optional())
         return validacoes
     }
 
@@ -374,24 +362,6 @@ module.exports = class Controller {
             validacoes.push(this.validaNotNull("salario"))
         }
         validacoes.push(this.validaDecimal("salario", 0).optional())
-        return validacoes
-    }
-
-    validaCidade(obrigatorio) {
-        let validacoes = new Array()
-        if (obrigatorio) {
-            validacoes.push(this.validaNotNull("cidade"))
-        }
-        validacoes.push(this.validaMaxChars("cidade", 30).optional())
-        validacoes.push(body("cidade").custom(nome => {
-            return this.cidadesDAO.buscaPorNome(nome).then(objeto => {
-                if (!objeto) {
-                    return Promise.reject('O valor informado não está cadastrado.');
-                } else {
-                    this.foreignKeys.cidade = objeto.id
-                }
-            });
-        }).optional())
         return validacoes
     }
 
@@ -496,84 +466,12 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaProduto(obrigatorio) {
-        let validacoes = new Array()
-        if (obrigatorio) {
-            validacoes.push(this.validaNotNull("produto"))
-        }
-        validacoes.push(this.validaMaxChars("produto", 100).optional())
-        validacoes.push(body("produto").custom(nome => {
-            return this.produtosDAO.buscaPorNome(nome).then(objeto => {
-                if (!objeto) {
-                    return Promise.reject('O valor informado não está cadastrado.');
-                } else {
-                    this.foreignKeys.produto = objeto.id
-                }
-            });
-        }).optional())
-        return validacoes
-    }
-
     validaValorTotal(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("valorTotal"))
         }
         validacoes.push(this.validaDecimal("valorTotal", 0).optional())
-        return validacoes
-    }
-
-    validaFuncionario(obrigatorio) {
-        let validacoes = new Array()
-        if (obrigatorio) {
-            validacoes.push(this.validaNotNull("funcionario"))
-        }
-        validacoes.push(body("funcionario", "O  valor informado está em um formato inválido.").isEmail().optional())
-        validacoes.push(body("funcionario").custom(email => {
-            return this.funcionariosDAO.buscaPorEmail(email).then(objeto => {
-                if (!objeto) {
-                    return Promise.reject('O valor informado não está cadastrado.');
-                } else {
-                    this.foreignKeys.funcionario = objeto.id
-                }
-            });
-        }).optional())
-        return validacoes
-    }
-
-    validaCliente(obrigatorio) {
-        let validacoes = new Array()
-        if (obrigatorio) {
-            validacoes.push(this.validaNotNull("cliente"))
-        }
-        validacoes.push(body("cliente", "O valor informado está em um formato inválido.").isEmail().optional())
-        validacoes.push(body("cliente").custom(email => {
-            return this.clientesDAO.buscaPorEmail(email).then(objeto => {
-                if (!objeto) {
-                    return Promise.reject('O valor informado não está cadastrado.');
-                } else {
-                    this.foreignKeys.cliente = objeto.id
-                }
-            });
-        }).optional())
-        return validacoes
-    }
-
-    validaFornecedor(obrigatorio) {
-        let validacoes = new Array()
-        if (obrigatorio) {
-            validacoes.push(this.validaNotNull("fornecedor"))
-        }
-        validacoes.push(body("fornecedor", "O valor informado está em um formato inválido.").isEmail().optional())
-        validacoes.push(body("fornecedor").custom(email => {
-            return this.fornecedoresDAO.buscaPorEmail(email).then(objeto => {
-                if (!objeto) {
-                    return Promise.reject('O valor informado não está cadastrado.');
-                } else {
-                    this.foreignKeys.fornecedor = objeto.id
-                }
-            });
-        }).optional())
         return validacoes
     }
 
@@ -631,11 +529,92 @@ module.exports = class Controller {
         return validacoes
     }
 
+    validaIdCidade(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("idCidade"))
+        }
+        validacoes.push(this.validaInteiro("idCidade", 1).optional())
+        validacoes.push(body("idCidade").custom(id => {
+            return this.cidadesDAO.buscaPorID(id).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O valor informado não está cadastrado.');
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
+    validaIdProduto(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("idProduto"))
+        }
+        validacoes.push(this.validaInteiro("idProduto", 1).optional())
+        validacoes.push(body("idProduto").custom(id => {
+            return this.produtosDAO.buscaPorID(id).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O valor informado não está cadastrado.');
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
+    validaIdFuncionario(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("idFuncionario"))
+        }
+        validacoes.push(this.validaInteiro("idFuncionario", 1).optional())
+        validacoes.push(body("idFuncionario").custom(id => {
+            return this.funcionariosDAO.buscaPorID(id).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O valor informado não está cadastrado.');
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
+    validaIdCliente(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("idCiente"))
+        }
+        validacoes.push(this.validaInteiro("idCiente", 1).optional())
+        validacoes.push(body("idCiente").custom(id => {
+            return this.clientesDAO.buscaPorID(id).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O valor informado não está cadastrado.');
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
+    validaIdFornecedor(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("idFornecedor"))
+        }
+        validacoes.push(this.validaInteiro("idFornecedor", 1).optional())
+        validacoes.push(body("idFornecedor").custom(id => {
+            return this.fornecedoresDAO.buscaPorID(id).then(objeto => {
+                if (!objeto) {
+                    return Promise.reject('O valor informado não está cadastrado.');
+                }
+            });
+        }).optional())
+        return validacoes
+    }
+
     validaIdVenda(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
             validacoes.push(this.validaNotNull("idVenda"))
         }
+        validacoes.push(this.validaInteiro("idVenda", 1).optional())
         validacoes.push(body("idVenda").custom(id => {
             return this.fornecedoresDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {

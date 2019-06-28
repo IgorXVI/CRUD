@@ -2,7 +2,7 @@ const Controller = require("./Controller")
 
 module.exports = class ClientesController extends Controller {
     constructor() {
-        super(`clientes`, `cliente`, `CPF, nome, email, cidade, dataAlteracao, dataCriacao, bairro, rua, numeroCasa, 
+        super(`clientes`, `cliente`, `CPF, nome, email, idCidade, dataAlteracao, dataCriacao, bairro, rua, numeroCasa, 
         telefone, dataNasc, complemento`, false)
 
         this.masterDAO = this.clientesDAO

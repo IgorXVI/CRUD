@@ -8,7 +8,7 @@ class Controller {
     mostrarMsgErros(erros) {
         this.msgView.innerHTML = ""
 
-        for(let i = 0; i < erros.length; i++){
+        for (let i = 0; i < erros.length; i++) {
             let li = document.createElement("li");
             li.textContent = erros[i];
             li.className = "alert alert-danger"
@@ -22,7 +22,7 @@ class Controller {
     mostrarMsgAcertos(acertos) {
         this.msgView.innerHTML = ""
 
-        for(let i = 0; i < acertos.length; i++){
+        for (let i = 0; i < acertos.length; i++) {
             let li = document.createElement("li");
             li.textContent = acertos[i];
             li.className = "alert alert-info"
@@ -32,5 +32,5 @@ class Controller {
             this.msgView.appendChild(li);
         }
     }
-    
+
 }
