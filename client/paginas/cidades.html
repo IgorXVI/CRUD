@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/bootstrap-css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
-    <title>Produtos</title>
+    <title>Cidades</title>
 </head>
 
 <body>
@@ -20,7 +20,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="/cidades">Cidades</a>
+                            <a class="nav-link" href="/produtos">Produtos</a>
                         </li>
 
                         <li class="nav-item">
@@ -69,7 +69,7 @@
         </div>
 
         <div class="card">
-            <h5 class="card-header">Produtos</h5>
+            <h5 class="card-header">Cidades</h5>
             <div class="card-body">
 
                 <input class="form-control" id="filtrar-tabela" type="text" placeholder="filtre a tabela"
@@ -81,13 +81,8 @@
                             <tr>
                                 <th scope="col" class="nomesColunasTabela">ID</th>
                                 <th scope="col" class="nomesColunasTabela">Nome</th>
-                                <th scope="col" class="nomesColunasTabela">Categoria</th>
-                                <th scope="col" class="nomesColunasTabela">Preço por unidade</th>
-                                <th scope="col" class="nomesColunasTabela">ID do Fornecedor</th>
-                                <th scope="col" class="nomesColunasTabela">Descrição</th>
-                                <th scope="col" class="nomesColunasTabela">Garantia</th>
-                                <th scope="col" class="nomesColunasTabela">Data de fabricação</th>
-                                <th scope="col" class="nomesColunasTabela">Data de validade</th>
+                                <th scope="col" class="nomesColunasTabela">UF</th>
+                                <th scope="col" class="nomesColunasTabela">CEP</th>
                                 <th scope="col" class="nomesColunasTabela">Data de ciração</th>
                                 <th scope="col" class="nomesColunasTabela">Data de alteração</th>
                                 <th scope="col" class="nomesColunasTabela">Ações</th>
@@ -97,7 +92,7 @@
                         </tbody>
                     </table>
                 </div>
-                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Produtos</button>
+                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Cidades</button>
             </div>
         </div>
 
@@ -111,9 +106,9 @@
 
 <script>
     let tabelaController = new TabelaController(
-        ["id", "nome", "categoria", "precoUnidade", "idFornecedor", "descricao", "garantia", "dataFabric", "dataValidade", "dataCriacao", "dataAlteracao"],
-        "produto",
-        "produtos"
+        ["id", "nome", "UF", "CEP", "dataAlteracao", "dataCriacao"],
+        "cidade",
+        "cidades"
     )
 </script>
 

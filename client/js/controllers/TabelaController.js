@@ -1,10 +1,12 @@
-class ProdutosController extends Controller {
+class TabelaController extends Controller {
 
-    constructor() {
+    constructor(atributos, nomeSingular, nomePlural) {
         super()
+        this.nomeSingular = nomeSingular
+        this.nomePlural = nomePlural
         let $ = document.querySelector.bind(document)
         this.tabela = $("#tabela")
-        this.atributos = ["id", "nome", "categoria", "precoUnidade", "idFornecedor", "descricao", "garantia", "dataFabric", "dataValidade", "dataCriacao", "dataAlteracao"]
+        this.atributos = atributos
         this.btnSair = $("#btnSair")
         this.btnSair.onclick = event => this.sair(event)
         this.btnBuscaTodos = $("#btnBuscaTodos")
@@ -44,7 +46,7 @@ class ProdutosController extends Controller {
         event.preventDefault()
 
         const service = new ApiService()
-        service.get("/produtos")
+        service.get(`/${this.nomePlural}`)
             .then(
                 (resposta) => {
                     this.tabela.innerHTML = ""
@@ -70,7 +72,7 @@ class ProdutosController extends Controller {
         id = id.substr(1)
 
         const service = new ApiService()
-        service.delete(`/produtos/produto/${id}`)
+        service.delete(`/${this.nomePlural}/${this.nomeSingular}/${id}`)
             .then(
                 () => {
                     event.target.parentNode.parentNode.remove()
@@ -99,10 +101,10 @@ class ProdutosController extends Controller {
         }
 
         const service = new ApiService()
-        service.post(`/produtos/produto/${id}`, objeto)
+        service.post(`/${this.nomePlural}/${this.nomeSingular}/${id}`, objeto)
             .then(
                 () => {
-                    service.get(`/produtos/produto/${id}`)
+                    service.get(`/${this.nomePlural}/${this.nomeSingular}/${id}`)
                         .then(
                             (resposta) => {
                                 for (let i = 0; i < this.atributos.length; i++) {
@@ -143,12 +145,12 @@ class ProdutosController extends Controller {
         }
 
         const service = new ApiService()
-        service.post(`/produtos/produto`, objeto)
+        service.post(`/${this.nomePlural}/${this.nomeSingular}`, objeto)
             .then(
                 () => {
                     event.target.parentNode.parentNode.remove()
 
-                    service.get(`/produtos`)
+                    service.get(`/${this.nomePlural}`)
                         .then(
                             (resposta) => {
                                 const ultimo = resposta.resultado[resposta.resultado.length - 1]
@@ -223,14 +225,14 @@ class ProdutosController extends Controller {
         btnd.className = "btn btn-danger btn-sm container"
         btnd.type = "button"
         btnd.id = `d${id}`
-        btnd.setAttribute("onclick", "produtosController.deletaUm(event)")
+        btnd.setAttribute("onclick", "tabelaController.deletaUm(event)")
 
         let btne = document.createElement("button")
         btne.textContent = "Editar"
         btne.className = "btn btn-warning btn-sm container"
         btne.type = "button"
         btne.id = `e${id}`
-        btne.setAttribute("onclick", "produtosController.editaUm(event)")
+        btne.setAttribute("onclick", "tabelaController.editaUm(event)")
 
         let td = document.createElement("td")
 
@@ -252,7 +254,7 @@ class ProdutosController extends Controller {
         btnCadastra.className = "btn btn-success btn-sm container"
         btnCadastra.type = "button"
         btnCadastra.id = `btnCadastra`
-        btnCadastra.setAttribute("onclick", "produtosController.adicionaUm(event)")
+        btnCadastra.setAttribute("onclick", "tabelaController.adicionaUm(event)")
 
         let tdBtnCadastra = document.createElement("td")
         tdBtnCadastra.appendChild(btnCadastra)
