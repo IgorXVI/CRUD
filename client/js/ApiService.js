@@ -1,7 +1,7 @@
 class ApiService {
 
     constructor(){
-        this.host = `http://127.0.0.1:6663/api`
+        this.host = `http://localhost:6663/api`
     }
 
     get(url) {

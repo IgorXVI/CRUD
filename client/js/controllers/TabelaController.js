@@ -19,20 +19,22 @@ class TabelaController extends Controller {
 
     filtraCampo(event) {
         let registros = document.querySelectorAll(".trDados")
+        let nomeDado = (document.querySelector('input[name="radio"]:checked').id).substr(1)
+
         if (event.target.value.length > 0) {
             for (let j = 0; j < registros.length; j++) {
                 let registro = registros[j]
-                var tds = registro.querySelectorAll(".tdDados")
-                for (let i = 0; i < tds.length; i++) {
-                    let txt = tds[i].textContent
-                    let expressao = new RegExp(event.target.value, "i");
-                    if (!expressao.test(txt)) {
-                        registro.classList.add("invisivel");
-                    } else {
-                        registro.classList.remove("invisivel");
-                        break
-                    }
+
+                let txt = registro.querySelector(`.tdDados${nomeDado}`).textContent
+                console.log(txt)
+
+                let expressao = new RegExp(event.target.value, "i");
+                if (!expressao.test(txt)) {
+                    registro.classList.add("invisivel");
+                } else {
+                    registro.classList.remove("invisivel");
                 }
+
             }
         } else {
             registros.forEach(registro => {
@@ -215,7 +217,7 @@ class TabelaController extends Controller {
         td.textContent = dado
         td.contentEditable = true
         td.id = `${nomeDado}${id}`
-        td.className = "tdDados"
+        td.className = `tdDados${nomeDado}`
         return td
     }
 

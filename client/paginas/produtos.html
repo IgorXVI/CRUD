@@ -19,6 +19,7 @@
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav mr-auto">
+
                         <li class="nav-item">
                             <a class="nav-link" href="/cidades">Cidades</a>
                         </li>
@@ -78,6 +79,22 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                         <thead class="thead-dark">
+
+                            <tr>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="Rid" checked></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="Rnome"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="Rcategoria"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RprecoUnidade"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RidFornecedor"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="Rdescricao"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="Rgarantia"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RdataFabric"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RdataValidade"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RdataCriacao"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RdataAlteracao"></th>
+                                <th scope="col"></th>
+                            </tr>
+
                             <tr>
                                 <th scope="col" class="nomesColunasTabela">ID</th>
                                 <th scope="col" class="nomesColunasTabela">Nome</th>
@@ -92,9 +109,12 @@
                                 <th scope="col" class="nomesColunasTabela">Data de alteração</th>
                                 <th scope="col" class="nomesColunasTabela">Ações</th>
                             </tr>
+
                         </thead>
+
                         <tbody id="tabela">
                         </tbody>
+
                     </table>
                 </div>
                 <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Produtos</button>
@@ -111,7 +131,9 @@
 
 <script>
     let tabelaController = new TabelaController(
-        ["id", "nome", "categoria", "precoUnidade", "idFornecedor", "descricao", "garantia", "dataFabric", "dataValidade", "dataCriacao", "dataAlteracao"],
+        ["id", "nome", "categoria", "precoUnidade", "idFornecedor", "descricao", "garantia", "dataFabric",
+            "dataValidade", "dataCriacao", "dataAlteracao"
+        ],
         "produto",
         "produtos"
     )
