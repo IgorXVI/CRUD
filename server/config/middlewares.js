@@ -16,8 +16,11 @@ function checkToken(req, res, next) {
 
       jwt.verify(token, secret, (err, decoded) => {
         if (err) {
+          const erro = [{
+            msg: "Token não é válido."
+          }]
           res.status(401).json({
-            erro: "Token não é válido."
+            erro
           })
           return
         } else {
@@ -26,8 +29,11 @@ function checkToken(req, res, next) {
         }
       });
     } else {
+      const erro = [{
+        msg: "Token de autorização não foi informado no header."
+      }]
       res.status(401).json({
-        erro: "Token de autorização não foi informado no header."
+        erro
       })
       return
     }
@@ -43,8 +49,11 @@ function checkNivel(nivel, metodos) {
       const usuarioNaoPermitido = req.decoded.nivelAcesso > nivel
       const metodoNaoPermitido = req.decoded.nivelAcesso == nivel && !(metodos && metodos.includes(req.method))
       if (usuarioNaoPermitido || metodoNaoPermitido) {
+        const erro = [{
+          msg: "Acesso negado."
+        }]
         res.status(401).json({
-          erro: "Acesso negado."
+          erro
         })
       } else {
         next()

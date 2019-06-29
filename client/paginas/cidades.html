@@ -25,7 +25,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a class="nav-link" href="/fornecedores">Funcionarios</a>
+                            <a class="nav-link" href="/funcionarios">Funcionarios</a>
                         </li>
 
                         <li class="nav-item">
@@ -79,6 +79,21 @@
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
                         <thead class="thead-dark">
+
+                            <tr>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="Rid" checked>
+                                </th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="Rnome"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RUF"></th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RCEP"></th>
+                                </th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RdataCriacao">
+                                </th>
+                                <th scope="col"><input type="radio" name="radio" class="container" id="RdataAlteracao">
+                                </th>
+                                <th scope="col"></th>
+                            </tr>
+
                             <tr>
                                 <th scope="col" class="nomesColunasTabela">ID</th>
                                 <th scope="col" class="nomesColunasTabela">Nome</th>
@@ -88,9 +103,12 @@
                                 <th scope="col" class="nomesColunasTabela">Data de alteração</th>
                                 <th scope="col" class="nomesColunasTabela">Ações</th>
                             </tr>
+
                         </thead>
+
                         <tbody id="tabela">
                         </tbody>
+
                     </table>
                 </div>
                 <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Cidades</button>

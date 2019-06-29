@@ -1,3 +1,7 @@
 .invisivel{
     display: none;
 }
+
+.nomesColunasTabela{
+    text-align: center;
+}
