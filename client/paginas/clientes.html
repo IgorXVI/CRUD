@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="/bootstrap-css/bootstrap.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <title>Clientes</title>
+</head>
+
+<body>
+
+    <main>
+
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/cidades">Cidades</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/funcionarios">Funcionarios</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/clientes">Clientes</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/fornecedores">Fornecedores</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/itens-venda">Itens de Venda</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/vendas">Vendas</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/produtos">Produtos</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/estoque">Estoque</a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="/usuarios">Usuarios</a>
+                        </li>
+
+                    </ul>
+                    <form class="form-inline my-2 my-lg-0">
+                        <button type="button" class="btn btn-outline-danger" id="btnSair">Sair</button>
+                    </form>
+                </div>
+
+            </nav>
+        </header>
+
+        <div class="container">
+            <ul id="msgView"></ul>
+        </div>
+
+        <div class="card">
+            <h5 class="card-header">Clientes</h5>
+            <div class="card-body">
+
+                <input class="form-control" id="filtrar-tabela" type="text" placeholder="filtre a tabela"
+                    aria-label="Search">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="thead-dark">
+                        </thead>
+
+                        <tbody id="tabela">
+                        </tbody>
+
+                    </table>
+                </div>
+                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Clientes</button>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+
+<script src="js/ApiService.js"></script>
+<script src="js/controllers/Controller.js"></script>
+<script src="js/controllers/TabelaController.js"></script>
+
+<script>
+    let tabelaController = new TabelaController(
+        ["id", "nome", "email", "CPF", "idCidade","telefone", "dataNasc", "bairro", "rua", "numeroCasa", "complemento",
+            "dataAlteracao", "dataCriacao"
+        ],
+        "cliente",
+        "clientes"
+    )
+</script>
+
+</html>

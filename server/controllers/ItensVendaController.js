@@ -143,7 +143,7 @@ module.exports = class ItensVendaController extends Controller {
                                 erro
                             })
                             super.fim()
-                            return
+                            return "fim"
                         } else {
                             return this.calculaValorTotal(objeto)
                         }
@@ -151,13 +151,19 @@ module.exports = class ItensVendaController extends Controller {
                 )
                 .then(
                     (valorTotal) => {
-                        objeto.valorTotal = valorTotal
-                        return this.atualizaVenda(objeto)
+                        if (valorTotal !== "fim") {
+                            objeto.valorTotal = valorTotal
+                            return this.atualizaVenda(objeto)
+                        } else {
+                            return "fim"
+                        }
                     }
                 )
                 .then(
-                    () => {
-                        super.atualizaUm(req, res, objeto)
+                    (result) => {
+                        if (result !== "fim") {
+                            super.atualizaUm(req, res, objeto)
+                        }
                     }
                 )
                 .catch(
@@ -234,25 +240,7 @@ module.exports = class ItensVendaController extends Controller {
             this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
                 .then(
                     (estoque) => {
-                        if (estoque && estoque.quantidade >= objeto.quantidade) {
-                            estoque.quantidade = estoque.quantidade - objeto.quantidade
-                            const id = estoque.id
-
-                            delete estoque.id
-                            delete estoque.dataCriacao
-
-                            return this.estoqueDAO.atualizaPorID(estoque, id)
-                        } else {
-                            resolve(false)
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            resolve(true)
-                        }
+                        resolve(estoque && estoque.quantidade >= objeto.quantidade)
                     }
                 )
                 .catch(
@@ -291,6 +279,33 @@ module.exports = class ItensVendaController extends Controller {
                 )
         })
 
+    }
+
+    atualizaEstoque(objeto) {
+        return new Promise((resolve, reject) => {
+            this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
+                .then(
+                    (estoque) => {
+                        estoque.quantidade = estoque.quantidade - objeto.quantidade
+                        const id = estoque.id
+
+                        delete estoque.id
+                        delete estoque.dataCriacao
+
+                        return this.estoqueDAO.atualizaPorID(estoque, id)
+                    }
+                )
+                .then(
+                    () => {
+                        resolve()
+                    }
+                )
+                .catch(
+                    (erro) => {
+                        reject(new Error(erro))
+                    }
+                )
+        })
     }
 
     roolbackEstoque(objeto) {

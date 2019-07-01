@@ -42,6 +42,8 @@ app.use("/fornecedores", middlewares.checkToken, express.static(path.join(__dirn
 app.use("/estoque", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/estoque.html")))
 app.use("/vendas", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/vendas.html")))
 app.use("/itens-venda", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/itens-venda.html")))
+app.use("/funcionarios", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/funcionarios.html")))
+app.use("/clientes", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/clientes.html")))
 
 
 //rotas de outros arquivos

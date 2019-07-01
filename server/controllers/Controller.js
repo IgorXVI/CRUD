@@ -616,7 +616,7 @@ module.exports = class Controller {
         }
         validacoes.push(this.validaInteiro("idVenda", 1).optional())
         validacoes.push(body("idVenda").custom(id => {
-            return this.fornecedoresDAO.buscaPorID(id).then(objeto => {
+            return this.vendasDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');
                 }
