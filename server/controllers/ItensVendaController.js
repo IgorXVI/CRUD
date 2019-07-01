@@ -133,6 +133,7 @@ module.exports = class ItensVendaController extends Controller {
                             itemBD = item
                             objeto.idProduto = itemBD.idProduto
                             objeto.idVenda = itemBD.idVenda
+                            delete objeto.dataCriacao
                             return this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
                         }
                     }
@@ -189,6 +190,7 @@ module.exports = class ItensVendaController extends Controller {
                 .then(
                     (retorno) => {
                         if (retorno != "fim") {
+                            console.log("passou o atualizaVenda")
                             res.status(201).end()
                             this.fim()
                         }
@@ -310,6 +312,8 @@ module.exports = class ItensVendaController extends Controller {
                         delete venda.id
                         delete venda.dataCriacao
 
+                        venda.dataAlteracao = super.dataDeHoje()
+
                         return this.vendasDAO.atualizaPorID(venda, id)
                     }
                 )
@@ -337,6 +341,8 @@ module.exports = class ItensVendaController extends Controller {
 
                         delete estoque.id
                         delete estoque.dataCriacao
+
+                        estoque.dataAlteracao = super.dataDeHoje()
 
                         return this.estoqueDAO.atualizaPorID(estoque, id)
                     }
