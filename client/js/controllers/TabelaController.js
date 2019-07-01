@@ -104,30 +104,18 @@ class TabelaController extends Controller {
 
         let objeto = {}
         for (let i = 0; i < this.atributos.length; i++) {
-            objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+            let text = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+            text.replace(/\s/g,'')
+            if(text.length !== 0){
+                objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+            }
         }
 
         const service = new ApiService()
         service.post(`/${this.nomePlural}/${this.nomeSingular}/${id}`, objeto)
             .then(
                 () => {
-                    service.get(`/${this.nomePlural}/${this.nomeSingular}/${id}`)
-                        .then(
-                            (resposta) => {
-                                for (let i = 0; i < this.atributos.length; i++) {
-                                    document.querySelector(`#${this.atributos[i]}${id}`).textContent = resposta.resultado[this.atributos[i]]
-                                }
-                            },
-                            (erros) => {
-                                super.mostrarMsgErros(erros)
-                            }
-                        )
-                        .catch(
-                            (erro) => {
-                                super.mostrarMsgErros(["Erro ao conectar com a API."])
-                                console.log(erro)
-                            }
-                        )
+                    this.btnBuscaTodos.click()
                 },
                 (erros) => {
                     super.mostrarMsgErros(erros)
@@ -148,7 +136,11 @@ class TabelaController extends Controller {
 
         let objeto = {}
         for (let i = 0; i < this.atributos.length; i++) {
-            objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+            let text = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+            text.replace(/\s/g,'')
+            if(text.length !== 0){
+                objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+            }
         }
 
         const service = new ApiService()
@@ -156,24 +148,8 @@ class TabelaController extends Controller {
             .then(
                 () => {
                     event.target.parentNode.parentNode.remove()
-
-                    service.get(`/${this.nomePlural}`)
-                        .then(
-                            (resposta) => {
-                                const ultimo = resposta.resultado[resposta.resultado.length - 1]
-                                this.adicionarNaTabela(ultimo)
-                                this.adicionarTrInput()
-                            },
-                            (erros) => {
-                                super.mostrarMsgErros(erros)
-                            }
-                        )
-                        .catch(
-                            (erro) => {
-                                super.mostrarMsgErros(["Erro ao conectar com a API."])
-                                console.log(erro)
-                            }
-                        )
+                    this.adicionarTrInput()
+                    this.btnBuscaTodos.click()
                 },
                 (erros) => {
                     super.mostrarMsgErros(erros)

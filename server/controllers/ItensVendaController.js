@@ -9,7 +9,7 @@ module.exports = class ItensVendaController extends Controller {
         super.gerarRotaBuscaTodos()
         super.gerarRotaBuscaUm()
         this.gerarRotaAdicionaUm(super.gerarValidacao(true, ["ValorTotal"]))
-        this.gerarRotaAtualizaUm(super.gerarValidacao(false, ["quantidade"]))
+        this.gerarRotaAtualizaUm(super.gerarValidacao(false, ["Quantidade"]))
         this.gerarRotaDeletaUm()
     }
 
@@ -27,7 +27,7 @@ module.exports = class ItensVendaController extends Controller {
                         if (resultado) {
                             const erro = [{
                                 location: "body",
-                                param: "idVenda, idProduto",
+                                param: "idProduto, idVenda",
                                 msg: "Não podem existir dois itens de venda que possuem o mesmo produto e a mesma venda.",
                                 value: [req.body.idVenda, req.body.idProduto]
                             }]
@@ -125,6 +125,8 @@ module.exports = class ItensVendaController extends Controller {
                 )
                 .then(
                     () => {
+                        objeto.idProduto = itemBD.idProduto
+                        objeto.idVenda = itemBD.idVenda
                         return this.produtosSuficientesEstocados(objeto)
                     }
                 )

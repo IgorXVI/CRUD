@@ -1,7 +1,7 @@
-class VendasController extends TabelaController {
+class ItensVendaController extends TabelaController {
 
     constructor() {
-        super(["id", "valorTotal", "idFuncionario", "idCliente", "dataAlteracao", "dataCriacao"], "venda", "vendas", true)
+        super(["id", "valorTotal", "quantidade", "idProduto", "idVenda", "dataAlteracao", "dataCriacao"], "item", "itens-venda", true)
 
         super.criarColunasTableHeader()
         this.adicionarTrInput()
@@ -18,6 +18,8 @@ class VendasController extends TabelaController {
         super.adicionarNaTabela(objeto)
 
         document.querySelector(`#valorTotal${objeto.id}`).contentEditable = false
+        document.querySelector(`#idProduto${objeto.id}`).contentEditable = false
+        document.querySelector(`#idVenda${objeto.id}`).contentEditable = false
     }
 
 }
