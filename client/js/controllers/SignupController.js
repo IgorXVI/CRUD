@@ -17,8 +17,6 @@ class SignupController extends Controller {
             nome: this.inputNome.value
         }
 
-        console.log(dadosSignup)
-
         const service = new ApiService()
         service.post("/usuarios/usuario/signup", dadosSignup)
             .then(
