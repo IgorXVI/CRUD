@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="/bootstrap-css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
-    <title>Fornecedores</title>
+    <title>Estoque</title>
 </head>
 
 <body>
@@ -70,7 +70,7 @@
         </div>
 
         <div class="card">
-            <h5 class="card-header">Fornecedores</h5>
+            <h5 class="card-header">Estoque</h5>
             <div class="card-body">
 
                 <input class="form-control" id="filtrar-tabela" type="text" placeholder="filtre a tabela"
@@ -86,7 +86,7 @@
 
                     </table>
                 </div>
-                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Fornecedores</button>
+                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Estoque</button>
             </div>
         </div>
 
@@ -100,11 +100,9 @@
 
 <script>
     let tabelaController = new TabelaController(
-        ["id", "nome", "email", "CNPJ", "idCidade", "telefone", "bairro", "rua", "numeroCasa", "complemento",
-            "dataAlteracao", "dataCriacao"
-        ],
-        "fornecedor",
-        "fornecedores"
+        ["id", "quantidade", "idProduto", "dataAlteracao", "dataCriacao"],
+        "produto-estocado",
+        "estoque"
     )
 </script>
 

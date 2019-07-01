@@ -19,7 +19,7 @@ module.exports = class DAO {
         })
     }
 
-    atualizaPorColuna(objeto, colunaValor, colunaNome, colunas){
+    atualizaPorColuna(objeto, colunaValor, colunaNome, colunas) {
         const valores = Object.values(objeto)
 
         valores.push(colunaValor)
@@ -37,7 +37,7 @@ module.exports = class DAO {
         })
     }
 
-    deletaPorColuna(colunaValor, colunaNome){
+    deletaPorColuna(colunaValor, colunaNome) {
         const sql = `DELETE FROM ${this._tabela} WHERE ${colunaNome} = ?`
 
         return new Promise((resolve, reject) => {
@@ -56,6 +56,20 @@ module.exports = class DAO {
 
         return new Promise((resolve, reject) => {
             this._connection.get(sql, [colunaValor], (erro, objeto) => {
+                if (erro) {
+                    reject(new Error(erro))
+                    return
+                }
+                resolve(objeto)
+            })
+        })
+    }
+
+    buscarPorDuasColunas(colunaValor1, colunaValor2, colunaNome1, colunaNome2) {
+        const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome1} = ? AND ${colunaNome2} = ?`
+
+        return new Promise((resolve, reject) => {
+            this._connection.get(sql, [colunaValor1, colunaValor2], (erro, objeto) => {
                 if (erro) {
                     reject(new Error(erro))
                     return

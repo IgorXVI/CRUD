@@ -1,20 +1,26 @@
 class TabelaController extends Controller {
 
-    constructor(atributos, nomeSingular, nomePlural) {
+    constructor(atributos, nomeSingular, nomePlural, naoCriarTudo) {
         super()
         this.nomeSingular = nomeSingular
         this.nomePlural = nomePlural
-        let $ = document.querySelector.bind(document)
-        this.tabela = $("#tabela")
         this.atributos = atributos
-        this.btnSair = $("#btnSair")
-        this.btnSair.onclick = event => this.sair(event)
-        this.btnBuscaTodos = $("#btnBuscaTodos")
-        this.btnBuscaTodos.onclick = event => this.buscarTodos(event)
-        this.adicionarTrInput()
-        this.eventosOrdenaTabela()
+
+        let $ = document.querySelector.bind(document)
         this.campoFiltro = $("#filtrar-tabela")
+        this.tabela = $("#tabela")
+        this.btnSair = $("#btnSair")
+        this.btnBuscaTodos = $("#btnBuscaTodos")
+
+        this.btnSair.onclick = event => this.sair(event)
+        this.btnBuscaTodos.onclick = event => this.buscarTodos(event)
         this.campoFiltro.oninput = event => this.filtraCampo(event)
+
+        if (!naoCriarTudo) {
+            this.criarColunasTableHeader()
+            this.adicionarTrInput()
+            this.eventosOrdenaTabela()
+        }
     }
 
     filtraCampo(event) {
@@ -26,7 +32,6 @@ class TabelaController extends Controller {
                 let registro = registros[j]
 
                 let txt = registro.querySelector(`.tdDados${nomeDado}`).textContent
-                console.log(txt)
 
                 let expressao = new RegExp(event.target.value, "i");
                 if (!expressao.test(txt)) {
@@ -227,14 +232,14 @@ class TabelaController extends Controller {
         btnd.className = "btn btn-danger btn-sm container"
         btnd.type = "button"
         btnd.id = `d${id}`
-        btnd.setAttribute("onclick", "tabelaController.deletaUm(event)")
+        btnd.onclick = event => this.deletaUm(event)
 
         let btne = document.createElement("button")
         btne.textContent = "Editar"
         btne.className = "btn btn-warning btn-sm container"
         btne.type = "button"
         btne.id = `e${id}`
-        btne.setAttribute("onclick", "tabelaController.editaUm(event)")
+        btne.onclick = event => this.editaUm(event)
 
         let td = document.createElement("td")
 
@@ -256,7 +261,7 @@ class TabelaController extends Controller {
         btnCadastra.className = "btn btn-success btn-sm container"
         btnCadastra.type = "button"
         btnCadastra.id = `btnCadastra`
-        btnCadastra.setAttribute("onclick", "tabelaController.adicionaUm(event)")
+        btnCadastra.onclick = event => this.adicionaUm(event)
 
         let tdBtnCadastra = document.createElement("td")
         tdBtnCadastra.appendChild(btnCadastra)
@@ -291,6 +296,43 @@ class TabelaController extends Controller {
                     console.log(erro)
                 }
             )
+    }
+
+    criarColunasTableHeader() {
+        let trRadio = document.createElement("tr")
+        let trNomesColunas = document.createElement("tr")
+
+        for (let i = 0; i < this.atributos.length + 1; i++) {
+            let thRadio = document.createElement("th")
+            thRadio.scope = "col"
+
+            let thNomesColunas = document.createElement("th")
+            thNomesColunas.scope = "col"
+            thNomesColunas.className = "nomesColunasTabela"
+
+            if (i < this.atributos.length) {
+                let radioBtn = document.createElement("input")
+                radioBtn.type = "radio"
+                radioBtn.name = "radio"
+                radioBtn.className = "container"
+                radioBtn.id = `R${this.atributos[i]}`
+                if (this.atributos[i] == "id") {
+                    radioBtn.checked = true
+                }
+                thRadio.appendChild(radioBtn)
+
+                thNomesColunas.textContent = this.atributos[i]
+            } else {
+                thNomesColunas.textContent = "Ações"
+            }
+
+            trRadio.appendChild(thRadio)
+            trNomesColunas.appendChild(thNomesColunas)
+        }
+
+        let thead = document.querySelector(".thead-dark")
+        thead.appendChild(trRadio)
+        thead.appendChild(trNomesColunas)
     }
 
     eventosOrdenaTabela() {
