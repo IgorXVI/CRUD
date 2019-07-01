@@ -105,8 +105,7 @@ class TabelaController extends Controller {
         let objeto = {}
         for (let i = 0; i < this.atributos.length; i++) {
             let text = document.querySelector(`#${this.atributos[i]}${id}`).textContent
-            text.replace(/\s/g,'')
-            if(text.length !== 0){
+            if(text !== ""){
                 objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
             }
         }
@@ -137,8 +136,7 @@ class TabelaController extends Controller {
         let objeto = {}
         for (let i = 0; i < this.atributos.length; i++) {
             let text = document.querySelector(`#${this.atributos[i]}${id}`).textContent
-            text.replace(/\s/g,'')
-            if(text.length !== 0){
+            if(text !== ""){
                 objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
             }
         }

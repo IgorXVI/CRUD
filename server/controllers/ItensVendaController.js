@@ -37,13 +37,15 @@ module.exports = class ItensVendaController extends Controller {
                             super.fim()
                             return
                         } else {
-                            return this.produtosSuficientesEstocados(objeto)
+                            return this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
                         }
                     }
                 )
                 .then(
-                    (existem) => {
-                        if (!existem) {
+                    (estoque) => {
+                        if (estoque && estoque.quantidade >= objeto.quantidade) {
+                            return this.calculaValorTotal(objeto)
+                        } else {
                             const erro = [{
                                 location: "body",
                                 param: "idProduto",
@@ -55,8 +57,6 @@ module.exports = class ItensVendaController extends Controller {
                             })
                             super.fim()
                             return "fim"
-                        } else {
-                            return this.calculaValorTotal(objeto)
                         }
                     }
                 )
@@ -64,6 +64,24 @@ module.exports = class ItensVendaController extends Controller {
                     (valorTotal) => {
                         if (valorTotal != "fim") {
                             objeto.valorTotal = valorTotal
+                            return this.itensVendaDAO.adiciona(objeto)
+                        } else {
+                            return "fim"
+                        }
+                    }
+                )
+                .then(
+                    (retorno) => {
+                        if (retorno != "fim") {
+                            return this.atualizaEstoque(objeto)
+                        } else {
+                            return "fim"
+                        }
+                    }
+                )
+                .then(
+                    (retorno) => {
+                        if (retorno != "fim") {
                             return this.atualizaVenda(objeto)
                         } else {
                             return "fim"
@@ -73,7 +91,8 @@ module.exports = class ItensVendaController extends Controller {
                 .then(
                     (retorno) => {
                         if (retorno != "fim") {
-                            super.adicionaUm(req, res, objeto)
+                            res.status(201).end()
+                            super.fim()
                         }
                     }
                 )
@@ -92,8 +111,6 @@ module.exports = class ItensVendaController extends Controller {
             }
 
             let objeto = this.gerarObjeto(req)
-            objeto.idVenda = undefined
-            objeto.idProduto = undefined
 
             let itemBD = {}
 
@@ -101,58 +118,68 @@ module.exports = class ItensVendaController extends Controller {
                 .then(
                     (item) => {
                         if (!item) {
-                            const erro = [{
+                            const erro1 = [{
                                 location: "params",
                                 param: "id",
                                 msg: "O valor informado não é válido.",
                                 value: req.params.id
                             }]
                             res.status(400).json({
-                                erro
+                                erro: erro1
                             })
                             this.fim()
-                            return
+                            return "fim"
                         } else {
                             itemBD = item
-                            return this.roolbackEstoque(itemBD)
+                            objeto.idProduto = itemBD.idProduto
+                            objeto.idVenda = itemBD.idVenda
+                            return this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
                         }
                     }
                 )
                 .then(
-                    () => {
-                        return this.roolbackVenda(itemBD)
-                    }
-                )
-                .then(
-                    () => {
-                        objeto.idProduto = itemBD.idProduto
-                        objeto.idVenda = itemBD.idVenda
-                        return this.produtosSuficientesEstocados(objeto)
-                    }
-                )
-                .then(
-                    (existem) => {
-                        if (!existem) {
-                            const erro = [{
+                    (estoque) => {
+                        if (estoque && (estoque.quantidade + itemBD.quantidade) >= objeto.quantidade) {
+                            return this.calculaValorTotal(objeto)
+                        } else {
+                            const erro2 = [{
                                 location: "body",
                                 param: "idProduto",
                                 msg: "Não existem produtos suficientes estocados para realizar essa venda.",
                                 value: req.body.idProduto
                             }]
                             res.status(400).json({
-                                erro
+                                erro: erro2
                             })
                             super.fim()
                             return "fim"
-                        } else {
-                            return this.calculaValorTotal(objeto)
                         }
                     }
                 )
                 .then(
                     (valorTotal) => {
-                        if (valorTotal !== "fim") {
+                        if (valorTotal != "fim") {
                             objeto.valorTotal = valorTotal
+                            return this.itensVendaDAO.atualizaPorID(objeto, req.params.id)
+                        } else {
+                            return "fim"
+                        }
+                    }
+                )
+                .then(
+                    (retorno) => {
+                        if (retorno != "fim") {
+                            objeto.quantidade -= itemBD.quantidade
+                            return this.atualizaEstoque(objeto)
+                        } else {
+                            return "fim"
+                        }
+                    }
+                )
+                .then(
+                    (retorno) => {
+                        if (retorno !== "fim") {
+                            objeto.valorTotal -= itemBD.valorTotal
                             return this.atualizaVenda(objeto)
                         } else {
                             return "fim"
@@ -160,15 +187,16 @@ module.exports = class ItensVendaController extends Controller {
                     }
                 )
                 .then(
-                    (result) => {
-                        if (result !== "fim") {
-                            super.atualizaUm(req, res, objeto)
+                    (retorno) => {
+                        if (retorno != "fim") {
+                            res.status(201).end()
+                            this.fim()
                         }
                     }
                 )
                 .catch(
-                    (erro) => {
-                        super.erroServidor(erro)
+                    (error) => {
+                        super.erroServidor(error)
                     }
                 )
         })
@@ -196,21 +224,57 @@ module.exports = class ItensVendaController extends Controller {
                                 erro
                             })
                             this.fim()
-                            return
+                            return "fim"
                         } else {
                             itemBD = item
-                            return this.roolbackEstoque(itemBD)
+                            return this.itensVendaDAO.deletaPorID(req.params.id)
                         }
                     }
                 )
                 .then(
-                    () => {
-                        return this.roolbackVenda(itemBD)
+                    (retorno) => {
+                        if (retorno != "fim") {
+                            itemBD.quantidade = -itemBD.quantidade
+                            return this.atualizaEstoque(itemBD)
+                        } else {
+                            return "fim"
+                        }
                     }
                 )
                 .then(
-                    () => {
-                        super.deletaUm(req, res)
+                    (retorno) => {
+                        if (retorno !== "fim") {
+                            itemBD.valorTotal = -itemBD.valorTotal
+                            return this.atualizaVenda(itemBD)
+                        } else {
+                            return "fim"
+                        }
+                    }
+                )
+                .then(
+                    (retorno) => {
+                        if (retorno != "fim") {
+                            res.status(202).end()
+                            this.fim()
+                        }
+                    }
+                )
+                .catch(
+                    (erro) => {
+                        if (erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
+                            const erro = [{
+                                location: "params",
+                                param: "id",
+                                msg: "O valor informado está sendo usado como foreign key.",
+                                value: req.params.id
+                            }]
+                            res.status(400).json({
+                                erro
+                            })
+                            this.fim()
+                        } else {
+                            this.erroServidor()
+                        }
                     }
                 )
         })
@@ -223,24 +287,6 @@ module.exports = class ItensVendaController extends Controller {
                 .then(
                     (produto) => {
                         resolve(produto.precoUnidade * objeto.quantidade)
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        reject(new Error(erro))
-                    }
-                )
-        })
-
-    }
-
-    produtosSuficientesEstocados(objeto) {
-
-        return new Promise((resolve, reject) => {
-            this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
-                .then(
-                    (estoque) => {
-                        resolve(estoque && estoque.quantidade >= objeto.quantidade)
                     }
                 )
                 .catch(
@@ -286,67 +332,13 @@ module.exports = class ItensVendaController extends Controller {
             this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
                 .then(
                     (estoque) => {
-                        estoque.quantidade = estoque.quantidade - objeto.quantidade
+                        estoque.quantidade -= objeto.quantidade
                         const id = estoque.id
 
                         delete estoque.id
                         delete estoque.dataCriacao
 
                         return this.estoqueDAO.atualizaPorID(estoque, id)
-                    }
-                )
-                .then(
-                    () => {
-                        resolve()
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        reject(new Error(erro))
-                    }
-                )
-        })
-    }
-
-    roolbackEstoque(objeto) {
-        return new Promise((resolve, reject) => {
-            this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
-                .then(
-                    (estoque) => {
-                        estoque.quantidade = estoque.quantidade + objeto.quantidade
-                        const id = estoque.id
-
-                        delete estoque.id
-                        delete estoque.dataCriacao
-
-                        return this.estoqueDAO.atualizaPorID(estoque, id)
-                    }
-                )
-                .then(
-                    () => {
-                        resolve()
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        reject(new Error(erro))
-                    }
-                )
-        })
-    }
-
-    roolbackVenda(objeto) {
-        return new Promise((resolve, reject) => {
-            this.vendasDAO.buscaPorID(objeto.idVenda)
-                .then(
-                    (venda) => {
-                        venda.valorTotal -= objeto.valorTotal
-                        const id = venda.id
-
-                        delete venda.id
-                        delete venda.dataCriacao
-
-                        return this.vendasDAO.atualizaPorID(venda, id)
                     }
                 )
                 .then(
