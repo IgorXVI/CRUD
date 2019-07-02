@@ -22,7 +22,7 @@ app.use(expressValidator())
 app.use(cookieParser())
 
 //rotas da api
-app.use("/api/usuarios", middlewares.checkToken, middlewares.checkNivel(1, ""), usuariosRotas)
+app.use("/api/usuarios", middlewares.checkToken, middlewares.checkNivel(1, "GET"), usuariosRotas)
 app.use("/api/cidades", middlewares.checkToken, middlewares.checkNivel(2, "GET"), cidadesRotas)
 app.use("/api/clientes", middlewares.checkToken, middlewares.checkNivel(2, "GET"), clientesRotas)
 app.use("/api/estoque", middlewares.checkToken, middlewares.checkNivel(2, "GET"), estoqueRotas)
@@ -35,7 +35,7 @@ app.use("/api/vendas", middlewares.checkToken, middlewares.checkNivel(2, "GET"),
 //rotas das paginas
 app.use("/", express.static(path.join(__dirname, "../..", "client")))
 app.use("/signup", express.static(path.join(__dirname, "../..", "client/paginas/signup.html")))
-app.use("/usuarios", middlewares.checkToken, middlewares.checkNivel(1, ""), express.static(path.join(__dirname, "../..", "client/paginas/usuarios.html")))
+app.use("/usuarios", middlewares.checkToken, middlewares.checkNivel(1, "GET"), express.static(path.join(__dirname, "../..", "client/paginas/usuarios.html")))
 app.use("/produtos", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/produtos.html")))
 app.use("/cidades", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/cidades.html")))
 app.use("/fornecedores", middlewares.checkToken, express.static(path.join(__dirname, "../..", "client/paginas/fornecedores.html")))
