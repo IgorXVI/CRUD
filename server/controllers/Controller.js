@@ -445,6 +445,7 @@ module.exports = class Controller {
             validacoes.push(this.validaNotNull("CEP"))
         }
         validacoes.push(this.validaFixoChars("CEP", 9).optional())
+        validacoes.push(body("CEP", "O valor deve estar no formato xxxxx-xxx, onde x é um dígito.").matches(/^[0-9]{5}-[\d]{3}$/).optional())
         return validacoes
     }
 
@@ -454,6 +455,7 @@ module.exports = class Controller {
             validacoes.push(this.validaNotNull("CNPJ"))
         }
         validacoes.push(this.validaFixoChars("CNPJ", 18).optional())
+        validacoes.push(body("CNPJ", "O valor deve estar no formato xx.xxx.xxx/xxxx-xx, onde x é um dígito.").matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}\-\d{2}$/).optional())
         return validacoes
     }
 

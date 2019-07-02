@@ -2,7 +2,8 @@ let jwt = require('jsonwebtoken')
 const secret = require('./secret')
 
 function podePassar(req) {
-  return (`${req.baseUrl}${req.url}` == "/api/usuarios/usuario/login" || `${req.baseUrl}${req.url}` == "/api/usuarios/usuario/signup")
+  const url = `${req.baseUrl}${req.url}`
+  return (url === "/api/usuarios/usuario/login" || url === "/api/usuarios/usuario/signup" || url === "/api/usuarios/usuario/logout")
 }
 
 function checkToken(req, res, next) {

@@ -296,6 +296,7 @@ class TabelaController extends Controller {
                 thRadio.appendChild(radioBtn)
 
                 thNomesColunas.textContent = this.atributos[i]
+                thNomesColunas.id = `${this.atributos[i]}Head`
             } else {
                 thNomesColunas.textContent = "Ações"
                 thNomesColunas.id = "acoesHead"
