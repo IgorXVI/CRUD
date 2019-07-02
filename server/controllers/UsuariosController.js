@@ -27,7 +27,16 @@ module.exports = class UsuariosController extends Controller {
 
         this.router.post(`/usuario/login`, [
             super.validaEmail(true),
-            super.validaCampoExiste(this.usuariosDAO, "email"),
+            body("email").custom(valor => {
+                return this.usuariosDAO.buscaPorEmail(valor).then(objeto => {
+                    if (!objeto) {
+                        return Promise.reject(`O valor informado não está cadastrado.`);
+                    }
+                    else {
+                        dadosBanco = objeto
+                    }
+                });
+            }).optional(),
             super.validaSenha(true),
             body("tokenEmJSON").isBoolean().withMessage("O valor deve ser booleano."),
             body("tokenEmJSON").exists().withMessage("O valor deve ser informado.")
@@ -52,9 +61,9 @@ module.exports = class UsuariosController extends Controller {
                             super.fim()
                         }
                         const token = jwt.sign({
-                                id: dadosBanco.id,
-                                nivelAcesso: dadosBanco.nivelAcesso
-                            },
+                            id: dadosBanco.id,
+                            nivelAcesso: dadosBanco.nivelAcesso
+                        },
                             process.env.SECRET, {
                                 expiresIn: "1h"
                             }
@@ -133,26 +142,59 @@ module.exports = class UsuariosController extends Controller {
         this.router.post(`/usuario/:id`, [
             super.validaNome(false),
             super.validaEmail(false),
-            super.validaAtualizacaoCampoUnico(this.usuariosDAO, "email"),
             super.validaSenha(false),
             super.validaNivelAcesso(false)
         ], (req, res) => {
+
             if (super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)) {
                 return
             }
 
             const objeto = super.gerarObjeto(req)
 
-            if (objeto.senha) {
-                bcrypt.hash(objeto.senha, 10)
+            if (objeto.email) {
+                this.usuariosDAO.buscaPorEmail(objeto.email)
                     .then(
-                        (hash) => {
-                            objeto.senha = hash
-                            super.atualizaUm(req, res, objeto)
+                        (resultado) => {
+                            if (!resultado || (resultado && resultado.id == req.params.id)) {
+                                if (objeto.senha) {
+                                    bcrypt.hash(objeto.senha, 10)
+                                        .then(
+                                            (hash) => {
+                                                objeto.senha = hash
+                                                super.atualizaUm(req, res, objeto)
+                                            }
+                                        )
+                                } else {
+                                    super.atualizaUm(req, res, objeto)
+                                }
+                            }
+                            else {
+                                const erro = [{
+                                    location: "body",
+                                    param: "email",
+                                    msg: "O valor informado já está cadastrado.",
+                                    value: req.params.id
+                                }]
+                                res.status(400).json({
+                                    erro
+                                })
+                            }
                         }
                     )
-            } else {
-                super.atualizaUm(req, res, objeto)
+            }
+            else {
+                if (objeto.senha) {
+                    bcrypt.hash(objeto.senha, 10)
+                        .then(
+                            (hash) => {
+                                objeto.senha = hash
+                                super.atualizaUm(req, res, objeto)
+                            }
+                        )
+                } else {
+                    super.atualizaUm(req, res, objeto)
+                }
             }
         })
     }

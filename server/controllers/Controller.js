@@ -631,35 +631,11 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaCampoExiste(DAO, campo){
-        return body(campo).custom(valor => {
-            return DAO.buscaPorColuna(valor, campo).then(objeto => {
-                if (!objeto) {
-                    return Promise.reject(`O valor informado não está cadastrado.`);
-                }
-            });
-        }).optional()
-    }
-
     validaCampoUnico(DAO, campo){
         return body(campo).custom(valor => {
             return DAO.buscaPorColuna(valor, campo).then(objeto => {
                 if (objeto) {
                     return Promise.reject(`O valor informado já está cadastrado.`);
-                }
-            });
-        }).optional()
-    }
-
-    validaAtualizacaoCampoUnico(DAO, campo){
-        return check([campo, "id"]).custom(valores => {
-
-            const valor = valores[0]
-            const id = valores[1]
-
-            return DAO.buscaPorColuna(valor, campo).then(objeto => {
-                if (objeto && objeto.id != id) {
-                    return Promise.reject(`O valor informado já está cadastrado id = ${valores}.`);
                 }
             });
         }).optional()
