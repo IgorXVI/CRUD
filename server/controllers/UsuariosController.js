@@ -1,6 +1,5 @@
 const Controller = require("./Controller")
 const bcrypt = require("bcrypt")
-const secret = require("../config/secret")
 const jwt = require('jsonwebtoken')
 
 const {
@@ -28,15 +27,7 @@ module.exports = class UsuariosController extends Controller {
 
         this.router.post(`/usuario/login`, [
             super.validaEmail(true),
-            body("email").custom(email => {
-                return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
-                    if (!usuario) {
-                        return Promise.reject('O valor informado não está cadastrado.');
-                    } else {
-                        dadosBanco = usuario
-                    }
-                });
-            }).optional(),
+            super.validaCampoExiste(this.usuariosDAO, "email"),
             super.validaSenha(true),
             body("tokenEmJSON").isBoolean().withMessage("O valor deve ser booleano."),
             body("tokenEmJSON").exists().withMessage("O valor deve ser informado.")
@@ -64,7 +55,7 @@ module.exports = class UsuariosController extends Controller {
                                 id: dadosBanco.id,
                                 nivelAcesso: dadosBanco.nivelAcesso
                             },
-                            secret, {
+                            process.env.SECRET, {
                                 expiresIn: "1h"
                             }
                         )
@@ -94,13 +85,7 @@ module.exports = class UsuariosController extends Controller {
         this.router.post(`/usuario/signup`, [
             super.validaNome(true),
             super.validaEmail(true),
-            body("email").custom(email => {
-                return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
-                    if (usuario) {
-                        return Promise.reject('O valor informado já está cadastrado.');
-                    }
-                });
-            }).optional(),
+            super.validaCampoUnico(this.usuariosDAO, "email"),
             super.validaSenha(true)
         ], (req, res) => {
             if (super.inicio(req, res, "Fazendo signup de usuario...")) {
@@ -124,13 +109,7 @@ module.exports = class UsuariosController extends Controller {
         this.router.post(`/usuario`, [
             super.validaNome(true),
             super.validaEmail(true),
-            body("email").custom(email => {
-                return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
-                    if (usuario) {
-                        return Promise.reject('O valor informado já está cadastrado.');
-                    }
-                });
-            }).optional(),
+            super.validaCampoUnico(this.usuariosDAO, "email"),
             super.validaSenha(true),
             super.validaNivelAcesso(true)
         ], (req, res) => {
@@ -154,13 +133,7 @@ module.exports = class UsuariosController extends Controller {
         this.router.post(`/usuario/:id`, [
             super.validaNome(false),
             super.validaEmail(false),
-            body("email").custom(email => {
-                return this.usuariosDAO.buscaPorEmail(email).then(usuario => {
-                    if (usuario) {
-                        return Promise.reject('O valor informado já está cadastrado.');
-                    }
-                });
-            }).optional(),
+            super.validaAtualizacaoCampoUnico(this.usuariosDAO, "email"),
             super.validaSenha(false),
             super.validaNivelAcesso(false)
         ], (req, res) => {

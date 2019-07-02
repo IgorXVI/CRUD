@@ -1,6 +1,8 @@
+require('dotenv').config()
+
 const app = require("./config/custom-express")
 
-const porta = 6663
+const porta = process.env.PORT
 app.listen(porta, ()=>{
     console.log(`ouvindo na porta ${porta}`)
 })

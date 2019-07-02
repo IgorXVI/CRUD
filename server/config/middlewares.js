@@ -1,5 +1,4 @@
 let jwt = require('jsonwebtoken')
-const secret = require('./secret')
 
 function podePassar(req) {
   const url = `${req.baseUrl}${req.url}`
@@ -15,7 +14,7 @@ function checkToken(req, res, next) {
         token = token.slice(7, token.length)
       }
 
-      jwt.verify(token, secret, (err, decoded) => {
+      jwt.verify(token, process.env.SECRET, (err, decoded) => {
         if (err) {
           const erro = [{
             msg: "Token não é válido."
