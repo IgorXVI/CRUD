@@ -1,6 +1,6 @@
 class TabelaController extends Controller {
 
-    constructor(atributos, nomeSingular, nomePlural, naoCriarTudo) {
+    constructor(atributos, nomeSingular, nomePlural) {
         super()
         this.nomeSingular = nomeSingular
         this.nomePlural = nomePlural
@@ -11,16 +11,24 @@ class TabelaController extends Controller {
         this.tabela = $("#tabela")
         this.btnSair = $("#btnSair")
         this.btnBuscaTodos = $("#btnBuscaTodos")
+        this.btnEnviar = $("#btnEnviar")
+        this.btnCadastrar = $("#btnCadastrar")
 
+        this.btnCadastrar.onclick = event => {
+            document.querySelector("#idRow").classList.add("invisivel")
+            this.btnEnviar.onclick = event => this.adicionaUm(event)
+        }
         this.btnSair.onclick = event => this.sair(event)
         this.btnBuscaTodos.onclick = event => this.buscarTodos(event)
         this.campoFiltro.oninput = event => this.filtraCampo(event)
 
-        if (!naoCriarTudo) {
-            this.criarColunasTableHeader()
-            this.adicionarTrInput()
-            this.eventosOrdenaTabela()
-        }
+        this.criarTabelaHeader()
+    }
+
+    criarTabelaHeader() {
+        this.campoFiltro.classList.remove("invisivel")
+        this.criarColunasTableHeader()
+        this.eventosOrdenaTabela()
     }
 
     filtraCampo(event) {
@@ -58,7 +66,6 @@ class TabelaController extends Controller {
                 (resposta) => {
                     this.tabela.innerHTML = ""
                     this.adicionarVariosNaTabela(resposta.resultado)
-                    this.adicionarTrInput()
                 },
                 (erros) => {
                     super.mostrarMsgErros(erros)
@@ -99,14 +106,13 @@ class TabelaController extends Controller {
     editaUm(event) {
         event.preventDefault();
 
-        let id = event.target.id
-        id = id.substr(1)
+        let id = document.querySelector("#idInput").value
 
         let objeto = {}
-        for (let i = 0; i < this.atributos.length; i++) {
-            let text = document.querySelector(`#${this.atributos[i]}${id}`).textContent
-            if(text !== ""){
-                objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+        for (let i = 1; i < this.atributos.length - 2; i++) {
+            let text = document.querySelector(`#${this.atributos[i]}Input`).value
+            if (text !== "") {
+                objeto[this.atributos[i]] = text
             }
         }
 
@@ -131,22 +137,20 @@ class TabelaController extends Controller {
     adicionaUm(event) {
         event.preventDefault();
 
-        const id = "0"
-
         let objeto = {}
-        for (let i = 0; i < this.atributos.length; i++) {
-            let text = document.querySelector(`#${this.atributos[i]}${id}`).textContent
-            if(text !== ""){
-                objeto[this.atributos[i]] = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+        for (let i = 1; i < this.atributos.length - 2; i++) {
+            let text = document.querySelector(`#${this.atributos[i]}Input`).value
+            if (text !== "") {
+                objeto[this.atributos[i]] = text
             }
         }
+
+        console.log(objeto)
 
         const service = new ApiService()
         service.post(`/${this.nomePlural}/${this.nomeSingular}`, objeto)
             .then(
                 () => {
-                    event.target.parentNode.parentNode.remove()
-                    this.adicionarTrInput()
                     this.btnBuscaTodos.click()
                 },
                 (erros) => {
@@ -213,7 +217,19 @@ class TabelaController extends Controller {
         btne.className = "btn btn-warning btn-sm container"
         btne.type = "button"
         btne.id = `e${id}`
-        btne.onclick = event => this.editaUm(event)
+        btne.setAttribute("data-toggle", "modal")
+        btne.setAttribute("data-target", "#formularioModal")
+        btne.onclick = event => {
+            document.querySelector("#idInput").value = id
+
+            document.querySelector("#idRow").classList.remove("invisivel")
+
+            for (let i = 1; i < this.atributos.length - 2; i++) {
+                document.querySelector(`#${this.atributos[i]}Input`).value = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+            }
+
+            this.btnEnviar.onclick = event => this.editaUm(event)
+        }
 
         let td = document.createElement("td")
 
@@ -221,34 +237,6 @@ class TabelaController extends Controller {
         td.appendChild(btne)
 
         return td
-    }
-
-    adicionarTrInput() {
-        let tr = document.createElement("tr")
-
-        for (let i = 0; i < this.atributos.length; i++) {
-            tr.appendChild(this.montaTd("", "0", this.atributos[i]))
-        }
-
-        let btnCadastra = document.createElement("button")
-        btnCadastra.textContent = "Cadastrar"
-        btnCadastra.className = "btn btn-success btn-sm container"
-        btnCadastra.type = "button"
-        btnCadastra.id = `btnCadastra`
-        btnCadastra.onclick = event => this.adicionaUm(event)
-
-        let tdBtnCadastra = document.createElement("td")
-        tdBtnCadastra.appendChild(btnCadastra)
-
-        tr.appendChild(tdBtnCadastra)
-
-        tr.id = "trCadastro"
-
-        this.tabela.prepend(tr)
-
-        document.querySelector(`#id0`).contentEditable = false
-        document.querySelector(`#dataCriacao0`).contentEditable = false
-        document.querySelector(`#dataAlteracao0`).contentEditable = false
     }
 
     sair(event) {
