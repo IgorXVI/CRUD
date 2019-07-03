@@ -49,5 +49,6 @@ app.use("/clientes", middlewares.checkToken, express.static(path.join(__dirname,
 //rotas de outros arquivos
 app.use("/bootstrap", express.static(path.join(__dirname, "../..", "node_modules/bootstrap/dist")))
 app.use("/jquery", express.static(path.join(__dirname, "../..", "node_modules/jquery/dist")))
+app.use("/html2canvas", express.static(path.join(__dirname, "../..", "node_modules/html2canvas/dist")))
 
 module.exports = app

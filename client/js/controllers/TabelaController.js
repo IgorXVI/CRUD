@@ -25,6 +25,50 @@ class TabelaController extends Controller {
         this.criarTabelaHeader()
     }
 
+    gerarRelatorio(event) {
+        event.preventDefault()
+
+        const acoesHead = document.querySelector("#acoesHead")
+        const tdAcoes = document.querySelectorAll(".tdAcoes")
+
+        acoesHead.classList.add("invisivel")
+        if (tdAcoes.length > 0) {
+            for (let i = 0; i < tdAcoes.length; i++) {
+                tdAcoes[i].classList.add("invisivel")
+            }
+        }
+
+        const todaTabela = document.querySelector(".table-responsive")
+
+        html2canvas(todaTabela).then(canvas => {
+            const dataUrl = canvas.toDataURL()
+
+            let windowContent = '<!DOCTYPE html>';
+            windowContent += '<html>'
+            windowContent += `<head><title>Relatório de ${this.nomePlural}</title></head>`;
+            windowContent += '<body>'
+            windowContent += '<img src="' + dataUrl + '">';
+            windowContent += '</body>';
+            windowContent += '</html>';
+            let printWin = window.open('', '', 'width=340,height=260');
+            printWin.document.open();
+            printWin.document.write(windowContent);
+            printWin.document.close();
+            printWin.focus();
+            printWin.print();
+            printWin.close();
+
+        })
+
+        acoesHead.classList.remove("invisivel")
+        if (tdAcoes.length > 0) {
+            for (let i = 0; i < tdAcoes.length; i++) {
+                tdAcoes[i].classList.remove("invisivel")
+            }
+        }
+
+    }
+
     criarTabelaHeader() {
         this.campoFiltro.classList.remove("invisivel")
         this.criarColunasTableHeader()
@@ -263,7 +307,7 @@ class TabelaController extends Controller {
         }
 
         let td = document.createElement("td")
-
+        td.className = "tdAcoes"
         td.appendChild(btnd)
         td.appendChild(btne)
 
@@ -327,13 +371,28 @@ class TabelaController extends Controller {
         let thead = document.querySelector(".thead-dark")
         thead.appendChild(trNomesColunas)
 
+        let divInputInicio = document.querySelector(".card-body").querySelector("form").querySelector("div")
+
         let divSelect = document.createElement("div")
         divSelect.className = "col-auto input-inicio"
         divSelect.appendChild(select)
 
-        let divInputInicio = document.querySelector(".card-body").querySelector("form").querySelector("div")
         let f = divInputInicio.querySelector(".input-inicio")
         divInputInicio.insertBefore(divSelect, f)
+
+        let btnGerarRelatorio = document.createElement("button")
+        btnGerarRelatorio.type = "button"
+        btnGerarRelatorio.className = "btn btn-secondary btn-lg"
+        btnGerarRelatorio.id = "btnGerarRelatorio"
+        btnGerarRelatorio.textContent = "Gerar Relatorio"
+        btnGerarRelatorio.onclick = event => this.gerarRelatorio(event)
+
+        let divBtnGerarRelatorio = document.createElement("div")
+        divBtnGerarRelatorio.className = "col-auto btn-inicio"
+        divBtnGerarRelatorio.appendChild(btnGerarRelatorio)
+
+        let s = divInputInicio.querySelector(".input-inicio")
+        divInputInicio.insertBefore(divBtnGerarRelatorio, s)
     }
 
     eventosOrdenaTabela() {

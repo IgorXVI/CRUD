@@ -1,19 +1,19 @@
-.invisivel{
+.invisivel {
     display: none;
 }
 
-.btn-inicio{
+.btn-inicio {
     padding-bottom: 10px
 }
 
-.input-inicio{
+.input-inicio {
     padding-top: 10px
 }
 
-.nomesColunasTabela{
+.nomesColunasTabela {
     text-align: center;
 }
 
-#acoesHead{
+#acoesHead {
     width: 75px
 }
