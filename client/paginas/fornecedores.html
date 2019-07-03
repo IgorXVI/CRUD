@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="/bootstrap-css/bootstrap.css">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
     <title>Fornecedores</title>
 </head>
@@ -70,25 +70,110 @@
         </div>
 
         <div class="card">
-            <h5 class="card-header">Fornecedores</h5>
-            <div class="card-body">
-
-                <input class="form-control" id="filtrar-tabela" type="text" placeholder="filtre a tabela"
-                    aria-label="Search">
-
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="thead-dark">
-                        </thead>
-
-                        <tbody id="tabela">
-                        </tbody>
-
-                    </table>
+                <h5 class="card-header">Fornecedores</h5>
+                <div class="card-body">
+    
+                    <form>
+                        <div class="row">
+                            <div class="col-auto btn-inicio">
+                                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar
+                                    Fornecedores</button>
+                            </div>
+                            <div class="col-auto btn-inicio">
+                                <button type="button" class="btn btn-success btn-lg" data-toggle="modal" id="btnCadastrar"
+                                    data-target="#formularioModal">Cadastrar Fornecedor</button>
+                            </div>
+                            <div class="col-auto input-inicio">
+                                <input class="form-control invisivel" id="filtrar-tabela" type="text"
+                                    placeholder="filtre a tabela" aria-label="Search">
+                            </div>
+                        </div>
+                    </form>
+    
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                            </thead>
+    
+                            <tbody id="tabela">
+                            </tbody>
+    
+                        </table>
+                    </div>
+    
+                    <div class="modal fade" id="formularioModal" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLongTitle">Formulario</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+    
+                                    <form>
+                                        <div class="form-group" id="idRow">
+                                            <label for="idInput">id</label>
+                                            <input type="number" class="form-control" id="idInput">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="nomeInput">nome</label>
+                                            <input type="text" class="form-control" id="nomeInput" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="emailInput">email</label>
+                                            <input type="email" class="form-control" id="emailInput" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="CNPJInput">CNPJ</label>
+                                            <input type="text" class="form-control" id="CNPJInput"
+                                                pattern="\d{2}.\d{3}.\d{3}/\d{4}-\d{2}"
+                                                title="O valor deve estar no formato xx.xxx.xxx/xxxx-xx, onde x é um dígito."
+                                                required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="idCidadeInput">idCidade</label>
+                                            <input type="number" class="form-control" id="idCidadeInput" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="telefoneInput">telefone</label>
+                                            <input type="text" class="form-control" id="telefoneInput"
+                                                pattern="\([1-9]{2}\) (?:[2-8]|9[1-9])[0-9]{3}-[0-9]{4}"
+                                                title="O valor deve estar no formato (xx) xxxxx-xxxx, onde x é um dígito."
+                                                required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="bairroInput">bairro</label>
+                                            <input type="text" class="form-control" id="bairroInput" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="ruaInput">rua</label>
+                                            <input type="text" class="form-control" id="ruaInput" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="numeroCasaInput">numeroCasa</label>
+                                            <input type="number" class="form-control" id="numeroCasaInput" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="complementoInput">complemento</label>
+                                            <textarea class="form-control" id="complementoInput" rows="3" required></textarea>
+                                        </div>
+                                    </form>
+    
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                        id="btnEnviar">Enviar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+    
                 </div>
-                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Fornecedores</button>
             </div>
-        </div>
 
     </main>
 
@@ -97,6 +182,8 @@
 <script src="js/services/ApiService.js"></script>
 <script src="js/controllers/Controller.js"></script>
 <script src="js/controllers/TabelaController.js"></script>
+<script src="jquery/jquery.js"></script>
+<script src="bootstrap/js/bootstrap.js"></script>
 
 <script>
     let tabelaController = new TabelaController(

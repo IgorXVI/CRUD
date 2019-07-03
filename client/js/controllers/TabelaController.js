@@ -110,9 +110,12 @@ class TabelaController extends Controller {
 
         let objeto = {}
         for (let i = 1; i < this.atributos.length - 2; i++) {
-            let text = document.querySelector(`#${this.atributos[i]}Input`).value
-            if (text !== "") {
-                objeto[this.atributos[i]] = text
+            let input = document.querySelector(`#${this.atributos[i]}Input`)
+            if (input) {
+                let text = input.value
+                if (text !== "") {
+                    objeto[this.atributos[i]] = text
+                }
             }
         }
 
@@ -139,13 +142,14 @@ class TabelaController extends Controller {
 
         let objeto = {}
         for (let i = 1; i < this.atributos.length - 2; i++) {
-            let text = document.querySelector(`#${this.atributos[i]}Input`).value
-            if (text !== "") {
-                objeto[this.atributos[i]] = text
+            let input = document.querySelector(`#${this.atributos[i]}Input`)
+            if (input) {
+                let text = input.value
+                if (text !== "") {
+                    objeto[this.atributos[i]] = text
+                }
             }
         }
-
-        console.log(objeto)
 
         const service = new ApiService()
         service.post(`/${this.nomePlural}/${this.nomeSingular}`, objeto)
@@ -174,10 +178,6 @@ class TabelaController extends Controller {
     adicionarNaTabela(objeto) {
         const tr = this.montaTr(objeto)
         this.tabela.prepend(tr)
-
-        document.querySelector(`#id${objeto.id}`).contentEditable = false
-        document.querySelector(`#dataCriacao${objeto.id}`).contentEditable = false
-        document.querySelector(`#dataAlteracao${objeto.id}`).contentEditable = false
     }
 
     montaTr(objeto) {
@@ -198,7 +198,6 @@ class TabelaController extends Controller {
     montaTd(dado, id, nomeDado) {
         let td = document.createElement("td")
         td.textContent = dado
-        td.contentEditable = true
         td.id = `${nomeDado}${id}`
         td.className = `tdDados${nomeDado}`
         return td
@@ -220,12 +219,18 @@ class TabelaController extends Controller {
         btne.setAttribute("data-toggle", "modal")
         btne.setAttribute("data-target", "#formularioModal")
         btne.onclick = event => {
-            document.querySelector("#idInput").value = id
+            const idInput2 = document.querySelector("#idInput")
+            idInput2.value = id
+            idInput2.readOnly = true
+            idInput2.type = "text"
 
             document.querySelector("#idRow").classList.remove("invisivel")
 
             for (let i = 1; i < this.atributos.length - 2; i++) {
-                document.querySelector(`#${this.atributos[i]}Input`).value = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+                const input = document.querySelector(`#${this.atributos[i]}Input`)
+                if(input && this.atributos[i] !== "senha"){
+                    input.value = document.querySelector(`#${this.atributos[i]}${id}`).textContent
+                }
             }
 
             this.btnEnviar.onclick = event => this.editaUm(event)
@@ -320,13 +325,14 @@ class TabelaController extends Controller {
             rows = table.rows;
             /* Loop through all table rows (except the
             first, which contains table headers): */
-            for (i = 1; i < (rows.length - 1); i++) {
+            for (i = 0; i < (rows.length - 1); i++) {
                 // Start by saying there should be no switching:
                 shouldSwitch = false;
                 /* Get the two elements you want to compare,
                 one from current row and one from the next: */
                 x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[i + 1].getElementsByTagName("TD")[n];
+                y = rows[(i + 1)%rows.length].getElementsByTagName("TD")[n];
+
                 /* Check if the two rows should switch place,
                 based on the direction, asc or desc: */
                 if (dir == "asc") {
@@ -346,7 +352,7 @@ class TabelaController extends Controller {
             if (shouldSwitch) {
                 /* If a switch has been marked, make the switch
                 and mark that a switch has been done: */
-                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                rows[i].parentNode.insertBefore(rows[(i + 1)%rows.length], rows[i]);
                 switching = true;
                 // Each time a switch is done, increase this count by 1:
                 switchcount++;

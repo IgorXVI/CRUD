@@ -21,16 +21,16 @@
                 <form onsubmit="signupController.registrar(event)">
                     <div class="form-group">
                         <label for="inputNome">Nome</label>
-                        <input type="text" class="form-control" id="inputNome" placeholder="Nome Sobrenome">
+                        <input type="text" class="form-control" id="inputNome" placeholder="Nome Sobrenome" required>
                     </div>
                     <div class="form-group">
                         <label for="inputEmail">Email</label>
                         <input type="email" class="form-control" id="inputEmail" aria-describedby="emailHelp"
-                            placeholder="seu@email.com">
+                            placeholder="seu@email.com" required>
                     </div>
                     <div class="form-group">
                         <label for="inputSenha">Senha</label>
-                        <input type="password" class="form-control" id="inputSenha" placeholder="adminadmin">
+                        <input type="password" class="form-control" id="inputSenha" placeholder="suasenha" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Registrar</button>
                     <button type="button" type="button" onclick="signupController.entrar(event)" class="btn btn-primary"

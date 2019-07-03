@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="/bootstrap-css/bootstrap.css">
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.css">
     <link rel="stylesheet" href="/css/index.css">
     <title>Vendas</title>
 </head>
@@ -70,25 +70,76 @@
         </div>
 
         <div class="card">
-            <h5 class="card-header">Vendas</h5>
-            <div class="card-body">
-
-                <input class="form-control" id="filtrar-tabela" type="text" placeholder="filtre a tabela"
-                    aria-label="Search">
-
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="thead-dark">
-                        </thead>
-
-                        <tbody id="tabela">
-                        </tbody>
-
-                    </table>
+                <h5 class="card-header">Vendas</h5>
+                <div class="card-body">
+    
+                    <form>
+                        <div class="row">
+                            <div class="col-auto btn-inicio">
+                                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar
+                                    Vendas</button>
+                            </div>
+                            <div class="col-auto btn-inicio">
+                                <button type="button" class="btn btn-success btn-lg" data-toggle="modal" id="btnCadastrar"
+                                    data-target="#formularioModal">Cadastrar Venda</button>
+                            </div>
+                            <div class="col-auto input-inicio">
+                                <input class="form-control invisivel" id="filtrar-tabela" type="text"
+                                    placeholder="filtre a tabela" aria-label="Search">
+                            </div>
+                        </div>
+                    </form>
+    
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                            </thead>
+    
+                            <tbody id="tabela">
+                            </tbody>
+    
+                        </table>
+                    </div>
+    
+                    <div class="modal fade" id="formularioModal" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLongTitle">Formulario</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+    
+                                    <form>
+                                        <div class="form-group" id="idRow">
+                                            <label for="idInput">id</label>
+                                            <input type="number" class="form-control" id="idInput">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="idFuncionarioInput">idFuncionario</label>
+                                            <input type="number" class="form-control" id="idFuncionarioInput" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="idClienteInput">idCliente</label>
+                                            <input type="number" class="form-control" id="idClienteInput" required>
+                                        </div>
+                                    </form>
+    
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                        id="btnEnviar">Enviar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+    
                 </div>
-                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Vendas</button>
             </div>
-        </div>
 
     </main>
 
@@ -97,10 +148,13 @@
 <script src="js/services/ApiService.js"></script>
 <script src="js/controllers/Controller.js"></script>
 <script src="js/controllers/TabelaController.js"></script>
-<script src="js/controllers/VendasController.js"></script>
+<script src="jquery/jquery.js"></script>
+<script src="bootstrap/js/bootstrap.js"></script>
 
 <script>
-    let vendasController = new VendasController()
+    let tabelaController = new TabelaController(["id", "valorTotal", "idFuncionario", "idCliente", "dataAlteracao",
+        "dataCriacao"
+    ], "venda", "vendas")
 </script>
 
 </html>

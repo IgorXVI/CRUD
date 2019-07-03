@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -73,8 +73,22 @@
             <h5 class="card-header">Produtos</h5>
             <div class="card-body">
 
-                <input class="form-control" id="filtrar-tabela" type="text" placeholder="filtre a tabela"
-                    aria-label="Search">
+                <form>
+                    <div class="row">
+                        <div class="col-auto btn-inicio">
+                            <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar
+                                Produtos</button>
+                        </div>
+                        <div class="col-auto btn-inicio">
+                            <button type="button" class="btn btn-success btn-lg" data-toggle="modal" id="btnCadastrar"
+                                data-target="#formularioModal">Cadastrar Produto</button>
+                        </div>
+                        <div class="col-auto input-inicio">
+                            <input class="form-control invisivel" id="filtrar-tabela" type="text"
+                                placeholder="filtre a tabela" aria-label="Search">
+                        </div>
+                    </div>
+                </form>
 
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover">
@@ -86,7 +100,68 @@
 
                     </table>
                 </div>
-                <button type="button" class="btn btn-primary btn-lg" id="btnBuscaTodos">Buscar Produtos</button>
+
+                <div class="modal fade" id="formularioModal" tabindex="-1" role="dialog"
+                    aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLongTitle">Formulario</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+
+                                <form>
+                                    <div class="form-group" id="idRow">
+                                        <label for="idInput">id</label>
+                                        <input type="number" class="form-control" id="idInput">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nomeInput">nome</label>
+                                        <input type="text" class="form-control" id="nomeInput" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="categoriaInput">categoria</label>
+                                        <input type="text" class="form-control" id="categoriaInput" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="precoUnidadeInput">precoUnidade</label>
+                                        <input type="text" class="form-control" id="precoUnidadeInput" pattern="\d+(\.\d+)*" title="O valor deve ser um número de ponto flutuante." required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="idFornecedorInput">idFornecedor</label>
+                                        <input type="number" class="form-control" id="idFornecedorInput" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="descricaoInput">descricao</label>
+                                        <textarea class="form-control" id="descricaoInput" rows="3" required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="garantiaInput">garantia</label>
+                                        <input type="number" class="form-control" id="garantiaInput" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dataFabricInput">dataFabric</label>
+                                        <input class="form-control" type="date" value="2011-08-19" id="dataFabricInput" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dataValidadeInput">dataValidade</label>
+                                        <input class="form-control" type="date" value="2011-08-19" id="dataValidadeInput" required>
+                                    </div>
+                                </form>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                    id="btnEnviar">Enviar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
         </div>
 
@@ -97,6 +172,8 @@
 <script src="js/services/ApiService.js"></script>
 <script src="js/controllers/Controller.js"></script>
 <script src="js/controllers/TabelaController.js"></script>
+<script src="jquery/jquery.js"></script>
+<script src="bootstrap/js/bootstrap.js"></script>
 
 <script>
     let tabelaController = new TabelaController(

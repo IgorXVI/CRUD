@@ -586,10 +586,10 @@ module.exports = class Controller {
     validaIdCliente(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("idCiente"))
+            validacoes.push(this.validaNotNull("idCliente"))
         }
-        validacoes.push(this.validaInteiro("idCiente", 1).optional())
-        validacoes.push(body("idCiente").custom(id => {
+        validacoes.push(this.validaInteiro("idCliente", 1).optional())
+        validacoes.push(body("idCliente").custom(id => {
             return this.clientesDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');
