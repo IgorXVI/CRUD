@@ -29,29 +29,55 @@ class TabelaController extends Controller {
         this.campoFiltro.classList.remove("invisivel")
         this.criarColunasTableHeader()
         this.eventosOrdenaTabela()
+        document.querySelector("#select-filtra").classList.remove("invisivel")
     }
 
     filtraCampo(event) {
         let registros = document.querySelectorAll(".trDados")
-        let nomeDado = (document.querySelector('input[name="radio"]:checked').id).substr(1)
+        let nomeDado = document.querySelector("#select-filtra").value
 
         if (event.target.value.length > 0) {
-            for (let j = 0; j < registros.length; j++) {
-                let registro = registros[j]
 
-                let txt = registro.querySelector(`.tdDados${nomeDado}`).textContent
+            if (nomeDado === "Todos") {
 
-                let expressao = new RegExp(event.target.value, "i");
-                if (!expressao.test(txt)) {
-                    registro.classList.add("invisivel");
-                } else {
-                    registro.classList.remove("invisivel");
+                for (let j = 0; j < registros.length; j++) {
+                    let registro = registros[j]
+
+                    for (let i = 0; i < this.atributos.length; i++) {
+                        let txt = registro.querySelector(`.tdDados${this.atributos[i]}`).textContent
+
+                        let expressao = new RegExp(event.target.value, "i")
+                        if (!expressao.test(txt)) {
+                            registro.classList.add("invisivel")
+                        } else {
+                            registro.classList.remove("invisivel")
+                            break
+                        }
+                    }
+
+                }
+
+            } else {
+
+                for (let j = 0; j < registros.length; j++) {
+                    let registro = registros[j]
+
+                    let txt = registro.querySelector(`.tdDados${nomeDado}`).textContent
+
+                    let expressao = new RegExp(event.target.value, "i")
+                    if (!expressao.test(txt)) {
+                        registro.classList.add("invisivel")
+                    } else {
+                        registro.classList.remove("invisivel")
+                    }
+
                 }
 
             }
+
         } else {
             registros.forEach(registro => {
-                registro.classList.remove("invisivel");
+                registro.classList.remove("invisivel")
             });
         }
 
@@ -113,7 +139,7 @@ class TabelaController extends Controller {
             let input = document.querySelector(`#${this.atributos[i]}Input`)
             if (input) {
                 let text = input.value
-                if (text !== "") {
+                if (text && text !== "") {
                     objeto[this.atributos[i]] = text
                 }
             }
@@ -145,7 +171,7 @@ class TabelaController extends Controller {
             let input = document.querySelector(`#${this.atributos[i]}Input`)
             if (input) {
                 let text = input.value
-                if (text !== "") {
+                if (text && text !== "") {
                     objeto[this.atributos[i]] = text
                 }
             }
@@ -228,7 +254,7 @@ class TabelaController extends Controller {
 
             for (let i = 1; i < this.atributos.length - 2; i++) {
                 const input = document.querySelector(`#${this.atributos[i]}Input`)
-                if(input && this.atributos[i] !== "senha"){
+                if (input && this.atributos[i] !== "senha") {
                     input.value = document.querySelector(`#${this.atributos[i]}${id}`).textContent
                 }
             }
@@ -266,42 +292,48 @@ class TabelaController extends Controller {
     }
 
     criarColunasTableHeader() {
-        let trRadio = document.createElement("tr")
+        let select = document.createElement("select")
+        select.className = "form-control invisivel"
+        select.id = "select-filtra"
+
         let trNomesColunas = document.createElement("tr")
 
         for (let i = 0; i < this.atributos.length + 1; i++) {
-            let thRadio = document.createElement("th")
-            thRadio.scope = "col"
+            let option = document.createElement("option")
 
             let thNomesColunas = document.createElement("th")
             thNomesColunas.scope = "col"
             thNomesColunas.className = "nomesColunasTabela"
 
             if (i < this.atributos.length) {
-                let radioBtn = document.createElement("input")
-                radioBtn.type = "radio"
-                radioBtn.name = "radio"
-                radioBtn.className = "container"
-                radioBtn.id = `R${this.atributos[i]}`
-                if (this.atributos[i] == "id") {
-                    radioBtn.checked = true
-                }
-                thRadio.appendChild(radioBtn)
+                option.value = this.atributos[i]
+                option.textContent = this.atributos[i]
 
                 thNomesColunas.textContent = this.atributos[i]
                 thNomesColunas.id = `${this.atributos[i]}Head`
             } else {
+                option.value = "Todos"
+                option.textContent = "Todos"
+                option.selected = true
+
                 thNomesColunas.textContent = "Ações"
                 thNomesColunas.id = "acoesHead"
             }
 
-            trRadio.appendChild(thRadio)
+            select.appendChild(option)
             trNomesColunas.appendChild(thNomesColunas)
         }
 
         let thead = document.querySelector(".thead-dark")
-        thead.appendChild(trRadio)
         thead.appendChild(trNomesColunas)
+
+        let divSelect = document.createElement("div")
+        divSelect.className = "col-auto input-inicio"
+        divSelect.appendChild(select)
+
+        let divInputInicio = document.querySelector(".card-body").querySelector("form").querySelector("div")
+        let f = divInputInicio.querySelector(".input-inicio")
+        divInputInicio.insertBefore(divSelect, f)
     }
 
     eventosOrdenaTabela() {
@@ -331,7 +363,7 @@ class TabelaController extends Controller {
                 /* Get the two elements you want to compare,
                 one from current row and one from the next: */
                 x = rows[i].getElementsByTagName("TD")[n];
-                y = rows[(i + 1)%rows.length].getElementsByTagName("TD")[n];
+                y = rows[(i + 1) % rows.length].getElementsByTagName("TD")[n];
 
                 /* Check if the two rows should switch place,
                 based on the direction, asc or desc: */
@@ -352,7 +384,7 @@ class TabelaController extends Controller {
             if (shouldSwitch) {
                 /* If a switch has been marked, make the switch
                 and mark that a switch has been done: */
-                rows[i].parentNode.insertBefore(rows[(i + 1)%rows.length], rows[i]);
+                rows[i].parentNode.insertBefore(rows[(i + 1) % rows.length], rows[i]);
                 switching = true;
                 // Each time a switch is done, increase this count by 1:
                 switchcount++;
