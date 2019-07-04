@@ -41,12 +41,31 @@ class TabelaController extends Controller {
         const todaTabela = document.querySelector(".table-responsive")
 
         html2canvas(todaTabela).then(canvas => {
+            canvas.style.width = "100%"
             const dataUrl = canvas.toDataURL()
 
+            const colunaFiltro = document.querySelector("#select-filtra").value
+            const valorColunaFiltro = this.campoFiltro.value
+            
+            let primeiraParte = `, filtrado pelas colunas ${colunaFiltro}`
+            let segundaParte = `que possuem valor semelhante à ${valorColunaFiltro}`
+
+            if(colunaFiltro === "Todos"){
+                primeiraParte = `, filtrado por todas as colunas `
+            }
+
+            if(valorColunaFiltro === ""){
+                primeiraParte = ``
+                segundaParte = ``
+            }
+            
+            let tituloRelatorio = `Relatório de ${this.nomePlural}${primeiraParte}${segundaParte}`
+        
             let windowContent = '<!DOCTYPE html>';
             windowContent += '<html>'
             windowContent += `<head><title>Relatório de ${this.nomePlural}</title></head>`;
             windowContent += '<body>'
+            windowContent += `<h3>${tituloRelatorio}</h3>`
             windowContent += '<img src="' + dataUrl + '">';
             windowContent += '</body>';
             windowContent += '</html>';
@@ -276,15 +295,15 @@ class TabelaController extends Controller {
     montaBotoes(id) {
         let btnd = document.createElement("button")
         btnd.textContent = "Deletar"
-        btnd.className = "btn btn-danger btn-sm container"
         btnd.type = "button"
+        btnd.className = "btn btn-danger btn-sm btn-acoes"
         btnd.id = `d${id}`
         btnd.onclick = event => this.deletaUm(event)
 
         let btne = document.createElement("button")
         btne.textContent = "Editar"
-        btne.className = "btn btn-warning btn-sm container"
         btne.type = "button"
+        btne.className = "btn btn-warning btn-sm btn-acoes"
         btne.id = `e${id}`
         btne.setAttribute("data-toggle", "modal")
         btne.setAttribute("data-target", "#formularioModal")
