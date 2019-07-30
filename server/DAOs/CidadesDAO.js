@@ -1,27 +1,27 @@
 const DAO = require("./DAO")
 
 module.exports = class CidadesDAO extends DAO{
-    constructor(connection) {
-        super(connection, `cidades`)
+    constructor() {
+        super(`cidades`)
     }
 
-    adiciona(cidade) {
+    async adiciona(cidade) {
         return super.adiciona(cidade, `nome, UF, CEP, dataAlteracao, dataCriacao`)
     }
 
-    atualizaPorID(cidade, id){
+    async atualizaPorID(cidade, id){
         return super.atualizaPorColuna(cidade, id, `id`, `nome, UF, CEP, dataAlteracao`)
     }
 
-    deletaPorID(id){
+    async deletaPorID(id){
         return super.deletaPorColuna(id, `id`)
     }
 
-    buscaPorNome(nome) {
+    async buscaPorNome(nome) {
         return super.buscaPorColuna(nome, `nome`)
     }
 
-    buscaPorID(id) {
+    async buscaPorID(id) {
         return super.buscaPorColuna(id, `id`)
     }
 }

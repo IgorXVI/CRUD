@@ -1,27 +1,27 @@
 const DAO = require("./DAO")
 
 module.exports = class ItensVendaDAO extends DAO {
-    constructor(connection) {
-        super(connection, `itensVenda`)
+    constructor() {
+        super(`itensVenda`)
     }
 
-    adiciona(item) {
+    async adiciona(item) {
         return super.adiciona(item, `valorTotal, quantidade, idProduto, idVenda, dataAlteracao, dataCriacao`)
     }
 
-    atualizaPorID(item, id){
+    async atualizaPorID(item, id){
         return super.atualizaPorColuna(item, id, `id`, `valorTotal, quantidade, idProduto, idVenda, dataAlteracao`)
     }
 
-    deletaPorID(id){
+    async deletaPorID(id){
         return super.deletaPorColuna(id, `id`)
     }
 
-    buscaPorID(id) {
+    async buscaPorID(id) {
         return super.buscaPorColuna(id, `id`)
     }
 
-    buscaoPorIDVendaEIDProduto(idVenda, idProduto){
+    async buscaoPorIDVendaEIDProduto(idVenda, idProduto){
         return super.buscarPorDuasColunas(idVenda, idProduto, `idVenda`, `idProduto`)
     }
 

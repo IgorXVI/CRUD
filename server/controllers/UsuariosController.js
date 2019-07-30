@@ -8,7 +8,12 @@ const {
 
 module.exports = class UsuariosController extends Controller {
     constructor() {
-        super(`usuarios`, `usuario`, `nome, email, senha, nivelAcesso, dataAlteracao, dataCriacao`, false)
+        super(`usuarios`, `usuario`, [ 'nome',
+        'email',
+        'senha',
+        'nivelAcesso',
+        'dataAlteracao',
+        'dataCriacao' ], false)
 
         this.masterDAO = this.usuariosDAO
 

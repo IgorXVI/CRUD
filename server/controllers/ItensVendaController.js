@@ -2,14 +2,19 @@ const Controller = require("./Controller")
 
 module.exports = class ItensVendaController extends Controller {
     constructor() {
-        super(`itens-venda`, `item`, `valorTotal, quantidade, idProduto, idVenda, dataAlteracao, dataCriacao`, false)
+        super(`itens-venda`, `item`, [ 'valorTotal',
+        'quantidade',
+        'idProduto',
+        'idVenda',
+        'dataAlteracao',
+        'dataCriacao' ], false)
 
         this.masterDAO = this.itensVendaDAO
 
         super.gerarRotaBuscaTodos()
         super.gerarRotaBuscaUm()
-        this.gerarRotaAdicionaUm(super.gerarValidacao(true, ["ValorTotal"]))
-        this.gerarRotaAtualizaUm(super.gerarValidacao(false, ["Quantidade"]))
+        this.gerarRotaAdicionaUm(super.gerarValidacao(true, ["valorTotal"]))
+        this.gerarRotaAtualizaUm(super.gerarValidacao(false, ["quantidade"]))
         this.gerarRotaDeletaUm()
     }
 
