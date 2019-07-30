@@ -2,12 +2,13 @@ const Controller = require("./Controller")
 
 module.exports = class ItensVendaController extends Controller {
     constructor() {
-        super(`itens-venda`, `item`, [ 'valorTotal',
-        'quantidade',
-        'idProduto',
-        'idVenda',
-        'dataAlteracao',
-        'dataCriacao' ], false)
+        super(`itens-venda`, `item`, ['valorTotal',
+            'quantidade',
+            'idProduto',
+            'idVenda',
+            'dataAlteracao',
+            'dataCriacao'
+        ], false)
 
         this.masterDAO = this.itensVendaDAO
 
@@ -18,351 +19,235 @@ module.exports = class ItensVendaController extends Controller {
         this.gerarRotaDeletaUm()
     }
 
-    gerarRotaAdicionaUm(validacao) {
+    async gerarRotaAdicionaUm(validacao) {
         this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
-            if (this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)) {
-                return
+            try {
+                this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+                let objeto = super.gerarObjeto(req)
+                const item = await this.itensVendaDAO.buscaPorIDVendaEIDProduto(objeto.idVenda, objeto.idProduto)
+                if (item) {
+                    throw new Error("Erro dois itens de venda que possuem o mesmo produto e a mesma venda.")
+                }
+                const estoque = await this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
+                if (!(estoque && estoque.quantidade >= objeto.quantidade)) {
+                    throw new Error("Erro não existem produtos suficientes estocados para realizar essa venda.")
+                }
+                const valorTotal = await this.calculaValorTotal(objeto)
+                objeto.valorTotal = valorTotal
+                await this.itensVendaDAO.adiciona(objeto)
+                await this.atualizaEstoque(objeto)
+                await this.atualizaVenda(objeto)
+                res.status(201).end()
+                super.fim()
+            } catch (erro) {
+                this.lidarComErro(erro, res)
             }
-
-            let objeto = super.gerarObjeto(req)
-
-            this.itensVendaDAO.buscaoPorIDVendaEIDProduto(objeto.idVenda, objeto.idProduto)
-                .then(
-                    (resultado) => {
-                        if (resultado) {
-                            const erro = [{
-                                location: "body",
-                                param: "idProduto, idVenda",
-                                msg: "Não podem existir dois itens de venda que possuem o mesmo produto e a mesma venda.",
-                                value: [req.body.idVenda, req.body.idProduto]
-                            }]
-                            res.status(400).json({
-                                erro
-                            })
-                            super.fim()
-                            return
-                        } else {
-                            return this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
-                        }
-                    }
-                )
-                .then(
-                    (estoque) => {
-                        if (estoque && estoque.quantidade >= objeto.quantidade) {
-                            return this.calculaValorTotal(objeto)
-                        } else {
-                            const erro = [{
-                                location: "body",
-                                param: "idProduto",
-                                msg: "Não existem produtos suficientes estocados para realizar essa venda.",
-                                value: req.body.idProduto
-                            }]
-                            res.status(400).json({
-                                erro
-                            })
-                            super.fim()
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (valorTotal) => {
-                        if (valorTotal != "fim") {
-                            objeto.valorTotal = valorTotal
-                            return this.itensVendaDAO.adiciona(objeto)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            return this.atualizaEstoque(objeto)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            return this.atualizaVenda(objeto)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            res.status(201).end()
-                            super.fim()
-                        }
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        super.erroServidor(erro)
-                    }
-                )
         })
     }
 
     gerarRotaAtualizaUm(validacao) {
         this.router.post(`/${this.nomeSingular}/:id`, validacao, (req, res) => {
             if (this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)) {
-                return
+                let objeto = this.gerarObjeto(req)
+
+                let itemBD = {}
+
+                this.itensVendaDAO.buscaPorID(req.params.id)
+                    .then(
+                        (item) => {
+                            if (!item) {
+                                const erro1 = [{
+                                    location: "params",
+                                    param: "id",
+                                    msg: "O valor informado não é válido.",
+                                    value: req.params.id
+                                }]
+                                res.status(400).json({
+                                    erro: erro1
+                                })
+                                this.fim()
+                                return "fim"
+                            } else {
+                                itemBD = item
+                                objeto.idProduto = itemBD.idProduto
+                                objeto.idVenda = itemBD.idVenda
+                                delete objeto.dataCriacao
+                                return this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
+                            }
+                        }
+                    )
+                    .then(
+                        (estoque) => {
+                            if (estoque && (estoque.quantidade + itemBD.quantidade) >= objeto.quantidade) {
+                                return this.calculaValorTotal(objeto)
+                            } else {
+                                const erro2 = [{
+                                    location: "body",
+                                    param: "idProduto",
+                                    msg: "Não existem produtos suficientes estocados para realizar essa venda.",
+                                    value: req.body.idProduto
+                                }]
+                                res.status(400).json({
+                                    erro: erro2
+                                })
+                                super.fim()
+                                return "fim"
+                            }
+                        }
+                    )
+                    .then(
+                        (valorTotal) => {
+                            if (valorTotal != "fim") {
+                                objeto.valorTotal = valorTotal
+                                return this.itensVendaDAO.atualizaPorID(objeto, req.params.id)
+                            } else {
+                                return "fim"
+                            }
+                        }
+                    )
+                    .then(
+                        (retorno) => {
+                            if (retorno != "fim") {
+                                objeto.quantidade -= itemBD.quantidade
+                                return this.atualizaEstoque(objeto)
+                            } else {
+                                return "fim"
+                            }
+                        }
+                    )
+                    .then(
+                        (retorno) => {
+                            if (retorno !== "fim") {
+                                objeto.valorTotal -= itemBD.valorTotal
+                                return this.atualizaVenda(objeto)
+                            } else {
+                                return "fim"
+                            }
+                        }
+                    )
+                    .then(
+                        (retorno) => {
+                            if (retorno != "fim") {
+                                console.log("passou o atualizaVenda")
+                                res.status(201).end()
+                                this.fim()
+                            }
+                        }
+                    )
+                    .catch(
+                        (error) => {
+                            super.erroServidor(error)
+                        }
+                    )
             }
-
-            let objeto = this.gerarObjeto(req)
-
-            let itemBD = {}
-
-            this.itensVendaDAO.buscaPorID(req.params.id)
-                .then(
-                    (item) => {
-                        if (!item) {
-                            const erro1 = [{
-                                location: "params",
-                                param: "id",
-                                msg: "O valor informado não é válido.",
-                                value: req.params.id
-                            }]
-                            res.status(400).json({
-                                erro: erro1
-                            })
-                            this.fim()
-                            return "fim"
-                        } else {
-                            itemBD = item
-                            objeto.idProduto = itemBD.idProduto
-                            objeto.idVenda = itemBD.idVenda
-                            delete objeto.dataCriacao
-                            return this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
-                        }
-                    }
-                )
-                .then(
-                    (estoque) => {
-                        if (estoque && (estoque.quantidade + itemBD.quantidade) >= objeto.quantidade) {
-                            return this.calculaValorTotal(objeto)
-                        } else {
-                            const erro2 = [{
-                                location: "body",
-                                param: "idProduto",
-                                msg: "Não existem produtos suficientes estocados para realizar essa venda.",
-                                value: req.body.idProduto
-                            }]
-                            res.status(400).json({
-                                erro: erro2
-                            })
-                            super.fim()
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (valorTotal) => {
-                        if (valorTotal != "fim") {
-                            objeto.valorTotal = valorTotal
-                            return this.itensVendaDAO.atualizaPorID(objeto, req.params.id)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            objeto.quantidade -= itemBD.quantidade
-                            return this.atualizaEstoque(objeto)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno !== "fim") {
-                            objeto.valorTotal -= itemBD.valorTotal
-                            return this.atualizaVenda(objeto)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            console.log("passou o atualizaVenda")
-                            res.status(201).end()
-                            this.fim()
-                        }
-                    }
-                )
-                .catch(
-                    (error) => {
-                        super.erroServidor(error)
-                    }
-                )
         })
     }
 
     gerarRotaDeletaUm() {
         this.router.delete(`/${this.nomeSingular}/:id`, (req, res) => {
             if (this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)) {
-                return
+                let itemBD = {}
+
+                this.itensVendaDAO.buscaPorID(req.params.id)
+                    .then(
+                        (item) => {
+                            if (!item) {
+                                const erro = [{
+                                    location: "params",
+                                    param: "id",
+                                    msg: "O valor informado não é válido.",
+                                    value: req.params.id
+                                }]
+                                res.status(400).json({
+                                    erro
+                                })
+                                this.fim()
+                                return "fim"
+                            } else {
+                                itemBD = item
+                                return this.itensVendaDAO.deletaPorID(req.params.id)
+                            }
+                        }
+                    )
+                    .then(
+                        (retorno) => {
+                            if (retorno != "fim") {
+                                itemBD.quantidade = -itemBD.quantidade
+                                return this.atualizaEstoque(itemBD)
+                            } else {
+                                return "fim"
+                            }
+                        }
+                    )
+                    .then(
+                        (retorno) => {
+                            if (retorno !== "fim") {
+                                itemBD.valorTotal = -itemBD.valorTotal
+                                return this.atualizaVenda(itemBD)
+                            } else {
+                                return "fim"
+                            }
+                        }
+                    )
+                    .then(
+                        (retorno) => {
+                            if (retorno != "fim") {
+                                res.status(202).end()
+                                this.fim()
+                            }
+                        }
+                    )
+                    .catch(
+                        (erro) => {
+                            if (erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
+                                const erro = [{
+                                    location: "params",
+                                    param: "id",
+                                    msg: "O valor informado está sendo usado como foreign key.",
+                                    value: req.params.id
+                                }]
+                                res.status(400).json({
+                                    erro
+                                })
+                                this.fim()
+                            } else {
+                                this.erroServidor()
+                            }
+                        }
+                    )
             }
-
-            let itemBD = {}
-
-            this.itensVendaDAO.buscaPorID(req.params.id)
-                .then(
-                    (item) => {
-                        if (!item) {
-                            const erro = [{
-                                location: "params",
-                                param: "id",
-                                msg: "O valor informado não é válido.",
-                                value: req.params.id
-                            }]
-                            res.status(400).json({
-                                erro
-                            })
-                            this.fim()
-                            return "fim"
-                        } else {
-                            itemBD = item
-                            return this.itensVendaDAO.deletaPorID(req.params.id)
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            itemBD.quantidade = -itemBD.quantidade
-                            return this.atualizaEstoque(itemBD)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno !== "fim") {
-                            itemBD.valorTotal = -itemBD.valorTotal
-                            return this.atualizaVenda(itemBD)
-                        } else {
-                            return "fim"
-                        }
-                    }
-                )
-                .then(
-                    (retorno) => {
-                        if (retorno != "fim") {
-                            res.status(202).end()
-                            this.fim()
-                        }
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        if (erro.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
-                            const erro = [{
-                                location: "params",
-                                param: "id",
-                                msg: "O valor informado está sendo usado como foreign key.",
-                                value: req.params.id
-                            }]
-                            res.status(400).json({
-                                erro
-                            })
-                            this.fim()
-                        } else {
-                            this.erroServidor()
-                        }
-                    }
-                )
         })
     }
 
-    calculaValorTotal(objeto) {
-
-        return new Promise((resolve, reject) => {
-            this.produtosDAO.buscaPorID(objeto.idProduto)
-                .then(
-                    (produto) => {
-                        resolve(produto.precoUnidade * objeto.quantidade)
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        reject(new Error(erro))
-                    }
-                )
-        })
-
+    async calculaValorTotal(objeto) {
+        const produto = await this.produtosDAO.buscaPorID(objeto.idProduto)
+        return produto.precoUnidade * objeto.quantidade
     }
 
-    atualizaVenda(objeto) {
+    async atualizaVenda(objeto) {
+        let venda = await this.vendasDAO.buscaPorID(objeto.idVenda)
+        venda.valorTotal += objeto.valorTotal
+        const id = venda.id
 
-        return new Promise((resolve, reject) => {
-            this.vendasDAO.buscaPorID(objeto.idVenda)
-                .then(
-                    (venda) => {
-                        venda.valorTotal += objeto.valorTotal
-                        const id = venda.id
+        delete venda.id
+        delete venda.dataCriacao
 
-                        delete venda.id
-                        delete venda.dataCriacao
+        venda.dataAlteracao = super.dataDeHoje()
 
-                        venda.dataAlteracao = super.dataDeHoje()
-
-                        return this.vendasDAO.atualizaPorID(venda, id)
-                    }
-                )
-                .then(
-                    () => {
-                        resolve()
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        reject(new Error(erro))
-                    }
-                )
-        })
-
+        await this.vendasDAO.atualizaPorID(venda, id)
     }
 
-    atualizaEstoque(objeto) {
-        return new Promise((resolve, reject) => {
-            this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
-                .then(
-                    (estoque) => {
-                        estoque.quantidade -= objeto.quantidade
-                        const id = estoque.id
+    async atualizaEstoque(objeto) {
+        let estoque = await this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
+        estoque.quantidade -= objeto.quantidade
+        const id = estoque.id
 
-                        delete estoque.id
-                        delete estoque.dataCriacao
+        delete estoque.id
+        delete estoque.dataCriacao
 
-                        estoque.dataAlteracao = super.dataDeHoje()
+        estoque.dataAlteracao = super.dataDeHoje()
 
-                        return this.estoqueDAO.atualizaPorID(estoque, id)
-                    }
-                )
-                .then(
-                    () => {
-                        resolve()
-                    }
-                )
-                .catch(
-                    (erro) => {
-                        reject(new Error(erro))
-                    }
-                )
-        })
+        await this.estoqueDAO.atualizaPorID(estoque, id)
     }
 
 }

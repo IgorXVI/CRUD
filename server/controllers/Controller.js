@@ -46,116 +46,111 @@ module.exports = class Controller {
 
     }
 
-    gerarRotaBuscaTodos() {
+    async gerarRotaBuscaTodos() {
         this.router.get("/", (req, res) => {
-            if (this.inicio(req, res, `Buscando ${this.nome}...`)) {
+            try {
+                this.inicio(req, res, `Buscando ${this.nome}...`)
                 this.buscaTodos(req, res)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
             }
         })
     }
 
-    gerarRotaAdicionaUm(validacao) {
+    async gerarRotaAdicionaUm(validacao) {
         this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
-            if (this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)) {
+            try {
+                this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
                 const objeto = this.gerarObjeto(req)
                 this.adicionaUm(req, res, objeto)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
             }
         })
     }
 
-    gerarRotaBuscaUm() {
+    async gerarRotaBuscaUm() {
         this.router.get(`/${this.nomeSingular}/:id`, (req, res) => {
-            if (this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)) {
+            try {
+                this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
                 this.buscaUm(req, res)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
             }
         })
     }
 
-    gerarRotaDeletaUm() {
+    async gerarRotaDeletaUm() {
         this.router.delete(`/${this.nomeSingular}/:id`, (req, res) => {
-            if (this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)) {
+            try {
+                this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
                 this.deletaUm(req, res)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
             }
         })
     }
 
-    gerarRotaAtualizaUm(validacao) {
+    async gerarRotaAtualizaUm(validacao) {
         this.router.post(`/${this.nomeSingular}/:id`, validacao, (req, res) => {
-            if (this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)) {
+            try {
+                this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
                 const objeto = this.gerarObjeto(req)
                 this.atualizaUm(req, res, objeto)
+            } catch {
+                this.lidarComErro(erro, req, res)
             }
         })
     }
 
     async buscaTodos(req, res) {
-        try {
-            const DAO = this.masterDAO
-            const objeto = await DAO.buscaTodos()
-            res.status(200).json({
-                resultado: objeto
-            })
-            this.fim()
-        } catch (erro) {
-            this.lidarComErro(erro, res)
-        }
+        const DAO = this.masterDAO
+        const objeto = await DAO.buscaTodos()
+        res.status(200).json({
+            resultado: objeto
+        })
+        this.fim()
     }
 
     async deletaUm(req, res) {
-        try {
-            const DAO = this.masterDAO
-            await this.buscaObjetoPorID(req.params.id, DAO)
-            await DAO.deletaPorID(req.params.id)
-            res.status(202).end()
-            this.fim()
-        } catch (erro) {
-            this.lidarComErro(erro, res)
-        }
+        const DAO = this.masterDAO
+        await this.buscaObjetoPorID(req.params.id, DAO)
+        await DAO.deletaPorID(req.params.id)
+        res.status(202).end()
+        this.fim()
     }
 
     async buscaUm(req, res) {
-        try {
-            const DAO = this.masterDAO
-            const objeto = await this.buscaObjetoPorID(req.params.id, DAO)
-            res.status(200).json({
-                resultado: objeto
-            })
-            this.fim()
-        } catch (erro) {
-            this.lidarComErro(erro, res)
-        }
+        const DAO = this.masterDAO
+        const objeto = await this.buscaObjetoPorID(req.params.id, DAO)
+        res.status(200).json({
+            resultado: objeto
+        })
+        this.fim()
     }
 
     async adicionaUm(req, res, objeto) {
-        try {
-            const DAO = this.masterDAO
-            await DAO.adiciona(objeto)
-            res.status(201).end()
-            this.fim()
-        } catch (erro) {
-            this.lidarComErro(erro, res)
-        }
+        const DAO = this.masterDAO
+        await DAO.adiciona(objeto)
+        res.status(201).end()
+        this.fim()
     }
 
     async atualizaUm(req, res, objeto) {
-        try {
-            const DAO = this.masterDAO
-            delete objeto.dataCriacao
-            const objetoDB = await this.buscaObjetoPorID(req.params.id, DAO)
-            const keys = Object.keys(objeto)
-            let keysDB = Object.keys(objetoDB)
-            keysDB.shift()
-            for (let i = 0; i < keys.length; i++) {
-                if (!objeto[keys[i]]) {
-                    objeto[keys[i]] = objetoDB[keysDB[i]]
-                }
+        const DAO = this.masterDAO
+        delete objeto.dataCriacao
+        const objetoDB = await this.buscaObjetoPorID(req.params.id, DAO)
+        const keys = Object.keys(objeto)
+        let keysDB = Object.keys(objetoDB)
+        keysDB.shift()
+        for (let i = 0; i < keys.length; i++) {
+            if (!objeto[keys[i]]) {
+                objeto[keys[i]] = objetoDB[keysDB[i]]
             }
-            await DAO.atualizaPorID(objeto, req.params.id)
-            res.status(201).end()
-            this.fim()
-        } catch (erro) {
-            this.lidarComErro(erro, res)
         }
+        await DAO.atualizaPorID(objeto, req.params.id)
+        res.status(201).end()
+        this.fim()
     }
 
     async buscaObjetoPorID(id, DAO) {
@@ -167,7 +162,7 @@ module.exports = class Controller {
         }
     }
 
-    lidarComErro(erroRecebido, res) {
+    lidarComErro(erroRecebido, req, res) {
         if (erroRecebido.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
             const erro = [{
                 location: "params",
@@ -188,6 +183,30 @@ module.exports = class Controller {
             res.status(400).json({
                 erro
             })
+        } else if (erroRecebido.message.includes("Erro de validacao.")) {
+            res.status(400).json({
+                erro: req.validationErrors()
+            })
+        } else if (erroRecebido.message.includes("Erro dois itens de venda que possuem o mesmo produto e a mesma venda.")) {
+            const erro = [{
+                location: "body",
+                param: "idProduto, idVenda",
+                msg: "Não podem existir dois itens de venda que possuem o mesmo produto e a mesma venda.",
+                value: [req.body.idVenda, req.body.idProduto]
+            }]
+            res.status(400).json({
+                erro
+            })
+        } else if (erroRecebido.message.includes("Erro não existem produtos suficientes estocados para realizar essa venda.")) {
+            const erro = [{
+                location: "body",
+                param: "idProduto",
+                msg: "Não existem produtos suficientes estocados para realizar essa venda.",
+                value: req.body.idProduto
+            }]
+            res.status(400).json({
+                erro
+            })
         } else {
             console.error(erroRecebido)
             const erro = [{
@@ -200,21 +219,12 @@ module.exports = class Controller {
         this.fim()
     }
 
-    checkErrosValidacao(req, res) {
-        const erro = req.validationErrors()
-        if (erro) {
-            res.status(400).json({
-                erro
-            })
-            this.fim()
-            return true
-        }
-        return false
-    }
-
-    inicio(req, res, mensagem) {
+    inicio(req, mensagem) {
         console.log(mensagem)
-        return !this.checkErrosValidacao(req, res)
+        const errosValidacao = req.validationErrors()
+        if (errosValidacao) {
+            throw new Error("Erro de validacao.")
+        }
     }
 
     fim() {
@@ -230,7 +240,7 @@ module.exports = class Controller {
         const atributosArr = this.atributos.map(atributo => `${atributo.charAt(0).toUpperCase()}${atributo.slice(1)}`)
 
         let validacao = new Array()
-        
+
         for (let i = 0; i < atributosArr.length; i++) {
 
             if (!(atributosArr[i] == "DataCriacao" || atributosArr[i] == "DataAlteracao")) {

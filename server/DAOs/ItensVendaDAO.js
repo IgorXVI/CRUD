@@ -21,7 +21,7 @@ module.exports = class ItensVendaDAO extends DAO {
         return super.buscaPorColuna(id, `id`)
     }
 
-    async buscaoPorIDVendaEIDProduto(idVenda, idProduto){
+    async buscaPorIDVendaEIDProduto(idVenda, idProduto){
         return super.buscarPorDuasColunas(idVenda, idProduto, `idVenda`, `idProduto`)
     }
 
