@@ -12,8 +12,6 @@ module.exports = class ProdutosController extends Controller {
         'garantia',
         'dataFabric',
         'dataValidade' ], true)
-
-        this.masterDAO = this.produtosDAO
     }
 
 }

@@ -15,8 +15,6 @@ module.exports = class ClientesController extends Controller {
             'dataNasc',
             'complemento'
         ], true)
-
-        this.masterDAO = this.clientesDAO
     }
 
 }

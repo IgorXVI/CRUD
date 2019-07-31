@@ -1,4 +1,4 @@
-const express = require("./node_modules/express")
+const express = require("express")
 
 const CidadesDAO = require("../DAOs/CidadesDAO")
 const FuncionariosDAO = require("../DAOs/FuncionariosDAO")
@@ -12,10 +12,12 @@ const UsuariosDAO = require("../DAOs/UsuariosDAO")
 
 const {
     body
-} = require("./node_modules/express-validator/check")
+} = require("express-validator/check")
+
+const _ = require('lodash');
 
 module.exports = class Controller {
-    constructor(nome, nomeSingular, atributos, gerarTodasRotas, masterDAO) {
+    constructor(nome, nomeSingular, atributos, gerarTodasRotas) {
         this.router = express.Router()
 
         this.cidadesDAO = new CidadesDAO()
@@ -28,7 +30,7 @@ module.exports = class Controller {
         this.itensVendaDAO = new ItensVendaDAO()
         this.usuariosDAO = new UsuariosDAO()
 
-        this.masterDAO = masterDAO
+        this.masterDAO = this[`${_.camelCase(this.nome)}DAO`]
 
         this.atributos = atributos
         this.nome = nome
@@ -213,6 +215,27 @@ module.exports = class Controller {
                 param: "idProduto",
                 msg: "Não existem produtos suficientes estocados para realizar essa venda.",
                 value: req.body.idProduto
+            }]
+            res.status(400).json({
+                erro
+            })
+        } else if (erroRecebido.message.includes("Erro senha invalida.")) {
+            const erro = [{
+                location: "body",
+                param: "senha",
+                msg: "O valor não é válido.",
+                value: req.body.senha
+            }]
+            res.status(400).json({
+                erro
+            })
+            super.fim()
+        } else if (erroRecebido.message.includes("Erro email ja cadastrado.")) {
+            const erro = [{
+                location: "body",
+                param: "email",
+                msg: "O valor informado já está cadastrado.",
+                value: req.params.id
             }]
             res.status(400).json({
                 erro

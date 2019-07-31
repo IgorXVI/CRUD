@@ -13,8 +13,6 @@ module.exports = class FornecedoresController extends Controller{
         'rua',
         'numeroCasa',
         'complemento' ], true)
-
-        this.masterDAO = this.fornecedoresDAO
     }
 
 }

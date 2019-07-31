@@ -1,14 +1,13 @@
 const Controller = require("./Controller")
 
-module.exports = class VendasController extends Controller{
-    constructor(){
-        super(`vendas`, `venda`, [ 'valorTotal',
-        'idFuncionario',
-        'idCliente',
-        'dataAlteracao',
-        'dataCriacao' ], false)
-
-        this.masterDAO = this.vendasDAO
+module.exports = class VendasController extends Controller {
+    constructor() {
+        super(`vendas`, `venda`, ['valorTotal',
+            'idFuncionario',
+            'idCliente',
+            'dataAlteracao',
+            'dataCriacao'
+        ], false)
 
         super.gerarRotaBuscaTodos()
         super.gerarRotaBuscaUm()
@@ -19,27 +18,31 @@ module.exports = class VendasController extends Controller{
 
     gerarRotaAdicionaUm(validacao) {
         this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
-            if (super.inicio(req, res, `Adicionando ${this.nomeSingular}...`)) {
-                return
-            }
-            let objeto = super.gerarObjeto(req)
-
-            objeto.valorTotal = 0
-
-            this.adicionaUm(req, res, objeto)
+            (async () => {
+                try {
+                    super.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+                    let objeto = super.gerarObjeto(req)
+                    objeto.valorTotal = 0
+                    this.adicionaUm(req, res, objeto)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
-    
+
     gerarRotaAtualizaUm(validacao) {
         this.router.post(`/${this.nomeSingular}/:id`, validacao, (req, res) => {
-            if (super.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)) {
-                return
-            }
-            let objeto = super.gerarObjeto(req)
-
-            objeto.valorTotal = 0
-
-            this.atualizaUm(req, res, objeto)
+            (async () => {
+                try {
+                    super.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
+                    let objeto = super.gerarObjeto(req)
+                    objeto.valorTotal = 0
+                    this.atualizaUm(req, res, objeto)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 

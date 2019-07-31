@@ -8,14 +8,13 @@ const {
 
 module.exports = class UsuariosController extends Controller {
     constructor() {
-        super(`usuarios`, `usuario`, [ 'nome',
-        'email',
-        'senha',
-        'nivelAcesso',
-        'dataAlteracao',
-        'dataCriacao' ], false)
-
-        this.masterDAO = this.usuariosDAO
+        super(`usuarios`, `usuario`, ['nome',
+            'email',
+            'senha',
+            'nivelAcesso',
+            'dataAlteracao',
+            'dataCriacao'
+        ], false)
 
         this.gerarRotaLogin()
         this.gerarRotaSignup()
@@ -36,8 +35,7 @@ module.exports = class UsuariosController extends Controller {
                 return this.usuariosDAO.buscaPorEmail(valor).then(objeto => {
                     if (!objeto) {
                         return Promise.reject(`O valor informado não está cadastrado.`);
-                    }
-                    else {
+                    } else {
                         dadosBanco = objeto
                     }
                 });
@@ -46,52 +44,38 @@ module.exports = class UsuariosController extends Controller {
             body("tokenEmJSON").isBoolean().withMessage("O valor deve ser booleano."),
             body("tokenEmJSON").exists().withMessage("O valor deve ser informado.")
         ], (req, res) => {
-            if (super.inicio(req, res, "Fazendo login de usuario...")) {
-                return
-            }
-
-            bcrypt.compare(req.body.senha, dadosBanco.senha)
-                .then(
-                    (senhaEhValida) => {
-                        if (!senhaEhValida) {
-                            const erro = [{
-                                location: "body",
-                                param: "senha",
-                                msg: "O valor não é válido.",
-                                value: req.body.senha
-                            }]
-                            res.status(400).json({
-                                erro
-                            })
-                            super.fim()
-                        }
-                        const token = jwt.sign({
+            (async () => {
+                try {
+                    super.inicio(req, res, "Fazendo login de usuario...")
+                    const senhaEhValida = await bcrypt.compare(req.body.senha, dadosBanco.senha)
+                    if (!senhaEhValida) {
+                        throw new Error("Erro senha invalida.")
+                    }
+                    const token = jwt.sign({
                             id: dadosBanco.id,
                             nivelAcesso: dadosBanco.nivelAcesso
                         },
-                            process.env.SECRET, {
-                                expiresIn: "1h"
-                            }
-                        )
-
-                        const tokenEmJSON = (req.body.tokenEmJSON == "true")
-                        if (tokenEmJSON) {
-                            res.status(201).json({
-                                token
-                            })
-                        } else {
-                            res.status(201).cookie("auth", token, {
-                                expires: new Date(Date.now() + 3500000),
-                                httpOnly: true
-                            })
-                            res.end()
+                        process.env.SECRET, {
+                            expiresIn: "1h"
                         }
-                        super.fim()
+                    )
+                    const tokenEmJSON = (req.body.tokenEmJSON == "true")
+                    if (tokenEmJSON) {
+                        res.status(201).json({
+                            token
+                        })
+                    } else {
+                        res.status(201).cookie("auth", token, {
+                            expires: new Date(Date.now() + 3500000),
+                            httpOnly: true
+                        })
+                        res.end()
                     }
-                )
-                .catch(
-                    erro => super.erroServidor(erro, res)
-                )
+                    super.fim()
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
@@ -102,20 +86,17 @@ module.exports = class UsuariosController extends Controller {
             super.validaCampoUnico(this.usuariosDAO, "email"),
             super.validaSenha(true)
         ], (req, res) => {
-            if (super.inicio(req, res, "Fazendo signup de usuario...")) {
-                return
-            }
-
-            const dadosSignup = super.gerarObjeto(req)
-            dadosSignup.nivelAcesso = 2
-
-            bcrypt.hash(dadosSignup.senha, 10)
-                .then(
-                    (hash) => {
-                        dadosSignup.senha = hash
-                        super.adicionaUm(req, res, dadosSignup)
-                    }
-                )
+            (async () => {
+                try {
+                    super.inicio(req, res, "Fazendo signup de usuario...")
+                    const dadosSignup = super.gerarObjeto(req)
+                    dadosSignup.nivelAcesso = 2
+                    dadosSignup.senha = await bcrypt.hash(dadosSignup.senha, 10)
+                    super.adicionaUm(req, res, dadosSignup)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
@@ -127,19 +108,16 @@ module.exports = class UsuariosController extends Controller {
             super.validaSenha(true),
             super.validaNivelAcesso(true)
         ], (req, res) => {
-            if (super.inicio(req, res, "Adicionando usuario...")) {
-                return
-            }
-
-            const objeto = super.gerarObjeto(req)
-
-            bcrypt.hash(objeto.senha, 10)
-                .then(
-                    (hash) => {
-                        objeto.senha = hash
-                        super.adicionaUm(req, res, objeto)
-                    }
-                )
+            (async () => {
+                try {
+                    super.inicio(req, res, "Adicionando usuario...")
+                    const objeto = super.gerarObjeto(req)
+                    objeto.senha = await bcrypt.hash(objeto.senha, 10)
+                    super.adicionaUm(req, res, objeto)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
@@ -150,57 +128,24 @@ module.exports = class UsuariosController extends Controller {
             super.validaSenha(false),
             super.validaNivelAcesso(false)
         ], (req, res) => {
-
-            if (super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)) {
-                return
-            }
-
-            const objeto = super.gerarObjeto(req)
-
-            if (objeto.email) {
-                this.usuariosDAO.buscaPorEmail(objeto.email)
-                    .then(
-                        (resultado) => {
-                            if (!resultado || (resultado && resultado.id == req.params.id)) {
-                                if (objeto.senha) {
-                                    bcrypt.hash(objeto.senha, 10)
-                                        .then(
-                                            (hash) => {
-                                                objeto.senha = hash
-                                                super.atualizaUm(req, res, objeto)
-                                            }
-                                        )
-                                } else {
-                                    super.atualizaUm(req, res, objeto)
-                                }
-                            }
-                            else {
-                                const erro = [{
-                                    location: "body",
-                                    param: "email",
-                                    msg: "O valor informado já está cadastrado.",
-                                    value: req.params.id
-                                }]
-                                res.status(400).json({
-                                    erro
-                                })
-                            }
+            (async () => {
+                try {
+                    super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)
+                    const objeto = super.gerarObjeto(req)
+                    if(objeto.email){
+                        const resultado = await this.usuariosDAO.buscaPorEmail(objeto.email)
+                        if( !( !resultado || (resultado && resultado.id == req.params.id) ) ){
+                            throw new Error("Erro email ja cadastrado.")
                         }
-                    )
-            }
-            else {
-                if (objeto.senha) {
-                    bcrypt.hash(objeto.senha, 10)
-                        .then(
-                            (hash) => {
-                                objeto.senha = hash
-                                super.atualizaUm(req, res, objeto)
-                            }
-                        )
-                } else {
+                    }
+                    if(objeto.senha){
+                        objeto.senha = await bcrypt.hash(objeto.senha, 10)
+                    }
                     super.atualizaUm(req, res, objeto)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
                 }
-            }
+            })()
         })
     }
 

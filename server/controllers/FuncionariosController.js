@@ -15,8 +15,6 @@ module.exports = class FuncionariosController extends Controller{
         'telefone',
         'dataNasc',
         'complemento' ], true)
-
-        this.masterDAO = this.funcionariosDAO
     }
 
 }
