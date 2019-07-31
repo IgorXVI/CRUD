@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email VARCHAR(255) NOT NULL,
     senha VARCHAR(255) NOT NULL,
     nivelAcesso INTEGER NOT NULL,
-    url VARCHAR(255),
 	dataAlteracao VARCHAR(24) NOT NULL,
     dataCriacao VARCHAR(24) NOT NULL
 )
@@ -27,7 +26,6 @@ CREATE TABLE IF NOT EXISTS cidades (
     nome VARCHAR(30) NOT NULL,
     UF VARCHAR(2) NOT NULL,
     CEP VARCHAR(9) NOT NULL,
-    url VARCHAR(255),
 	dataAlteracao VARCHAR(24) NOT NULL,
     dataCriacao VARCHAR(24) NOT NULL
 )
@@ -39,7 +37,6 @@ CREATE TABLE IF NOT EXISTS clientes (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
     idCidade INTEGER NOT NULL,
-    url VARCHAR(255),
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     bairro VARCHAR(25) NOT NULL,
@@ -59,7 +56,6 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     email VARCHAR(255) NOT NULL,
 	salario REAL NOT NULL,
     idCidade INTEGER NOT NULL,
-    url VARCHAR(255),
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     bairro VARCHAR(25) NOT NULL,
@@ -78,7 +74,6 @@ CREATE TABLE IF NOT EXISTS fornecedores (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
     idCidade INTEGER NOT NULL,
-    url VARCHAR(255),
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     telefone VARCHAR(15) NOT NULL,
@@ -96,7 +91,6 @@ CREATE TABLE IF NOT EXISTS produtos (
 	categoria VARCHAR(100),  
     precoUnidade REAL NOT NULL,
     idFornecedor INTEGER NOT NULL,
-    url VARCHAR(255),
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     descricao TEXT NOT NULL,
@@ -112,7 +106,6 @@ CREATE TABLE IF NOT EXISTS estoque (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     quantidade INTEGER NOT NULL,
     idProduto INTEGER NOT NULL,
-    url VARCHAR(255),
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (idProduto) REFERENCES produtos(id)
@@ -125,7 +118,6 @@ CREATE TABLE IF NOT EXISTS vendas (
     valorTotal REAL NOT NULL,
     idFuncionario INTEGER NOT NULL,
     idCliente INTEGER NOT NULL,
-    url VARCHAR(255),
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (idFuncionario) REFERENCES funcionarios(id),
@@ -139,11 +131,16 @@ CREATE TABLE IF NOT EXISTS itensVenda (
 	quantidade INTEGER NOT NULL,
     idProduto INTEGER NOT NULL,
     idVenda INTEGER NOT NULL,
-    url VARCHAR(255),
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (idProduto) REFERENCES produtos(id),
 	FOREIGN KEY (idVenda) REFERENCES vendas(id)
+)
+`
+const URL_SCHEMA = `
+CREATE TABLE IF NOT EXISTS url (
+    tabela VARCHAR(255) PRIMARY KEY,
+    urlString VARCHAR(255)
 )
 `
 
@@ -158,6 +155,7 @@ db.serialize(() => {
     db.run(ESTOQUE_SCHEMA)
     db.run(VENDAS_SCHEMA)
     db.run(ITENS_VENDA_SCHEMA)
+    db.run(URL_SCHEMA)
 });
 
 process.on("SIGINT", () =>

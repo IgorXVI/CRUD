@@ -35,10 +35,9 @@ module.exports = class DAO {
         })
     }
 
-    async atualizaUmaColunaPorId(colunaValor, colunaNome, id){
-        const sql = `UPDATE ${this._tabela} SET ${colunaNome} WHERE id = ?`
-
-        this._connection.run(sql, [colunaValor, id], (erro)=>{
+    async atualizaUmaColunaPorOutraColuna(colunaValor, colunaNome, outraColunaValor, outraColunaNome){
+        const sql = `UPDATE ${this._tabela} SET ${colunaNome} = ? WHERE ${outraColunaNome} = ?`
+        this._connection.run(sql, [colunaValor, outraColunaValor], (erro)=>{
             if(erro){
                 throw new Error(erro)
             }

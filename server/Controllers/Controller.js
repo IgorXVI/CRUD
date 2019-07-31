@@ -9,6 +9,7 @@ const EstoqueDAO = require("../DAOs/EstoqueDAO")
 const VendasDAO = require("../DAOs/VendasDAO")
 const ItensVendaDAO = require("../DAOs/ItensVendaDAO")
 const UsuariosDAO = require("../DAOs/UsuariosDAO")
+const UrlDAO = require("../DAOs/UrlDAO")
 
 const {
     body
@@ -29,10 +30,23 @@ module.exports = class Controller {
         this.vendasDAO = new VendasDAO()
         this.itensVendaDAO = new ItensVendaDAO()
         this.usuariosDAO = new UsuariosDAO()
+        this.urlDAO = new UrlDAO()
 
-        this.masterDAO = this[`${_.camelCase(this.nome)}DAO`]
-        const url = `api/${this.nome}/${this.nomeSingular}`
-        this.masterDAO.atualizaUmaColunaPorId(url, "url", )
+        this.masterDAO = this[`${_.camelCase(nome)}DAO`]
+
+        (async () => {
+            const existe = await this.urlDAO.buscaPorTabela(_.camelCase(nome))
+            if(existe){
+                this.urlDAO.atualizaPorTabela(`api/${nome}/${nomeSingular}`, _.camelCase(nome))
+            }
+            else{
+                const objeto = {
+                    tabela: _.camelCase(nome),
+                    urlString: `api/${nome}/${nomeSingular}`
+                }
+                this.urlDAO.adiciona(objeto)
+            }
+        })()
 
         this.atributos = atributos
         this.nome = nome
@@ -47,7 +61,6 @@ module.exports = class Controller {
             this.gerarRotaAtualizaUm(this.gerarValidacao(false))
             this.gerarRotaDeletaUm()
         }
-
     }
 
     gerarRotaBuscaTodos() {
@@ -176,20 +189,21 @@ module.exports = class Controller {
         }
     }
 
-    converterForeignKeyEmURL(objetoRecebido){
+    async converterForeignKeyEmURL(objetoRecebido) {
         let objeto = objetoRecebido
         const keys = Object.keys(objeto)
         for (let i = 0; i < keys.length; i++) {
             if (this.ehForeignKey(keys[i])) {
                 let nomeSingular = keys[i].slice(2)
                 nomeSingular = `${nomeSingular.charAt(0).toLowerCase()}${nomeSingular.slice(1)}`
-                objeto[keys[i]] = `api/`
+                const url = await this.urlDAO.buscaPorTabela(nomeSingular).urlString
+                objeto[keys[i]] = `${url}/${objeto[keys[i]]}`
             }
         }
         return objeto
     }
 
-    ehForeignKey(campo){
+    ehForeignKey(campo) {
         return campo.includes("id") && campo.length > 2
     }
 
