@@ -5,15 +5,15 @@ const expressValidator = require("express-validator")
 const middlewares = require("./middlewares")
 const path = require('path')
 
-const cidadesRotas = (new (require("../controllers/CidadesController"))).router
-const clientesRotas = (new (require("../controllers/ClientesController"))).router
-const estoqueRotas = (new (require("../controllers/EstoqueController"))).router
-const fornecedoresRotas = (new (require("../controllers/FornecedoresController"))).router
-const funcionariosRotas = (new (require("../controllers/FuncionariosController"))).router
-const itensVendaRotas = (new (require("../controllers/ItensVendaController"))).router
-const produtosRotas = (new (require("../controllers/ProdutosController"))).router
-const usuariosRotas = (new (require("../controllers/UsuariosController"))).router
-const vendasRotas = (new (require("../controllers/VendasController"))).router
+const cidadesRotas = (new (require("../Controllers/CidadesController"))).router
+const clientesRotas = (new (require("../Controllers/ClientesController"))).router
+const estoqueRotas = (new (require("../Controllers/EstoqueController"))).router
+const fornecedoresRotas = (new (require("../Controllers/FornecedoresController"))).router
+const funcionariosRotas = (new (require("../Controllers/FuncionariosController"))).router
+const itensVendaRotas = (new (require("../Controllers/ItensVendaController"))).router
+const produtosRotas = (new (require("../Controllers/ProdutosController"))).router
+const usuariosRotas = (new (require("../Controllers/UsuariosController"))).router
+const vendasRotas = (new (require("../Controllers/VendasController"))).router
 
 const app = express()
 app.use(bodyParser.urlencoded({extended: false}))

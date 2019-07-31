@@ -19,29 +19,38 @@ module.exports = class ItensVendaController extends Controller {
         this.gerarRotaDeletaUm()
     }
 
-    async gerarRotaAdicionaUm(validacao) {
+    gerarRotaAdicionaUm(validacao) {
         this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
-            try {
-                this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-                let objeto = super.gerarObjeto(req)
-                const item = await this.itensVendaDAO.buscaPorIDVendaEIDProduto(objeto.idVenda, objeto.idProduto)
-                if (item) {
-                    throw new Error("Erro dois itens de venda que possuem o mesmo produto e a mesma venda.")
+            (async () => {
+                try {
+                    async function zovo() {
+                        setTimeout(function () {
+                            console.log(zovo)
+                        }, 3000)
+                    }
+                    await zovo()
+
+                    this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+                    let objeto = super.gerarObjeto(req)
+                    const item = await this.itensVendaDAO.buscaPorIDVendaEIDProduto(objeto.idVenda, objeto.idProduto)
+                    if (item) {
+                        throw new Error("Erro dois itens de venda que possuem o mesmo produto e a mesma venda.")
+                    }
+                    const estoque = await this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
+                    if (!(estoque && estoque.quantidade >= objeto.quantidade)) {
+                        throw new Error("Erro não existem produtos suficientes estocados para realizar essa venda.")
+                    }
+                    const valorTotal = await this.calculaValorTotal(objeto)
+                    objeto.valorTotal = valorTotal
+                    await this.itensVendaDAO.adiciona(objeto)
+                    await this.atualizaEstoque(objeto)
+                    await this.atualizaVenda(objeto)
+                    res.status(201).end()
+                    super.fim()
+                } catch (erro) {
+                    this.lidarComErro(erro, res)
                 }
-                const estoque = await this.estoqueDAO.buscaPorIDdeProduto(objeto.idProduto)
-                if (!(estoque && estoque.quantidade >= objeto.quantidade)) {
-                    throw new Error("Erro não existem produtos suficientes estocados para realizar essa venda.")
-                }
-                const valorTotal = await this.calculaValorTotal(objeto)
-                objeto.valorTotal = valorTotal
-                await this.itensVendaDAO.adiciona(objeto)
-                await this.atualizaEstoque(objeto)
-                await this.atualizaVenda(objeto)
-                res.status(201).end()
-                super.fim()
-            } catch (erro) {
-                this.lidarComErro(erro, res)
-            }
+            })()
         })
     }
 

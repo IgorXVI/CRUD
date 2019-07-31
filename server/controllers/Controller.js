@@ -1,4 +1,4 @@
-const express = require("express")
+const express = require("./node_modules/express")
 
 const CidadesDAO = require("../DAOs/CidadesDAO")
 const FuncionariosDAO = require("../DAOs/FuncionariosDAO")
@@ -12,7 +12,7 @@ const UsuariosDAO = require("../DAOs/UsuariosDAO")
 
 const {
     body
-} = require("express-validator/check")
+} = require("./node_modules/express-validator/check")
 
 module.exports = class Controller {
     constructor(nome, nomeSingular, atributos, gerarTodasRotas, masterDAO) {
@@ -46,60 +46,70 @@ module.exports = class Controller {
 
     }
 
-    async gerarRotaBuscaTodos() {
+    gerarRotaBuscaTodos() {
         this.router.get("/", (req, res) => {
-            try {
-                this.inicio(req, res, `Buscando ${this.nome}...`)
-                this.buscaTodos(req, res)
-            } catch (erro) {
-                this.lidarComErro(erro, req, res)
-            }
+            (async () => {
+                try {
+                    this.inicio(req, res, `Buscando ${this.nome}...`)
+                    this.buscaTodos(req, res)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
-    async gerarRotaAdicionaUm(validacao) {
+    gerarRotaAdicionaUm(validacao) {
         this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
-            try {
-                this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-                const objeto = this.gerarObjeto(req)
-                this.adicionaUm(req, res, objeto)
-            } catch (erro) {
-                this.lidarComErro(erro, req, res)
-            }
+            (async () => {
+                try {
+                    this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+                    const objeto = this.gerarObjeto(req)
+                    this.adicionaUm(req, res, objeto)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
-    async gerarRotaBuscaUm() {
+    gerarRotaBuscaUm() {
         this.router.get(`/${this.nomeSingular}/:id`, (req, res) => {
-            try {
-                this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
-                this.buscaUm(req, res)
-            } catch (erro) {
-                this.lidarComErro(erro, req, res)
-            }
+            (async () => {
+                try {
+                    this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
+                    this.buscaUm(req, res)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
-    async gerarRotaDeletaUm() {
+    gerarRotaDeletaUm() {
         this.router.delete(`/${this.nomeSingular}/:id`, (req, res) => {
-            try {
-                this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
-                this.deletaUm(req, res)
-            } catch (erro) {
-                this.lidarComErro(erro, req, res)
-            }
+            (async () => {
+                try {
+                    this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
+                    this.deletaUm(req, res)
+                } catch (erro) {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
-    async gerarRotaAtualizaUm(validacao) {
+    gerarRotaAtualizaUm(validacao) {
         this.router.post(`/${this.nomeSingular}/:id`, validacao, (req, res) => {
-            try {
-                this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
-                const objeto = this.gerarObjeto(req)
-                this.atualizaUm(req, res, objeto)
-            } catch {
-                this.lidarComErro(erro, req, res)
-            }
+            (async () => {
+                try {
+                    this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
+                    const objeto = this.gerarObjeto(req)
+                    this.atualizaUm(req, res, objeto)
+                } catch {
+                    this.lidarComErro(erro, req, res)
+                }
+            })()
         })
     }
 
