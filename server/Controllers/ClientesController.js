@@ -5,7 +5,7 @@ module.exports = class ClientesController extends Controller {
         super(`clientes`, `cliente`, ['CPF',
             'nome',
             'email',
-            'idCidade',
+            'cidade',
             'dataAlteracao',
             'dataCriacao',
             'bairro',

@@ -4,8 +4,8 @@ module.exports = class ItensVendaController extends Controller {
     constructor() {
         super(`itens-venda`, `item`, ['valorTotal',
             'quantidade',
-            'idProduto',
-            'idVenda',
+            'produto',
+            'venda',
             'dataAlteracao',
             'dataCriacao'
         ], false)

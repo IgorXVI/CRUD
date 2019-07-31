@@ -5,7 +5,7 @@ module.exports = class ProdutosController extends Controller {
         super(`produtos`, `produto`, [ 'nome',
         'categoria',
         'precoUnidade',
-        'idFornecedor',
+        'fornecedor',
         'dataAlteracao',
         'dataCriacao',
         'descricao',

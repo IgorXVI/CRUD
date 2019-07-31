@@ -6,7 +6,7 @@ module.exports = class FuncionariosController extends Controller{
         'nome',
         'email',
         'salario',
-        'idCidade',
+        'cidade',
         'dataAlteracao',
         'dataCriacao',
         'bairro',

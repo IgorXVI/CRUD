@@ -31,6 +31,8 @@ module.exports = class Controller {
         this.usuariosDAO = new UsuariosDAO()
 
         this.masterDAO = this[`${_.camelCase(this.nome)}DAO`]
+        const url = `api/${this.nome}/${this.nomeSingular}`
+        this.masterDAO.atualizaUmaColunaPorId(url, "url", )
 
         this.atributos = atributos
         this.nome = nome
@@ -174,6 +176,23 @@ module.exports = class Controller {
         }
     }
 
+    converterForeignKeyEmURL(objetoRecebido){
+        let objeto = objetoRecebido
+        const keys = Object.keys(objeto)
+        for (let i = 0; i < keys.length; i++) {
+            if (this.ehForeignKey(keys[i])) {
+                let nomeSingular = keys[i].slice(2)
+                nomeSingular = `${nomeSingular.charAt(0).toLowerCase()}${nomeSingular.slice(1)}`
+                objeto[keys[i]] = `api/`
+            }
+        }
+        return objeto
+    }
+
+    ehForeignKey(campo){
+        return campo.includes("id") && campo.length > 2
+    }
+
     lidarComErro(erroRecebido, req, res) {
         if (erroRecebido.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
             const erro = [{
@@ -241,7 +260,7 @@ module.exports = class Controller {
                 erro
             })
         } else {
-            console.error(erroRecebido)
+            console.log(erroRecebido)
             const erro = [{
                 msg: "Erro no servidor."
             }]
@@ -511,13 +530,13 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaIdCidade(obrigatorio) {
+    validaCidade(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("idCidade"))
+            validacoes.push(this.validaNotNull("cidade"))
         }
-        validacoes.push(this.validaInteiro("idCidade", 1).optional())
-        validacoes.push(body("idCidade").custom(id => {
+        validacoes.push(this.validaInteiro("cidade", 1).optional())
+        validacoes.push(body("cidade").custom(id => {
             return this.cidadesDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');
@@ -527,13 +546,13 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaIdProduto(obrigatorio) {
+    validaProduto(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("idProduto"))
+            validacoes.push(this.validaNotNull("produto"))
         }
-        validacoes.push(this.validaInteiro("idProduto", 1).optional())
-        validacoes.push(body("idProduto").custom(id => {
+        validacoes.push(this.validaInteiro("produto", 1).optional())
+        validacoes.push(body("produto").custom(id => {
             return this.produtosDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');
@@ -543,13 +562,13 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaIdFuncionario(obrigatorio) {
+    validaFuncionario(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("idFuncionario"))
+            validacoes.push(this.validaNotNull("funcionario"))
         }
-        validacoes.push(this.validaInteiro("idFuncionario", 1).optional())
-        validacoes.push(body("idFuncionario").custom(id => {
+        validacoes.push(this.validaInteiro("funcionario", 1).optional())
+        validacoes.push(body("funcionario").custom(id => {
             return this.funcionariosDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');
@@ -559,13 +578,13 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaIdCliente(obrigatorio) {
+    validaCliente(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("idCliente"))
+            validacoes.push(this.validaNotNull("cliente"))
         }
-        validacoes.push(this.validaInteiro("idCliente", 1).optional())
-        validacoes.push(body("idCliente").custom(id => {
+        validacoes.push(this.validaInteiro("cliente", 1).optional())
+        validacoes.push(body("cliente").custom(id => {
             return this.clientesDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');
@@ -575,13 +594,13 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaIdFornecedor(obrigatorio) {
+    validaFornecedor(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("idFornecedor"))
+            validacoes.push(this.validaNotNull("fornecedor"))
         }
-        validacoes.push(this.validaInteiro("idFornecedor", 1).optional())
-        validacoes.push(body("idFornecedor").custom(id => {
+        validacoes.push(this.validaInteiro("fornecedor", 1).optional())
+        validacoes.push(body("fornecedor").custom(id => {
             return this.fornecedoresDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');
@@ -591,13 +610,13 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaIdVenda(obrigatorio) {
+    validaVenda(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(this.validaNotNull("idVenda"))
+            validacoes.push(this.validaNotNull("venda"))
         }
-        validacoes.push(this.validaInteiro("idVenda", 1).optional())
-        validacoes.push(body("idVenda").custom(id => {
+        validacoes.push(this.validaInteiro("venda", 1).optional())
+        validacoes.push(body("venda").custom(id => {
             return this.vendasDAO.buscaPorID(id).then(objeto => {
                 if (!objeto) {
                     return Promise.reject('O valor informado não está cadastrado.');

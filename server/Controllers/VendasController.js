@@ -3,8 +3,8 @@ const Controller = require("./Controller")
 module.exports = class VendasController extends Controller {
     constructor() {
         super(`vendas`, `venda`, ['valorTotal',
-            'idFuncionario',
-            'idCliente',
+            'funcionario',
+            'cliente',
             'dataAlteracao',
             'dataCriacao'
         ], false)

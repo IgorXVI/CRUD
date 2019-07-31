@@ -22,14 +22,24 @@ module.exports = class DAO {
 
     async atualizaPorColuna(objeto, colunaValor, colunaNome, colunas) {
         const valores = Object.values(objeto)
-
         valores.push(colunaValor)
+
         const colunasEPlaceholders = colunas.split(",").map(nome => `${nome} = ?`).join(",")
 
         const sql = `UPDATE ${this._tabela} SET ${colunasEPlaceholders} WHERE ${colunaNome} = ?`
 
         this._connection.run(sql, valores, (erro) => {
             if (erro) {
+                throw new Error(erro)
+            }
+        })
+    }
+
+    async atualizaUmaColunaPorId(colunaValor, colunaNome, id){
+        const sql = `UPDATE ${this._tabela} SET ${colunaNome} WHERE id = ?`
+
+        this._connection.run(sql, [colunaValor, id], (erro)=>{
+            if(erro){
                 throw new Error(erro)
             }
         })
