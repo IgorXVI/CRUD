@@ -176,12 +176,12 @@ module.exports = class Controller {
         if (!objeto) {
             throw new Error("Erro no ID.");
         } else {
-            objeto = await this.converterForeignKeyEmURL(objeto)
+            objeto = await this.converterForeignKeyEmJSON(objeto)
             return objeto
         }
     }
 
-    async converterForeignKeyEmURL(objetoRecebido) {
+    async converterForeignKeyEmJSON(objetoRecebido) {
         let objeto = objetoRecebido
         const keys = Object.keys(objeto)
         for (let i = 0; i < keys.length; i++) {
