@@ -41,8 +41,11 @@ async function gerarDadosAleatorios(quantidade, primeiraVez) {
     }
 }
 
-function gerarStringAleatoria(tamanho) {
-    const N = Math.floor(Math.random() * tamanho) + 1
+function gerarStringAleatoria(tamanho, fixo) {
+    let N = Math.floor(Math.random() * tamanho) + 1
+    if(fixo){
+        N = tamanho
+    }
     return Array(N + 1).join((Math.random().toString(36) + '00000000000000000').slice(2, 18)).slice(0, N)
 }
 
@@ -62,7 +65,7 @@ function dataDeHoje() {
 function gerarJSONCidades() {
     let objeto = {}
     objeto.nome = gerarStringAleatoria(29)
-    objeto.UF = _.upperCase(gerarStringAleatoria(2))
+    objeto.UF = _.upperCase(gerarStringAleatoria(2, true))
     objeto.CEP = `${gerarStringDeNumerosAleatoria(5)}-${gerarStringDeNumerosAleatoria(3)}`
     objeto.dataAlteracao = dataDeHoje()
     objeto.dataCriacao = dataDeHoje()
@@ -81,7 +84,7 @@ function gerarJSONClientes() {
     objeto.rua = gerarStringAleatoria(10)
     objeto.numeroCasa = Math.floor(Math.random() * 100)
     objeto.telefone = `(${gerarStringDeNumerosAleatoria(2)}) ${gerarStringDeNumerosAleatoria(5)}-${gerarStringDeNumerosAleatoria(4)}`
-    objeto.dataNasc = dataDeHoje().substring(0, 9)
+    objeto.dataNasc = dataDeHoje().substring(0, 10)
     objeto.complemento = gerarStringAleatoria(50)
     return objeto
 }
@@ -99,7 +102,7 @@ function gerarJSONFuncionarios() {
     objeto.rua = gerarStringAleatoria(10)
     objeto.numeroCasa = Math.floor(Math.random() * 100)
     objeto.telefone = `(${gerarStringDeNumerosAleatoria(2)}) ${gerarStringDeNumerosAleatoria(5)}-${gerarStringDeNumerosAleatoria(4)}`
-    objeto.dataNasc = dataDeHoje().substring(0, 9)
+    objeto.dataNasc = dataDeHoje().substring(0, 10)
     objeto.complemento =  gerarStringAleatoria(50)
     return objeto
 }
@@ -130,8 +133,8 @@ function gerarJSONProdutos(){
     objeto.dataCriacao = dataDeHoje()
     objeto.descricao = gerarStringAleatoria(50)
     objeto.garantia = Math.floor(Math.random() * 10)
-    objeto.dataFabric = dataDeHoje().substring(0, 9)
-    objeto.dataValidade = dataDeHoje().substring(0, 9)
+    objeto.dataFabric = dataDeHoje().substring(0, 10)
+    objeto.dataValidade = dataDeHoje().substring(0, 10)
     return objeto
 }
 
