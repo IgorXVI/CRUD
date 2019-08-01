@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     CPF VARCHAR(14) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    idCidade INTEGER NOT NULL,
+    idCidades INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     bairro VARCHAR(25) NOT NULL,
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     telefone VARCHAR(15) NOT NULL,
     dataNasc VARCHAR(10) NOT NULL,
     complemento VARCHAR(255),
-    FOREIGN KEY (idCidade) REFERENCES cidades(id)
+    FOREIGN KEY (idCidades) REFERENCES cidades(id)
 );
 
 CREATE TABLE IF NOT EXISTS funcionarios (
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
 	salario REAL NOT NULL,
-    idCidade INTEGER NOT NULL,
+    idCidades INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     bairro VARCHAR(25) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     telefone VARCHAR(15) NOT NULL,
     dataNasc VARCHAR(10) NOT NULL,
     complemento VARCHAR(255),
-    FOREIGN KEY (idCidade) REFERENCES cidades(id)
+    FOREIGN KEY (idCidades) REFERENCES cidades(id)
 );
 
 CREATE TABLE IF NOT EXISTS fornecedores (
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS fornecedores (
     CNPJ VARCHAR(18) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    idCidade INTEGER NOT NULL,
+    idCidades INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     telefone VARCHAR(15) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS fornecedores (
     rua VARCHAR(25) NOT NULL,
     numeroCasa INTEGER NOT NULL,
     complemento VARCHAR(255),
-	FOREIGN KEY (idCidade) REFERENCES cidades(id)
+	FOREIGN KEY (idCidades) REFERENCES cidades(id)
 );
 
 CREATE TABLE IF NOT EXISTS produtos (
@@ -73,46 +73,46 @@ CREATE TABLE IF NOT EXISTS produtos (
     nome VARCHAR(100) NOT NULL,
 	categoria VARCHAR(100),  
     precoUnidade REAL NOT NULL,
-    idFornecedor INTEGER NOT NULL,
+    idFornecedores INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
     descricao TEXT NOT NULL,
     garantia INTEGER NOT NULL,
 	dataFabric VARCHAR(10) NOT NULL,
 	dataValidade VARCHAR(10) NOT NULL,
-	FOREIGN KEY (idFornecedor) REFERENCES fornecedores(id)
+	FOREIGN KEY (idFornecedores) REFERENCES fornecedores(id)
 );
 
 CREATE TABLE IF NOT EXISTS estoque (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     quantidade INTEGER NOT NULL,
-    idProduto INTEGER NOT NULL,
+    idProdutos INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-	FOREIGN KEY (idProduto) REFERENCES produtos(id)
+	FOREIGN KEY (idProdutos) REFERENCES produtos(id)
 );
 
 CREATE TABLE IF NOT EXISTS vendas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     valorTotal REAL NOT NULL,
-    idFuncionario INTEGER NOT NULL,
-    idCliente INTEGER NOT NULL,
+    idFuncionarios INTEGER NOT NULL,
+    idClientes INTEGER NOT NULL,
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-	FOREIGN KEY (idFuncionario) REFERENCES funcionarios(id),
-	FOREIGN KEY (idCliente) REFERENCES clientes(id)
+	FOREIGN KEY (idFuncionarios) REFERENCES funcionarios(id),
+	FOREIGN KEY (idClientes) REFERENCES clientes(id)
 );
 
 CREATE TABLE IF NOT EXISTS itensVenda (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     valorTotal REAL NOT NULL,
 	quantidade INTEGER NOT NULL,
-    idProduto INTEGER NOT NULL,
-    idVenda INTEGER NOT NULL,
+    idProdutos INTEGER NOT NULL,
+    idVendas INTEGER NOT NULL,
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-	FOREIGN KEY (idProduto) REFERENCES produtos(id),
-	FOREIGN KEY (idVenda) REFERENCES vendas(id)
+	FOREIGN KEY (idProdutos) REFERENCES produtos(id),
+	FOREIGN KEY (idVendas) REFERENCES vendas(id)
 );
 
 CREATE TABLE IF NOT EXISTS url (

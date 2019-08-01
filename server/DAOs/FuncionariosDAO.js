@@ -6,12 +6,12 @@ module.exports = class FuncionariosDAO extends DAO {
     }
 
     async adiciona(funcionario) {
-        return super.adiciona(funcionario, `CPF, nome, email, salario, idCidade, dataAlteracao, 
+        return super.adiciona(funcionario, `CPF, nome, email, salario, idCidades, dataAlteracao, 
         dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento`)
     }
 
     async atualizaPorID(funcionario, id){
-        return super.atualizaPorColuna(funcionario, id, `id`, `CPF, nome, email, salario, idCidade, dataAlteracao, 
+        return super.atualizaPorColuna(funcionario, id, `id`, `CPF, nome, email, salario, idCidades, dataAlteracao, 
         bairro, rua, numeroCasa, telefone, dataNasc, complemento`)
     }
 

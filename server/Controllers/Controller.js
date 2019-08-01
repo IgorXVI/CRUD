@@ -186,19 +186,31 @@ module.exports = class Controller {
         const keys = Object.keys(objeto)
         for (let i = 0; i < keys.length; i++) {
             if (this.ehForeignKey(keys[i])) {
-                let nomeSingular = keys[i].slice(2)
-                nomeSingular = `${nomeSingular.charAt(0).toLowerCase()}${nomeSingular.slice(1)}`
-                let url = await this.urlDAO.buscaPorTabela(nomeSingular).urlString
+                let nome = keys[i].slice(2)
+                nome = `${nome.charAt(0).toLowerCase()}${nome.slice(1)}`
+
+                let url = await this.urlDAO.buscaPorTabela(nome)
+                url = url.urlString
                 url = `${url}/${objeto[keys[i]]}`
-                delete objeto[keys[i]]
-                objeto[nomeSingular] = url
+
+                const resultado = {
+                    id: objeto[keys[i]],
+                    href: url
+                }
+
+                let nomeSingular = url.replace(`/${nome}/`, ``)
+                nomeSingular = nomeSingular.replace(`api`, ``)
+                nomeSingular = nomeSingular.replace(`/${objeto[keys[i]]}`, ``)
+
+                delete objeto[keys[i]] 
+                objeto[nomeSingular] = resultado
             }
         }
         return objeto
     }
 
     ehForeignKey(campo) {
-        return campo.includes("id") && campo.length > 2
+        return campo.charAt(0) === 'i' && campo.charAt(1) === 'd'  && campo.length > 2
     }
 
     lidarComErro(erroRecebido, req, res) {

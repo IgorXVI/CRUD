@@ -5,10 +5,11 @@ const FornecedoresDAO = require("./DAOs/FornecedoresDAO")
 const ProdutosDAO = require("./DAOs/ProdutosDAO")
 const EstoqueDAO = require("./DAOs/EstoqueDAO")
 const UsuariosDAO = require("./DAOs/UsuariosDAO")
+const bcrypt = require("bcrypt")
 
 const _ = require('lodash');
 
-async function gerarDadosAleatorios(quantidade) {
+async function gerarDadosAleatorios(quantidade, primeiraVez) {
     const cidadesDAO = new CidadesDAO()
     const clientesDAO = new ClientesDAO()
     const funcionariosDAO = new FuncionariosDAO()
@@ -17,13 +18,17 @@ async function gerarDadosAleatorios(quantidade) {
     const estoqueDAO = new EstoqueDAO()
     const usuariosDAO = new UsuariosDAO()
 
-    const usuarioMaster = {
-        usuario: "Igor Almeida",
-        email: "inazumaseleven04@gmail.com",
-        senha: "perestroika",
-        nivelAcesso: 0,
-        dataAlteracao: dataDeHoje(),
-        dataCriacao: dataDeHoje()
+    if(primeiraVez){
+        const hash = await bcrypt.hash("perestroika", 10)
+        const usuarioMaster = {
+            usuario: "Igor Almeida",
+            email: "inazumaseleven04@gmail.com",
+            senha: hash,
+            nivelAcesso: 0,
+            dataAlteracao: dataDeHoje(),
+            dataCriacao: dataDeHoje()
+        }
+        await usuariosDAO.adiciona(usuarioMaster)
     }
 
     for (let i = 0; i < quantidade; i++) {
@@ -33,7 +38,6 @@ async function gerarDadosAleatorios(quantidade) {
         await fornecedoresDAO.adiciona(gerarJSONFornecedores())
         await produtosDAO.adiciona(gerarJSONProdutos())
         await estoqueDAO.adiciona(gerarJSONEstoque())
-        await usuariosDAO.adiciona(usuarioMaster)
     }
 }
 
@@ -87,7 +91,7 @@ function gerarJSONFuncionarios() {
     objeto.CPF = `${gerarStringDeNumerosAleatoria(3)}.${gerarStringDeNumerosAleatoria(3)}.${gerarStringDeNumerosAleatoria(3)}-${gerarStringDeNumerosAleatoria(2)}`
     objeto.nome = gerarStringAleatoria(10)
     objeto.email = `${gerarStringAleatoria(10)}@${gerarStringAleatoria(5)}.com`
-    objeto.salario = Math.random()
+    objeto.salario = (Math.random()  * (10000000000000 - 900) + 900)
     objeto.idCidade = 1
     objeto.dataAlteracao = dataDeHoje()
     objeto.dataCriacao = dataDeHoje()
@@ -120,7 +124,7 @@ function gerarJSONProdutos(){
     let objeto = {}
     objeto.nome = gerarStringAleatoria(10)
     objeto.categoria = gerarStringAleatoria(10)
-    objeto.precoUnidade = Math.random()
+    objeto.precoUnidade = (Math.random() * (10000000 - 1) + 1)
     objeto.idFornecedor = 1
     objeto.dataAlteracao = dataDeHoje()
     objeto.dataCriacao = dataDeHoje()

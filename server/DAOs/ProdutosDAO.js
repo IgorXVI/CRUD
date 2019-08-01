@@ -6,12 +6,12 @@ module.exports = class ProdutosDAO extends DAO {
     }
 
     async adiciona(produto) {
-        return super.adiciona(produto, `nome, categoria, precoUnidade, idFornecedor, dataAlteracao, 
+        return super.adiciona(produto, `nome, categoria, precoUnidade, idFornecedores, dataAlteracao, 
         dataCriacao, descricao, garantia, dataFabric, dataValidade`)
     }
 
     async atualizaPorID(produto, id){
-        return super.atualizaPorColuna(produto, id, `id`, `nome, categoria, precoUnidade, idFornecedor, dataAlteracao, 
+        return super.atualizaPorColuna(produto, id, `id`, `nome, categoria, precoUnidade, idFornecedores, dataAlteracao, 
         descricao, garantia, dataFabric, dataValidade`)
     }
 

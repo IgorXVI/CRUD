@@ -6,12 +6,12 @@ module.exports = class ClientesDAO extends DAO {
     }
 
     async adiciona(cliente) {
-        return super.adiciona(cliente, `CPF, nome, email, idCidade, dataAlteracao, 
+        return super.adiciona(cliente, `CPF, nome, email, idCidades, dataAlteracao, 
         dataCriacao, bairro, rua, numeroCasa, telefone, dataNasc, complemento`)
     }
 
     async atualizaPorID(cliente, id){
-        return super.atualizaPorColuna(cliente, id, `id`, `CPF, nome, email, idCidade, dataAlteracao, 
+        return super.atualizaPorColuna(cliente, id, `id`, `CPF, nome, email, idCidades, dataAlteracao, 
         bairro, rua, numeroCasa, telefone, dataNasc, complemento`)
     }
 

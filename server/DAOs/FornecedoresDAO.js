@@ -6,12 +6,12 @@ module.exports = class FornecedoresDAO extends DAO {
     }
 
     async adiciona(fornecedor) {
-        return super.adiciona(fornecedor, `CNPJ, nome, email, idCidade, dataAlteracao, 
+        return super.adiciona(fornecedor, `CNPJ, nome, email, idCidades, dataAlteracao, 
         dataCriacao, telefone, bairro, rua, numeroCasa, complemento`)
     }
 
     async atualizaPorID(fornecedor, id){
-        return super.atualizaPorColuna(fornecedor, id, `id`, `CNPJ, nome, email, idCidade, dataAlteracao, 
+        return super.atualizaPorColuna(fornecedor, id, `id`, `CNPJ, nome, email, idCidades, dataAlteracao, 
         telefone, bairro, rua, numeroCasa, complemento`)
     }
 
