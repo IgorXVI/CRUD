@@ -1,14 +1,3 @@
-const sqlite3 = require("sqlite3").verbose()
-
-const db = new sqlite3.Database("./server/data.db", (erro) => {
-    if (erro) {
-        console.error(erro.message)
-    }
-
-    console.log("Conectado ao banco de dados SQLite data.db")
-})
-
-const USUARIOS_SCHEMA = `
 CREATE TABLE IF NOT EXISTS usuarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome VARCHAR(30) NOT NULL,
@@ -17,10 +6,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nivelAcesso INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
     dataCriacao VARCHAR(24) NOT NULL
-)
-`
+);
 
-const CIDADES_SCHEMA = `
 CREATE TABLE IF NOT EXISTS cidades (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome VARCHAR(30) NOT NULL,
@@ -28,9 +15,8 @@ CREATE TABLE IF NOT EXISTS cidades (
     CEP VARCHAR(9) NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
     dataCriacao VARCHAR(24) NOT NULL
-)
-`
-const CLIENTES_SCHEMA = `
+);
+
 CREATE TABLE IF NOT EXISTS clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     CPF VARCHAR(14) NOT NULL,
@@ -46,9 +32,8 @@ CREATE TABLE IF NOT EXISTS clientes (
     dataNasc VARCHAR(10) NOT NULL,
     complemento VARCHAR(255),
     FOREIGN KEY (idCidade) REFERENCES cidades(id)
-)
-`
-const FUNCIONARIOS_SCHEMA = `
+);
+
 CREATE TABLE IF NOT EXISTS funcionarios (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     CPF VARCHAR(14) NOT NULL,
@@ -65,9 +50,8 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     dataNasc VARCHAR(10) NOT NULL,
     complemento VARCHAR(255),
     FOREIGN KEY (idCidade) REFERENCES cidades(id)
-)
-`
-const FORNECEDORES_SCHEMA = `
+);
+
 CREATE TABLE IF NOT EXISTS fornecedores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     CNPJ VARCHAR(18) NOT NULL,
@@ -82,9 +66,8 @@ CREATE TABLE IF NOT EXISTS fornecedores (
     numeroCasa INTEGER NOT NULL,
     complemento VARCHAR(255),
 	FOREIGN KEY (idCidade) REFERENCES cidades(id)
-)
-`
-const PRODUTOS_SCHEMA = `
+);
+
 CREATE TABLE IF NOT EXISTS produtos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome VARCHAR(100) NOT NULL,
@@ -98,10 +81,8 @@ CREATE TABLE IF NOT EXISTS produtos (
 	dataFabric VARCHAR(10) NOT NULL,
 	dataValidade VARCHAR(10) NOT NULL,
 	FOREIGN KEY (idFornecedor) REFERENCES fornecedores(id)
-)
-`
+);
 
-const ESTOQUE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS estoque (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     quantidade INTEGER NOT NULL,
@@ -109,10 +90,8 @@ CREATE TABLE IF NOT EXISTS estoque (
 	dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (idProduto) REFERENCES produtos(id)
-)
-`
+);
 
-const VENDAS_SCHEMA = `
 CREATE TABLE IF NOT EXISTS vendas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     valorTotal REAL NOT NULL,
@@ -122,9 +101,8 @@ CREATE TABLE IF NOT EXISTS vendas (
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (idFuncionario) REFERENCES funcionarios(id),
 	FOREIGN KEY (idCliente) REFERENCES clientes(id)
-)
-`
-const ITENS_VENDA_SCHEMA = `
+);
+
 CREATE TABLE IF NOT EXISTS itensVenda (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     valorTotal REAL NOT NULL,
@@ -135,37 +113,9 @@ CREATE TABLE IF NOT EXISTS itensVenda (
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (idProduto) REFERENCES produtos(id),
 	FOREIGN KEY (idVenda) REFERENCES vendas(id)
-)
-`
-const URL_SCHEMA = `
+);
+
 CREATE TABLE IF NOT EXISTS url (
     tabela VARCHAR(255) PRIMARY KEY,
     urlString VARCHAR(255)
-)
-`
-
-db.serialize(() => {
-    db.run("PRAGMA foreign_keys = ON")
-    db.run(USUARIOS_SCHEMA)
-    db.run(CIDADES_SCHEMA)
-    db.run(CLIENTES_SCHEMA)
-    db.run(FUNCIONARIOS_SCHEMA)
-    db.run(FORNECEDORES_SCHEMA)
-    db.run(PRODUTOS_SCHEMA)
-    db.run(ESTOQUE_SCHEMA)
-    db.run(VENDAS_SCHEMA)
-    db.run(ITENS_VENDA_SCHEMA)
-    db.run(URL_SCHEMA)
-});
-
-process.on("SIGINT", () =>
-    db.close((erro) => {
-        if (erro) {
-            console.error(erro.message)
-            return
-        }
-        console.log("A conexão com o banco de dados SQLite data.db foi fechada.")
-    })
 );
-
-module.exports = db

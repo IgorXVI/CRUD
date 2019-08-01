@@ -1,9 +1,33 @@
-const dbConnection = require("../config/db")
+const dbConnection = require("../database/db")
 
 module.exports = class DAO {
     constructor(tabela) {
         this._connection = dbConnection
         this._tabela = tabela
+    }
+
+    runQuery(sql, valores){
+        const statement = this._connection.prepare(sql)
+        const info = statement.run(valores)
+        return info
+    }
+
+    getQuery(sql, valores){
+        const statement = this._connection.prepare(sql)
+        const resultado = statement.get(valores)
+        return resultado
+    }
+
+    allQuery(sql, valores){
+        const statement = this._connection.prepare(sql)
+        let resultado = undefined
+        if(valores){
+            resultado = statement.all(valores)
+        }
+        else{
+            resultado = statement.all(valores)
+        }
+        return resultado
     }
 
     async adiciona(objeto, colunas) {
@@ -12,12 +36,8 @@ module.exports = class DAO {
         const placeholders = valores.map((valor) => '?').join(',')
 
         const sql = `INSERT INTO ${this._tabela} (${colunas}) VALUES (${placeholders})`
-
-        this._connection.run(sql, valores, (erro) => {
-            if (erro) {
-                throw new Error(erro)
-            }
-        })
+        
+        return this.runQuery(sql, valores)
     }
 
     async atualizaPorColuna(objeto, colunaValor, colunaNome, colunas) {
@@ -28,58 +48,28 @@ module.exports = class DAO {
 
         const sql = `UPDATE ${this._tabela} SET ${colunasEPlaceholders} WHERE ${colunaNome} = ?`
 
-        this._connection.run(sql, valores, (erro) => {
-            if (erro) {
-                throw new Error(erro)
-            }
-        })
+        return this.runQuery(sql, valores)
     }
 
     async deletaPorColuna(colunaValor, colunaNome) {
         const sql = `DELETE FROM ${this._tabela} WHERE ${colunaNome} = ?`
 
-        this._connection.run(sql, [colunaValor], (erro) => {
-            if (erro) {
-                throw new Error(erro)
-            }
-        })
+        return this.runQuery(sql, colunaValor)
     }
 
     async buscaPorColuna(colunaValor, colunaNome) {
         const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome} = ?`
-        let resultado = undefined
-        this._connection.get(sql, [colunaValor], (erro, objeto) => {
-            if (erro) {
-                throw new Error(erro)
-            } else {
-               resultado = objeto
-            }
-        })
-        return resultado
+        return this.getQuery(sql, colunaValor)
     }
 
     async buscarPorDuasColunas(colunaValor1, colunaValor2, colunaNome1, colunaNome2) {
         const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome1} = ? AND ${colunaNome2} = ?`
-        let resultado = undefined 
-        this._connection.get(sql, [colunaValor1, colunaValor2], (erro, objeto) => {
-            if (erro) {
-                throw new Error(erro)
-            } else {
-                resultado = objeto
-            }
-        })
-        return resultado
+        return this.allQuery(sql, [colunaValor1, colunaValor2])
     }
 
     async buscaTodos() {
         const sql = `SELECT * FROM ${this._tabela}`
-        this._connection.all(sql, (erro, objeto) => {
-            if (erro) {
-                throw new Error(erro)
-            } else {
-                Promise.resolve(objeto)
-            }
-        })
+        return this.allQuery(sql)
     }
 
 }

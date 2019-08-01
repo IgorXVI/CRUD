@@ -7,18 +7,10 @@ module.exports = class UsuariosDAO extends DAO {
 
     async atualizaPorTabela(url, tabela){
         let sql = `INSERT OR IGNORE INTO url (tabela, urlString) VALUES (?, ?);`
-        this._connection.run(sql, [tabela, url], (erro)=>{
-            if(erro){
-                throw new Error(erro)
-            }
-        })
+        this.runQuery(sql, [tabela, url])
 
         sql = `UPDATE url SET urlString = ? WHERE tabela = ?;`
-        this._connection.run(sql, [url, tabela], (erro)=>{
-            if(erro){
-                throw new Error(erro)
-            }
-        })
+        this.runQuery(sql, [url, tabela])
     }
 
     async buscaPorTabela(tabela) {
