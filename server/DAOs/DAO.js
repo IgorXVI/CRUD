@@ -35,15 +35,6 @@ module.exports = class DAO {
         })
     }
 
-    async atualizaUmaColunaPorOutraColuna(colunaValor, colunaNome, outraColunaValor, outraColunaNome){
-        const sql = `UPDATE ${this._tabela} SET ${colunaNome} = ? WHERE ${outraColunaNome} = ?`
-        this._connection.run(sql, [colunaValor, outraColunaValor], (erro)=>{
-            if(erro){
-                throw new Error(erro)
-            }
-        })
-    }
-
     async deletaPorColuna(colunaValor, colunaNome) {
         const sql = `DELETE FROM ${this._tabela} WHERE ${colunaNome} = ?`
 
@@ -56,36 +47,37 @@ module.exports = class DAO {
 
     async buscaPorColuna(colunaValor, colunaNome) {
         const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome} = ?`
-
+        let resultado = undefined
         this._connection.get(sql, [colunaValor], (erro, objeto) => {
             if (erro) {
                 throw new Error(erro)
             } else {
-                return objeto
+               resultado = objeto
             }
         })
+        return resultado
     }
 
     async buscarPorDuasColunas(colunaValor1, colunaValor2, colunaNome1, colunaNome2) {
         const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome1} = ? AND ${colunaNome2} = ?`
-
+        let resultado = undefined 
         this._connection.get(sql, [colunaValor1, colunaValor2], (erro, objeto) => {
             if (erro) {
                 throw new Error(erro)
             } else {
-                return objeto
+                resultado = objeto
             }
         })
+        return resultado
     }
 
     async buscaTodos() {
         const sql = `SELECT * FROM ${this._tabela}`
-
         this._connection.all(sql, (erro, objeto) => {
             if (erro) {
                 throw new Error(erro)
             } else {
-                return objeto
+                Promise.resolve(objeto)
             }
         })
     }

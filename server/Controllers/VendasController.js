@@ -23,7 +23,7 @@ module.exports = class VendasController extends Controller {
                     super.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
                     let objeto = super.gerarObjeto(req)
                     objeto.valorTotal = 0
-                    this.adicionaUm(req, res, objeto)
+                    await this.adicionaUm(req, res, objeto)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -38,7 +38,7 @@ module.exports = class VendasController extends Controller {
                     super.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
                     let objeto = super.gerarObjeto(req)
                     objeto.valorTotal = 0
-                    this.atualizaUm(req, res, objeto)
+                    await this.atualizaUm(req, res, objeto)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }

@@ -34,19 +34,7 @@ module.exports = class Controller {
 
         this.masterDAO = this[`${_.camelCase(nome)}DAO`]
 
-        (async () => {
-            const existe = await this.urlDAO.buscaPorTabela(_.camelCase(nome))
-            if(existe){
-                this.urlDAO.atualizaPorTabela(`api/${nome}/${nomeSingular}`, _.camelCase(nome))
-            }
-            else{
-                const objeto = {
-                    tabela: _.camelCase(nome),
-                    urlString: `api/${nome}/${nomeSingular}`
-                }
-                this.urlDAO.adiciona(objeto)
-            }
-        })()
+        this.urlDAO.atualizaPorTabela(`api/${nome}/${nomeSingular}`, _.camelCase(nome))
 
         this.atributos = atributos
         this.nome = nome
@@ -68,7 +56,7 @@ module.exports = class Controller {
             (async () => {
                 try {
                     this.inicio(req, res, `Buscando ${this.nome}...`)
-                    this.buscaTodos(req, res)
+                    await this.buscaTodos(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -82,7 +70,7 @@ module.exports = class Controller {
                 try {
                     this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
                     const objeto = this.gerarObjeto(req)
-                    this.adicionaUm(req, res, objeto)
+                    await this.adicionaUm(req, res, objeto)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -95,7 +83,7 @@ module.exports = class Controller {
             (async () => {
                 try {
                     this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
-                    this.buscaUm(req, res)
+                    await this.buscaUm(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -108,7 +96,7 @@ module.exports = class Controller {
             (async () => {
                 try {
                     this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
-                    this.deletaUm(req, res)
+                    await this.deletaUm(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -122,7 +110,7 @@ module.exports = class Controller {
                 try {
                     this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
                     const objeto = this.gerarObjeto(req)
-                    this.atualizaUm(req, res, objeto)
+                    await this.atualizaUm(req, res, objeto)
                 } catch {
                     this.lidarComErro(erro, req, res)
                 }
@@ -132,9 +120,12 @@ module.exports = class Controller {
 
     async buscaTodos(req, res) {
         const DAO = this.masterDAO
-        const objeto = await DAO.buscaTodos()
+        const arr = await DAO.buscaTodos()
+        for(let i = 0; i < arr.length; i++){
+            arr[i] = await this.converterForeignKeyEmURL(arr[i])
+        }
         res.status(200).json({
-            resultado: objeto
+            resultado: arr
         })
         this.fim()
     }
@@ -149,7 +140,8 @@ module.exports = class Controller {
 
     async buscaUm(req, res) {
         const DAO = this.masterDAO
-        const objeto = await this.buscaObjetoPorID(req.params.id, DAO)
+        let objeto = await this.buscaObjetoPorID(req.params.id, DAO)
+        objeto = await this.converterForeignKeyEmURL(objeto)
         res.status(200).json({
             resultado: objeto
         })
@@ -196,8 +188,10 @@ module.exports = class Controller {
             if (this.ehForeignKey(keys[i])) {
                 let nomeSingular = keys[i].slice(2)
                 nomeSingular = `${nomeSingular.charAt(0).toLowerCase()}${nomeSingular.slice(1)}`
-                const url = await this.urlDAO.buscaPorTabela(nomeSingular).urlString
-                objeto[keys[i]] = `${url}/${objeto[keys[i]]}`
+                let url = await this.urlDAO.buscaPorTabela(nomeSingular).urlString
+                url = `${url}/${objeto[keys[i]]}`
+                delete objeto[keys[i]]
+                objeto[nomeSingular] = url
             }
         }
         return objeto
@@ -209,83 +203,83 @@ module.exports = class Controller {
 
     lidarComErro(erroRecebido, req, res) {
         if (erroRecebido.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
-            const erro = [{
+            const erros = [{
                 location: "params",
                 param: "id",
                 msg: "O valor informado está sendo usado como foreign key.",
                 value: req.params.id
             }]
             res.status(400).json({
-                erro
+                erros
             })
         } else if (erroRecebido.message.includes("Erro no ID.")) {
-            const erro = [{
+            const erros = [{
                 location: "params",
                 param: "id",
                 msg: "O valor informado não é válido.",
                 value: req.params.id
             }]
             res.status(400).json({
-                erro
+                erros
             })
         } else if (erroRecebido.message.includes("Erro de validacao.")) {
             res.status(400).json({
-                erro: req.validationErrors()
+                erros: req.validationErrors()
             })
         } else if (erroRecebido.message.includes("Erro dois itens de venda que possuem o mesmo produto e a mesma venda.")) {
-            const erro = [{
+            const erros = [{
                 location: "body",
                 param: "idProduto, idVenda",
                 msg: "Não podem existir dois itens de venda que possuem o mesmo produto e a mesma venda.",
                 value: [req.body.idVenda, req.body.idProduto]
             }]
             res.status(400).json({
-                erro
+                erros
             })
         } else if (erroRecebido.message.includes("Erro não existem produtos suficientes estocados para realizar essa venda.")) {
-            const erro = [{
+            const erros = [{
                 location: "body",
                 param: "idProduto",
                 msg: "Não existem produtos suficientes estocados para realizar essa venda.",
                 value: req.body.idProduto
             }]
             res.status(400).json({
-                erro
+                erros
             })
         } else if (erroRecebido.message.includes("Erro senha invalida.")) {
-            const erro = [{
+            const erros = [{
                 location: "body",
                 param: "senha",
                 msg: "O valor não é válido.",
                 value: req.body.senha
             }]
             res.status(400).json({
-                erro
+                erros
             })
             super.fim()
         } else if (erroRecebido.message.includes("Erro email ja cadastrado.")) {
-            const erro = [{
+            const erros = [{
                 location: "body",
                 param: "email",
                 msg: "O valor informado já está cadastrado.",
                 value: req.params.id
             }]
             res.status(400).json({
-                erro
+                erros
             })
         } else {
             console.log(erroRecebido)
-            const erro = [{
+            const erros = [{
                 msg: "Erro no servidor."
             }]
             res.status(500).json({
-                erro
+                erros
             })
         }
         this.fim()
     }
 
-    inicio(req, mensagem) {
+    inicio(req, res, mensagem) {
         console.log(mensagem)
         const errosValidacao = req.validationErrors()
         if (errosValidacao) {

@@ -5,12 +5,20 @@ module.exports = class UsuariosDAO extends DAO {
         super(`url`)
     }
 
-    async adiciona(objeto) {
-        return super.adiciona(objeto, `tabela, urlString`)
-    }
-
     async atualizaPorTabela(url, tabela){
-        return super.atualizaUmaColunaPorOutraColuna(url, `urlString`, tabela, `tabela`)
+        let sql = `INSERT OR IGNORE INTO url (tabela, urlString) VALUES (?, ?);`
+        this._connection.run(sql, [tabela, url], (erro)=>{
+            if(erro){
+                throw new Error(erro)
+            }
+        })
+
+        sql = `UPDATE url SET urlString = ? WHERE tabela = ?;`
+        this._connection.run(sql, [url, tabela], (erro)=>{
+            if(erro){
+                throw new Error(erro)
+            }
+        })
     }
 
     async buscaPorTabela(tabela) {

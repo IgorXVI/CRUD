@@ -92,7 +92,7 @@ module.exports = class UsuariosController extends Controller {
                     const dadosSignup = super.gerarObjeto(req)
                     dadosSignup.nivelAcesso = 2
                     dadosSignup.senha = await bcrypt.hash(dadosSignup.senha, 10)
-                    super.adicionaUm(req, res, dadosSignup)
+                    await super.adicionaUm(req, res, dadosSignup)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -113,7 +113,7 @@ module.exports = class UsuariosController extends Controller {
                     super.inicio(req, res, "Adicionando usuario...")
                     const objeto = super.gerarObjeto(req)
                     objeto.senha = await bcrypt.hash(objeto.senha, 10)
-                    super.adicionaUm(req, res, objeto)
+                    await super.adicionaUm(req, res, objeto)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -141,7 +141,7 @@ module.exports = class UsuariosController extends Controller {
                     if(objeto.senha){
                         objeto.senha = await bcrypt.hash(objeto.senha, 10)
                     }
-                    super.atualizaUm(req, res, objeto)
+                    await super.atualizaUm(req, res, objeto)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
