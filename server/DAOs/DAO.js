@@ -25,7 +25,7 @@ module.exports = class DAO {
             resultado = statement.all(valores)
         }
         else{
-            resultado = statement.all(valores)
+            resultado = statement.all()
         }
         return resultado
     }
