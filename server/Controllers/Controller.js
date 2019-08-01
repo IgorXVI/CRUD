@@ -120,9 +120,9 @@ module.exports = class Controller {
 
     async buscaTodos(req, res) {
         const DAO = this.masterDAO
-        const arr = await DAO.buscaTodos()
+        let arr = await DAO.buscaTodos()
         for(let i = 0; i < arr.length; i++){
-            arr[i] = await this.converterForeignKeyEmURL(arr[i])
+            arr[i] = await this.buscaObjetoPorID(arr[i].id, DAO)
         }
         res.status(200).json({
             resultado: arr
@@ -141,7 +141,6 @@ module.exports = class Controller {
     async buscaUm(req, res) {
         const DAO = this.masterDAO
         let objeto = await this.buscaObjetoPorID(req.params.id, DAO)
-        objeto = await this.converterForeignKeyEmURL(objeto)
         res.status(200).json({
             resultado: objeto
         })
@@ -173,10 +172,11 @@ module.exports = class Controller {
     }
 
     async buscaObjetoPorID(id, DAO) {
-        const objeto = await DAO.buscaPorID(id)
+        let objeto = await DAO.buscaPorID(id)
         if (!objeto) {
             throw new Error("Erro no ID.");
         } else {
+            objeto = await this.converterForeignKeyEmURL(objeto)
             return objeto
         }
     }
@@ -193,10 +193,7 @@ module.exports = class Controller {
                 url = url.urlString
                 url = `${url}/${objeto[keys[i]]}`
 
-                const resultado = {
-                    id: objeto[keys[i]],
-                    href: url
-                }
+                let resultado = await this.buscaObjetoPorID(objeto[keys[i]], this[`${_.camelCase(nome)}DAO`])
 
                 let nomeSingular = url.replace(`/${nome}/`, ``)
                 nomeSingular = nomeSingular.replace(`api`, ``)
