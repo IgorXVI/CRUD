@@ -42,11 +42,19 @@ async function gerarDadosAleatorios(quantidade, primeiraVez) {
 }
 
 function gerarStringAleatoria(tamanho, fixo) {
+    let resultado = ""
+    let set = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
     let N = Math.floor(Math.random() * tamanho) + 1
     if(fixo){
         N = tamanho
     }
-    return Array(N + 1).join((Math.random().toString(36) + '00000000000000000').slice(2, 18)).slice(0, N)
+
+    for (let i = 0; i < N; i++) {
+        let numero = Math.floor(Math.random() * set.length)
+        resultado += set.charAt(numero)
+    }
+    return resultado
 }
 
 function gerarStringDeNumerosAleatoria(tamanho) {
