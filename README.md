@@ -1,2 +1,2 @@
 # Loja do Igor
-Feito com nodejs versão 10.16.0
+Feito com nodejs versão v12.7.0
