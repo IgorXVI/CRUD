@@ -1,5 +1,5 @@
 {
-  "name": "lojadoigor",
+  "name": "loja-do-igor-api",
   "version": "1.0.0",
   "description": "Site de uma loja.",
   "main": "server/server.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IgorXVI/lojaDoIgor.git"
+    "url": "git+https://github.com/IgorXVI/loja-do-igor-api.git"
   },
   "author": "Igor Almeida",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/IgorXVI/lojaDoIgor/issues"
+    "url": "https://github.com/IgorXVI/loja-do-igor-api/issues"
   },
-  "homepage": "https://github.com/IgorXVI/lojaDoIgor#readme",
+  "homepage": "https://github.com/IgorXVI/loja-do-igor-api#readme",
   "dependencies": {
     "bcrypt": "^3.0.6",
     "better-sqlite3": "^5.4.1",
