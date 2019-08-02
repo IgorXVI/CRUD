@@ -5,7 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "nodemon server.js"
   },
   "repository": {
     "type": "git",
@@ -21,13 +21,10 @@
     "bcrypt": "^3.0.6",
     "better-sqlite3": "^5.4.1",
     "body-parser": "^1.19.0",
-    "bootstrap": "^4.3.1",
     "cookie-parser": "^1.4.4",
     "dotenv": "^8.0.0",
     "express": "^4.17.1",
     "express-validator": "^5.3.1",
-    "html2canvas": "^1.0.0-rc.3",
-    "jquery": "^3.4.1",
     "jsonwebtoken": "^8.5.1",
     "popper.js": "^1.15.0"
   }
