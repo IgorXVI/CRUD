@@ -36,8 +36,8 @@ module.exports = class ItensVendaController extends Controller {
                     await this.itensVendaDAO.adiciona(objeto)
                     await this.atualizaEstoque(objeto)
                     await this.atualizaVenda(objeto)
-                    res.status(201).end()
-                    super.fim()
+                    res.status(201).json({})
+                    super.fim(req)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -71,8 +71,8 @@ module.exports = class ItensVendaController extends Controller {
                     await this.atualizaEstoque(objeto)
                     objeto.valorTotal -= itemBD.valorTotal
                     await this.atualizaVenda(objeto)
-                    res.status(201).end()
-                    super.fim()
+                    res.status(201).json({})
+                    super.fim(req)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -96,8 +96,8 @@ module.exports = class ItensVendaController extends Controller {
                     await this.atualizaEstoque(itemBD)
                     itemBD.valorTotal = -itemBD.valorTotal
                     await this.atualizaVenda(itemBD)
-                    res.status(202).end()
-                    super.fim()
+                    res.status(202).json({})
+                    super.fim(req)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }

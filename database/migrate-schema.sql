@@ -117,5 +117,7 @@ CREATE TABLE IF NOT EXISTS itensVenda (
 
 CREATE TABLE IF NOT EXISTS url (
     tabela VARCHAR(255) PRIMARY KEY,
-    urlString VARCHAR(255)
+    urlString VARCHAR(255),
+    dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL
 );

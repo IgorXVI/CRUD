@@ -71,7 +71,7 @@ module.exports = class UsuariosController extends Controller {
                         })
                         res.end()
                     }
-                    super.fim()
+                    super.fim(req)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -155,8 +155,8 @@ module.exports = class UsuariosController extends Controller {
                 return
             }
             res.status(202).clearCookie("auth")
-            res.end()
-            super.fim()
+            res.json({})
+            super.fim(req)
         })
     }
 

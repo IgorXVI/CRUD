@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 // const gerarDadosAleatorios = require("./scriptDadosAleatorios")
-// gerarDadosAleatorios(10, true)
+// gerarDadosAleatorios(10, false)
 
 const app = require("./config/custom-express")
 

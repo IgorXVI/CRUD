@@ -2,6 +2,8 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 const expressValidator = require("express-validator")
+const cors = require('cors')
+var expressRequestId = require('express-request-id');
 const middlewares = require("./middlewares")
 
 const cidadesRotas = (new (require("../Controllers/CidadesController"))).router
@@ -19,6 +21,8 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 app.use(expressValidator())
 app.use(cookieParser())
+app.use(cors())
+app.use(expressRequestId())
 
 //rotas da api
 // app.use("/api/usuarios", middlewares.checkToken, middlewares.checkNivel(1, "GET"), usuariosRotas)

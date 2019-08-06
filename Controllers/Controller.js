@@ -34,7 +34,7 @@ module.exports = class Controller {
 
         this.masterDAO = this[`${_.camelCase(nome)}DAO`]
 
-        this.urlDAO.atualizaPorTabela(`api/${nome}/${nomeSingular}`, _.camelCase(nome))
+        this.urlDAO.atualizaPorTabela(`api/${nome}/${nomeSingular}`, _.camelCase(nome), this.dataDeHoje())
 
         this.atributos = atributos
         this.nome = nome
@@ -127,31 +127,33 @@ module.exports = class Controller {
         res.status(200).json({
             resultado: arr
         })
-        this.fim()
+        this.fim(req)
     }
 
     async deletaUm(req, res) {
         const DAO = this.masterDAO
         await this.buscaObjetoPorID(req.params.id, DAO)
         await DAO.deletaPorID(req.params.id)
-        res.status(202).end()
-        this.fim()
+        res.status(202).json({})
+        this.fim(req)
     }
 
     async buscaUm(req, res) {
         const DAO = this.masterDAO
         let objeto = await this.buscaObjetoPorID(req.params.id, DAO)
+        let arr = []
+        arr.push(objeto)
         res.status(200).json({
-            resultado: objeto
+            resultado: arr
         })
-        this.fim()
+        this.fim(req)
     }
 
     async adicionaUm(req, res, objeto) {
         const DAO = this.masterDAO
         await DAO.adiciona(objeto)
-        res.status(201).end()
-        this.fim()
+        res.status(201).json({})
+        this.fim(req)
     }
 
     async atualizaUm(req, res, objeto) {
@@ -167,8 +169,8 @@ module.exports = class Controller {
             }
         }
         await DAO.atualizaPorID(objeto, req.params.id)
-        res.status(201).end()
-        this.fim()
+        res.status(201).json({})
+        this.fim(req)
     }
 
     async buscaObjetoPorID(id, DAO) {
@@ -285,19 +287,19 @@ module.exports = class Controller {
                 erros
             })
         }
-        this.fim()
+        this.fim(req)
     }
 
     inicio(req, res, mensagem) {
-        console.log(mensagem)
+        console.log(`request id: ${req.id}, data: ${this.dataDeHoje()} -> ${mensagem}`)
         const errosValidacao = req.validationErrors()
         if (errosValidacao) {
             throw new Error("Erro de validacao.")
         }
     }
 
-    fim() {
-        console.log("fim")
+    fim(req) {
+        console.log(`request id: ${req.id}, data: ${this.dataDeHoje()} -> fim`)
     }
 
     gerarValidacao(obrigatorio, excecoes) {
