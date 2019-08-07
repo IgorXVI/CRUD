@@ -1,4 +1,8 @@
 const Controller = require("./Controller")
+const ItensVendaDAO = require("../DAOs/ItensVendaDAO")
+const EstoqueDAO = require("../DAOs/EstoqueDAO")
+const ProdutosDAO =  require("../DAOs/ProdutosDAO")
+const VendasDAO = require("../DAOs/VendasDAO")
 
 module.exports = class ItensVendaController extends Controller {
     constructor() {
@@ -8,7 +12,11 @@ module.exports = class ItensVendaController extends Controller {
             'venda',
             'dataAlteracao',
             'dataCriacao'
-        ], false)
+        ], false, new ItensVendaDAO())
+
+        this.estoqueDAO = new EstoqueDAO()
+        this.produtosDAO = new ProdutosDAO()
+        this.vendasDAO = new VendasDAO()
 
         super.gerarRotaBuscaTodos()
         super.gerarRotaBuscaUm()
@@ -23,7 +31,7 @@ module.exports = class ItensVendaController extends Controller {
                 try {
                     this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
                     let objeto = super.gerarObjeto(req)
-                    const item = await this.itensVendaDAO.buscaPorIDVendaEIDProduto(objeto.idVenda, objeto.idProduto)
+                    const item = await this.masterDAO.buscaPorIDVendaEIDProduto(objeto.idVenda, objeto.idProduto)
                     if (item) {
                         throw new Error("Erro dois itens de venda que possuem o mesmo produto e a mesma venda.")
                     }
@@ -33,11 +41,11 @@ module.exports = class ItensVendaController extends Controller {
                     }
                     const valorTotal = await this.calculaValorTotal(objeto)
                     objeto.valorTotal = valorTotal
-                    await this.itensVendaDAO.adiciona(objeto)
+                    await this.masterDAO.adiciona(objeto)
                     await this.atualizaEstoque(objeto)
                     await this.atualizaVenda(objeto)
                     res.status(201).json({})
-                    super.fim(req)
+                    super.fim(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -52,7 +60,7 @@ module.exports = class ItensVendaController extends Controller {
                     this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
                     let itemBD = {}
                     let objeto = super.gerarObjeto(req)
-                    const item = await this.itensVendaDAO.buscaPorID(req.params.id)
+                    const item = await this.masterDAO.buscaPorID(req.params.id)
                     if (!item) {
                         throw new Error("Erro no ID.");
                     }
@@ -66,13 +74,13 @@ module.exports = class ItensVendaController extends Controller {
                     }
                     const valorTotal = await this.calculaValorTotal(objeto)
                     objeto.valorTotal = valorTotal
-                    await this.itensVendaDAO.atualizaPorID(objeto, req.params.id)
+                    await this.masterDAO.atualizaPorID(objeto, req.params.id)
                     objeto.quantidade -= itemBD.quantidade
                     await this.atualizaEstoque(objeto)
                     objeto.valorTotal -= itemBD.valorTotal
                     await this.atualizaVenda(objeto)
                     res.status(201).json({})
-                    super.fim(req)
+                    super.fim(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -86,18 +94,18 @@ module.exports = class ItensVendaController extends Controller {
                 try {
                     this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
                     let itemBD = {}
-                    const item = await this.itensVendaDAO.buscaPorID(req.params.id)
+                    const item = await this.masterDAO.buscaPorID(req.params.id)
                     if (!item) {
                         throw new Error("Erro no ID.");
                     }
                     itemBD = item
-                    await this.itensVendaDAO.deletaPorID(req.params.id)
+                    await this.masterDAO.deletaPorID(req.params.id)
                     itemBD.quantidade = -itemBD.quantidade
                     await this.atualizaEstoque(itemBD)
                     itemBD.valorTotal = -itemBD.valorTotal
                     await this.atualizaVenda(itemBD)
                     res.status(202).json({})
-                    super.fim(req)
+                    super.fim(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }

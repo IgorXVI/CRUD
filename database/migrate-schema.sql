@@ -114,10 +114,3 @@ CREATE TABLE IF NOT EXISTS itensVenda (
 	FOREIGN KEY (idProdutos) REFERENCES produtos(id),
 	FOREIGN KEY (idVendas) REFERENCES vendas(id)
 );
-
-CREATE TABLE IF NOT EXISTS url (
-    tabela VARCHAR(255) PRIMARY KEY,
-    urlString VARCHAR(255),
-    dataAlteracao VARCHAR(24) NOT NULL,
-	dataCriacao VARCHAR(24) NOT NULL
-);

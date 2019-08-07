@@ -1,6 +1,7 @@
 const Controller = require("./Controller")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
+const UsuariosDAO = require("../DAOs/UsuariosDAO")
 
 const {
     body
@@ -14,7 +15,7 @@ module.exports = class UsuariosController extends Controller {
             'nivelAcesso',
             'dataAlteracao',
             'dataCriacao'
-        ], false)
+        ], false, new UsuariosDAO())
 
         this.gerarRotaLogin()
         this.gerarRotaSignup()
@@ -30,9 +31,9 @@ module.exports = class UsuariosController extends Controller {
         let dadosBanco = undefined
 
         this.router.post(`/usuario/login`, [
-            super.validaEmail(true),
+            this.validacao.validaEmail(true),
             body("email").custom(valor => {
-                return this.usuariosDAO.buscaPorEmail(valor).then(objeto => {
+                return this.masterDAO.buscaPorEmail(valor).then(objeto => {
                     if (!objeto) {
                         return Promise.reject(`O valor informado não está cadastrado.`);
                     } else {
@@ -40,7 +41,7 @@ module.exports = class UsuariosController extends Controller {
                     }
                 });
             }).optional(),
-            super.validaSenha(true),
+            this.validacao.validaSenha(true),
             body("tokenEmJSON").isBoolean().withMessage("O valor deve ser booleano."),
             body("tokenEmJSON").exists().withMessage("O valor deve ser informado.")
         ], (req, res) => {
@@ -71,7 +72,7 @@ module.exports = class UsuariosController extends Controller {
                         })
                         res.end()
                     }
-                    super.fim(req)
+                    super.fim(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
@@ -81,10 +82,10 @@ module.exports = class UsuariosController extends Controller {
 
     gerarRotaSignup() {
         this.router.post(`/usuario/signup`, [
-            super.validaNome(true),
-            super.validaEmail(true),
-            super.validaCampoUnico(this.usuariosDAO, "email"),
-            super.validaSenha(true)
+            this.validacao.validaNome(true),
+            this.validacao.validaEmail(true),
+            this.validacao.validaCampoUnico(this.masterDAO, "email"),
+            this.validacao.validaSenha(true)
         ], (req, res) => {
             (async () => {
                 try {
@@ -102,11 +103,11 @@ module.exports = class UsuariosController extends Controller {
 
     gerarRotaAdicionaUm() {
         this.router.post(`/usuario`, [
-            super.validaNome(true),
-            super.validaEmail(true),
-            super.validaCampoUnico(this.usuariosDAO, "email"),
-            super.validaSenha(true),
-            super.validaNivelAcesso(true)
+            this.validacao.validaNome(true),
+            this.validacao.validaEmail(true),
+            this.validacao.validaCampoUnico(this.masterDAO, "email"),
+            this.validacao.validaSenha(true),
+            this.validacao.validaNivelAcesso(true)
         ], (req, res) => {
             (async () => {
                 try {
@@ -123,17 +124,17 @@ module.exports = class UsuariosController extends Controller {
 
     gerarRotaAtualizaUm() {
         this.router.post(`/usuario/:id`, [
-            super.validaNome(false),
-            super.validaEmail(false),
-            super.validaSenha(false),
-            super.validaNivelAcesso(false)
+            this.validacao.validaNome(false),
+            this.validacao.validaEmail(false),
+            this.validacao.validaSenha(false),
+            this.validacao.validaNivelAcesso(false)
         ], (req, res) => {
             (async () => {
                 try {
                     super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)
                     const objeto = super.gerarObjeto(req)
                     if(objeto.email){
-                        const resultado = await this.usuariosDAO.buscaPorEmail(objeto.email)
+                        const resultado = await this.masterDAO.buscaPorEmail(objeto.email)
                         if( !( !resultado || (resultado && resultado.id == req.params.id) ) ){
                             throw new Error("Erro email ja cadastrado.")
                         }
@@ -156,7 +157,7 @@ module.exports = class UsuariosController extends Controller {
             }
             res.status(202).clearCookie("auth")
             res.json({})
-            super.fim(req)
+            super.fim(req, res)
         })
     }
 

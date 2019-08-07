@@ -1,4 +1,5 @@
 const Controller = require("./Controller")
+const VendasDAO = require("../DAOs/VendasDAO")
 
 module.exports = class VendasController extends Controller {
     constructor() {
@@ -7,7 +8,7 @@ module.exports = class VendasController extends Controller {
             'cliente',
             'dataAlteracao',
             'dataCriacao'
-        ], false)
+        ], false, new VendasDAO())
 
         super.gerarRotaBuscaTodos()
         super.gerarRotaBuscaUm()

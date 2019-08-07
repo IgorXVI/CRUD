@@ -1,4 +1,5 @@
 const Controller = require("./Controller")
+const ClientesDAO = require("../DAOs/ClientesDAO")
 
 module.exports = class ClientesController extends Controller {
     constructor() {
@@ -14,7 +15,7 @@ module.exports = class ClientesController extends Controller {
             'telefone',
             'dataNasc',
             'complemento'
-        ], true)
+        ], true, new ClientesDAO())
     }
 
 }
