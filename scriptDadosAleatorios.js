@@ -4,7 +4,7 @@ require('dotenv').config()
 
 const _ = require('lodash');
 
-gerarDadosAleatorios(500)
+gerarDadosAleatorios(219)
 
 async function gerarDadosAleatorios(quantidade) {
     const hash = await bcrypt.hash("perestroika", 10)
@@ -18,33 +18,39 @@ async function gerarDadosAleatorios(quantidade) {
     }
 
     for (let i = 0; i < quantidade; i++) {
-        console.log("usuario master: ")
-        post("usuarios/usuario", usuarioMaster)
-        console.log(`\n\nIteracao: ${i}`)
-        console.log("cidades:\n")
-        post("cidades/cidade", gerarJSONCidades())
-        console.log("clientes:\n")
-        post("clientes/cliente", gerarJSONClientes())
-        console.log("funcionarios:\n")
-        post("funcionarios/funcionario", gerarJSONFuncionarios())
-        console.log("fornecedores:\n")
-        post("fornecedores/fornecedor", gerarJSONFornecedores())
-        console.log("produtos:\n")
-        post("produtos/produto", gerarJSONProdutos())
-        console.log("estoque:\n")
-        post("estoque/produto-estocado", gerarJSONEstoque())
+        axios.all([post("usuarios/usuario", usuarioMaster), post("cidades/cidade", gerarJSONCidades()), post("clientes/cliente", gerarJSONClientes()), post("funcionarios/funcionario", gerarJSONFuncionarios()), post("fornecedores/fornecedor", gerarJSONFornecedores()), post("produtos/produto", gerarJSONProdutos()), post("estoque/produto-estocado", gerarJSONEstoque())])
+
+        // console.log("usuario master: ")
+        // await post("usuarios/usuario", usuarioMaster)
+        // console.log(`\n\nIteracao: ${i}`)
+        // console.log("cidades:\n")
+        // await post("cidades/cidade", gerarJSONCidades())
+        // console.log("clientes:\n")
+        // await post("clientes/cliente", gerarJSONClientes())
+        // console.log("funcionarios:\n")
+        // await post("funcionarios/funcionario", gerarJSONFuncionarios())
+        // console.log("fornecedores:\n")
+        // await post("fornecedores/fornecedor", gerarJSONFornecedores())
+        // console.log("produtos:\n")
+        // await post("produtos/produto", gerarJSONProdutos())
+        // console.log("estoque:\n")
+        // await post("estoque/produto-estocado", gerarJSONEstoque())
     }
 }
 
 async function post(url, dado) {
     try {
         await axios.post(`http://192.168.1.118:${process.env.PORT}/api/${url}`, dado)
+        console.log("sem erro")
     } catch (erro) {
         if (erro.response) {
+            console.log("erro resposta")
             console.log(erro.response.data)
         } else if (erro.request) {
-            console.log(erro.request)
+            console.log("erro request")
+            console.log(erro)
         } else {
+            console.log("outro erro")
             console.log(erro)
         }
     }
@@ -68,10 +74,10 @@ function gerarStringAleatoria(tamanho, fixo) {
 
 function gerarStringDeNumerosAleatoria(tamanho, minimo, maximo) {
     let resultado = ""
-    if(!minimo){
+    if (!minimo) {
         minimo = 0
     }
-    if(!maximo){
+    if (!maximo) {
         maximo = 10
     }
     for (let i = 0; i < tamanho; i++) {
