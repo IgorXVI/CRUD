@@ -1,13 +1,10 @@
 const express = require("express")
-const Validacao = require("./Validacao")
-
-const _ = require('lodash');
-
+const DAOs = require("../DAOs/DAOs")
+const { body } = require("express-validator/check")
+const _ = require('lodash')
 module.exports = class Controller {
     constructor(nome, nomeSingular, atributos, gerarTodasRotas, masterDAO) {
         this.router = express.Router()
-
-        this.validacao = new Validacao()
 
         this.masterDAO = masterDAO
 
@@ -24,13 +21,15 @@ module.exports = class Controller {
             this.gerarRotaAtualizaUm(this.gerarValidacao(false))
             this.gerarRotaDeletaUm()
         }
+
+        this.gerarValidacao = this.gerarValidacao.bind(this)
     }
 
     gerarRotaBuscaTodos() {
         this.router.get("/", (req, res) => {
             (async () => {
                 try {
-                    this.inicio(req, res, `Buscando ${this.nome}...`)
+                    await this.inicio(req, res, `Buscando ${this.nome}...`)
                     await this.buscaTodos(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
@@ -43,8 +42,8 @@ module.exports = class Controller {
         this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
             (async () => {
                 try {
-                    this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-                    const objeto = this.gerarObjeto(req)
+                    await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+                    const objeto = await this.gerarObjeto(req)
                     await this.adicionaUm(req, res, objeto)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
@@ -57,7 +56,7 @@ module.exports = class Controller {
         this.router.get(`/${this.nomeSingular}/:id`, (req, res) => {
             (async () => {
                 try {
-                    this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
+                    await this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
                     await this.buscaUm(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
@@ -70,7 +69,7 @@ module.exports = class Controller {
         this.router.delete(`/${this.nomeSingular}/:id`, (req, res) => {
             (async () => {
                 try {
-                    this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
+                    await this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
                     await this.deletaUm(req, res)
                 } catch (erro) {
                     this.lidarComErro(erro, req, res)
@@ -83,10 +82,10 @@ module.exports = class Controller {
         this.router.post(`/${this.nomeSingular}/:id`, validacao, (req, res) => {
             (async () => {
                 try {
-                    this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
-                    const objeto = this.gerarObjeto(req)
+                    await this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
+                    const objeto = await this.gerarObjeto(req)
                     await this.atualizaUm(req, res, objeto)
-                } catch {
+                } catch (erro) {
                     this.lidarComErro(erro, req, res)
                 }
             })()
@@ -131,9 +130,9 @@ module.exports = class Controller {
         this.fim(req, res)
     }
 
-    async atualizaUm(req, res, objeto) {
+    async atualizaUm(req, res, objetoRecebido) {
         const DAO = this.masterDAO
-        delete objeto.dataCriacao
+        let objeto = JSON.parse(JSON.stringify(objetoRecebido))
         const objetoDB = await this.buscaObjetoPorID(req.params.id, DAO)
         const keys = Object.keys(objeto)
         let keysDB = Object.keys(objetoDB)
@@ -162,16 +161,16 @@ module.exports = class Controller {
         let objeto = objetoRecebido
         const keys = Object.keys(objeto)
 
-        const DAOs = {
-            cidadesDAO: new CidadesDAO(),
-            funcionariosDAO: new FuncionariosDAO(),
-            clientesDAO: new ClientesDAO(),
-            fornecedoresDAO: new FornecedoresDAO(),
-            produtosDAO: new ProdutosDAO(),
-            estoqueDAO: new EstoqueDAO(),
-            vendasDAO: new VendasDAO(),
-            itensVendaDAO: new ItensVendaDAO(),
-            usuariosDAO: new UsuariosDAO(),
+        const daos = {
+            cidadesDAO: new DAOs.CidadesDAO(),
+            funcionariosDAO: new DAOs.FuncionariosDAO(),
+            clientesDAO: new DAOs.ClientesDAO(),
+            fornecedoresDAO: new DAOs.FornecedoresDAO(),
+            produtosDAO: new DAOs.ProdutosDAO(),
+            estoqueDAO: new DAOs.EstoqueDAO(),
+            vendasDAO: new DAOs.VendasDAO(),
+            itensVendaDAO: new DAOs.ItensVendaDAO(),
+            usuariosDAO: new DAOs.UsuariosDAO(),
         }
 
         for (let i = 0; i < keys.length; i++) {
@@ -183,7 +182,7 @@ module.exports = class Controller {
                 url = url.urlString
                 url = `${url}/${objeto[keys[i]]}`
 
-                let resultado = await this.buscaObjetoPorID(objeto[keys[i]], DAOs[`${_.camelCase(nome)}DAO`])
+                let resultado = await this.buscaObjetoPorID(objeto[keys[i]], daos[`${_.camelCase(nome)}DAO`])
 
                 let nomeSingular = url.replace(`/${nome}/`, ``)
                 nomeSingular = nomeSingular.replace(`api`, ``)
@@ -200,7 +199,7 @@ module.exports = class Controller {
         return campo.charAt(0) === 'i' && campo.charAt(1) === 'd' && campo.length > 2
     }
 
-    lidarComErro(erroRecebido, req, res) {
+    async lidarComErro(erroRecebido, req, res) {
         if (erroRecebido.message.includes("SQLITE_CONSTRAINT: FOREIGN KEY constraint failed")) {
             const erros = [{
                 location: "params",
@@ -278,7 +277,7 @@ module.exports = class Controller {
         this.fim(req, res)
     }
 
-    inicio(req, res, mensagem) {
+    async inicio(req, res, mensagem) {
         console.log(`request id: ${req.id}, data: ${this.dataDeHoje()} -> ${mensagem}`)
         const errosValidacao = req.validationErrors()
         if (errosValidacao) {
@@ -286,7 +285,7 @@ module.exports = class Controller {
         }
     }
 
-    fim(req, res) {
+    async fim(req, res) {
         res.end()
         console.log(`request id: ${req.id}, data: ${this.dataDeHoje()} -> fim`)
     }
@@ -299,34 +298,99 @@ module.exports = class Controller {
 
         const atributosArr = this.atributos.map(atributo => `${atributo.charAt(0).toUpperCase()}${atributo.slice(1)}`)
 
-        let validacao = new Array()
+        let validacaoArr = new Array()
 
         for (let i = 0; i < atributosArr.length; i++) {
 
-            if (!(atributosArr[i] == "DataCriacao" || atributosArr[i] == "DataAlteracao")) {
-                if ((excecoesArr.includes(atributosArr[i]))) {
-                    validacao.push(this.validacao[`valida${atributosArr[i]}`](!obrigatorio))
-                } else {
-                    validacao.push(this.validacao[`valida${atributosArr[i]}`](obrigatorio))
-                }
+            if ((excecoesArr.includes(atributosArr[i]))) {
+                validacaoArr.push(this[`valida${atributosArr[i]}`](!obrigatorio))
+            } else {
+                validacaoArr.push(this[`valida${atributosArr[i]}`](obrigatorio))
             }
 
         }
-        return validacao
+        return validacaoArr
     }
 
-    gerarObjeto(req) {
+    async gerarObjeto(req) {
         let objeto = {}
         for (let i = 0; i < this.atributos.length; i++) {
             objeto[this.atributos[i]] = req.body[this.atributos[i]]
         }
-        objeto.dataAlteracao = this.dataDeHoje()
-        objeto.dataCriacao = this.dataDeHoje()
         return objeto
     }
 
     dataDeHoje() {
         return new Date().toISOString()
+    }
+
+    validaCampoUnico(DAO, campo) {
+        return body(campo).custom(valor => {
+            (async () => {
+                const objeto = await DAO.buscaPorColuna(valor, campo)
+                if (objeto) {
+                    throw new Error(`O valor informado já está cadastrado.`);
+                }
+            })()
+        }).optional()
+    }
+
+    validaNotNull(atributo) {
+        return body(atributo, `É necessário informar o valor.`).exists()
+    }
+
+    validaFixoChars(atributo, valor) {
+        return body(atributo, `O valor deve conter ${valor} caractéres.`).isLength({
+            min: valor,
+            max: valor
+        }).optional()
+    }
+
+    validaMaxChars(atributo, maximo) {
+        return body(atributo, `O valor deve conter no máximo ${maximo} caractéres.`).isLength({
+            max: maximo
+        }).optional()
+    }
+
+    validaMinMaxChars(atributo, minimo, maximo) {
+        return body(atributo, `O valor deve conter no mínimo ${minimo} e no máximo ${maximo} caractéres.`).isLength({
+            min: minimo,
+            max: maximo
+        }).optional()
+    }
+
+    validaDecimal(atributo, minimo, maximo) {
+        if (minimo == null) {
+            minimo = -1.79769e+308
+        }
+
+        if (maximo == null) {
+            maximo = 1.79769e+308
+        }
+
+        return body(atributo, `O valor deve ser um número de ponto flutuante, com um ponto separando a parte inteira da parte decimal, e estar entre ${minimo} e ${maximo}`).isFloat({
+            min: minimo,
+            max: maximo
+        }).optional()
+    }
+
+    validaInteiro(atributo, minimo, maximo) {
+        if (minimo == null) {
+            minimo = -9223372036854775808
+        }
+
+        if (maximo == null) {
+            maximo = 9223372036854775808
+        }
+
+        return body(atributo, `O valor deve ser um número inteiro e estar entre ${minimo} e ${maximo}`).isFloat({
+            min: minimo,
+            max: maximo
+        }).optional()
+    }
+
+    validaDataISO8601(atributo) {
+        return body(atributo, `O valor deve estar no formato aaaa-mm-dd, onde a é o ano, m é o mês e d é o dia.`).isISO8601().optional()
     }
 
 }

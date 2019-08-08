@@ -30,18 +30,27 @@ module.exports = class DAO {
         return resultado
     }
 
-    async adiciona(objeto, colunas) {
+    async adiciona(objeto, colunasRecebidas) {
+        objeto.dataAlteracao = this.dataDeHoje()
+        objeto.dataCriacao = this.dataDeHoje()
+        let colunas = Object.assign("", colunasRecebidas);
+        colunas += `, dataAlteracao, dataCriacao`
+        
         const valores = Object.values(objeto)
 
-        const placeholders = valores.map((valor) => '?').join(',')
+        const placeholders = valores.map(() => '?').join(',')
 
         const sql = `INSERT INTO ${this._tabela} (${colunas}) VALUES (${placeholders})`
         
         return this.runQuery(sql, valores)
     }
 
-    async atualizaPorColuna(objeto, colunaValor, colunaNome, colunas) {
-        const valores = Object.values(objeto)
+    async atualizaPorColuna(objeto, colunaValor, colunaNome, colunasRecebidas) {
+        objeto.dataAlteracao = this.dataDeHoje()
+        let colunas = Object.assign("", colunasRecebidas);
+        colunas += `, dataAlteracao`
+
+        let valores = Object.values(objeto)
         valores.push(colunaValor)
 
         const colunasEPlaceholders = colunas.split(",").map(nome => `${nome} = ?`).join(",")
@@ -70,6 +79,10 @@ module.exports = class DAO {
     async buscaTodos() {
         const sql = `SELECT * FROM ${this._tabela}`
         return this.allQuery(sql)
+    }
+
+    dataDeHoje() {
+        return new Date().toISOString()
     }
 
 }

@@ -3,15 +3,12 @@ const ItensVendaDAO = require("../DAOs/ItensVendaDAO")
 const EstoqueDAO = require("../DAOs/EstoqueDAO")
 const ProdutosDAO =  require("../DAOs/ProdutosDAO")
 const VendasDAO = require("../DAOs/VendasDAO")
-
 module.exports = class ItensVendaController extends Controller {
     constructor() {
         super(`itens-venda`, `item`, ['valorTotal',
             'quantidade',
             'produto',
-            'venda',
-            'dataAlteracao',
-            'dataCriacao'
+            'venda'
         ], false, new ItensVendaDAO())
 
         this.estoqueDAO = new EstoqueDAO()

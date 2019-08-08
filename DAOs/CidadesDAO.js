@@ -6,11 +6,11 @@ module.exports = class CidadesDAO extends DAO{
     }
 
     async adiciona(cidade) {
-        return super.adiciona(cidade, `nome, UF, CEP, dataAlteracao, dataCriacao`)
+        return super.adiciona(cidade, `nome, UF, CEP`)
     }
 
     async atualizaPorID(cidade, id){
-        return super.atualizaPorColuna(cidade, id, `id`, `nome, UF, CEP, dataAlteracao`)
+        return super.atualizaPorColuna(cidade, id, `id`, `nome, UF, CEP`)
     }
 
     async deletaPorID(id){

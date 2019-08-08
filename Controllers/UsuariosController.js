@@ -1,37 +1,31 @@
-const Controller = require("./Controller")
+const PessoaFisicaController = require("./PessoaFisicaController")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
-const UsuariosDAO = require("../DAOs/UsuariosDAO")
-
 const {
     body
 } = require("express-validator/check")
 
-module.exports = class UsuariosController extends Controller {
-    constructor() {
-        super(`usuarios`, `usuario`, ['nome',
-            'email',
-            'senha',
-            'nivelAcesso',
-            'dataAlteracao',
-            'dataCriacao'
-        ], false, new UsuariosDAO())
+module.exports = class UsuariosController extends PessoaFisicaController {
+    constructor(nome, nomeSingular, atributos, gerarTodasRotas, masterDAO) {
+        super(nome, nomeSingular, ['senha', 'nivelAcesso'].concat(atributos), false, masterDAO)
 
-        this.gerarRotaLogin()
-        this.gerarRotaSignup()
-        this.gerarRotaAdicionaUm()
-        this.gerarRotaAtualizaUm()
-        this.gerarRotaLogout()
-        super.gerarRotaBuscaTodos()
-        super.gerarRotaBuscaUm()
-        super.gerarRotaDeletaUm()
+        if (gerarTodasRotas) {
+            this.gerarRotaLogin()
+            this.gerarRotaSignup(this.gerarValidacao(true))
+            this.gerarRotaAdicionaUm(this.gerarValidacao(true))
+            this.gerarRotaAtualizaUm(this.gerarValidacao(false))
+            this.gerarRotaLogout()
+            super.gerarRotaBuscaTodos()
+            super.gerarRotaBuscaUm()
+            super.gerarRotaDeletaUm()
+        }
     }
 
     gerarRotaLogin() {
         let dadosBanco = undefined
 
         this.router.post(`/usuario/login`, [
-            this.validacao.validaEmail(true),
+            this.validaEmail(true),
             body("email").custom(valor => {
                 return this.masterDAO.buscaPorEmail(valor).then(objeto => {
                     if (!objeto) {
@@ -41,13 +35,13 @@ module.exports = class UsuariosController extends Controller {
                     }
                 });
             }).optional(),
-            this.validacao.validaSenha(true),
+            this.validaSenha(true),
             body("tokenEmJSON").isBoolean().withMessage("O valor deve ser booleano."),
             body("tokenEmJSON").exists().withMessage("O valor deve ser informado.")
         ], (req, res) => {
             (async () => {
                 try {
-                    super.inicio(req, res, "Fazendo login de usuario...")
+                    await super.inicio(req, res, "Fazendo login de usuario...")
                     const senhaEhValida = await bcrypt.compare(req.body.senha, dadosBanco.senha)
                     if (!senhaEhValida) {
                         throw new Error("Erro senha invalida.")
@@ -80,17 +74,12 @@ module.exports = class UsuariosController extends Controller {
         })
     }
 
-    gerarRotaSignup() {
-        this.router.post(`/usuario/signup`, [
-            this.validacao.validaNome(true),
-            this.validacao.validaEmail(true),
-            this.validacao.validaCampoUnico(this.masterDAO, "email"),
-            this.validacao.validaSenha(true)
-        ], (req, res) => {
+    gerarRotaSignup(validacao) {
+        this.router.post(`/usuario/signup`, validacao, (req, res) => {
             (async () => {
                 try {
-                    super.inicio(req, res, "Fazendo signup de usuario...")
-                    const dadosSignup = super.gerarObjeto(req)
+                    await super.inicio(req, res, "Fazendo signup de usuario...")
+                    const dadosSignup = await super.gerarObjeto(req)
                     dadosSignup.nivelAcesso = 2
                     dadosSignup.senha = await bcrypt.hash(dadosSignup.senha, 10)
                     await super.adicionaUm(req, res, dadosSignup)
@@ -101,18 +90,12 @@ module.exports = class UsuariosController extends Controller {
         })
     }
 
-    gerarRotaAdicionaUm() {
-        this.router.post(`/usuario`, [
-            this.validacao.validaNome(true),
-            this.validacao.validaEmail(true),
-            this.validacao.validaCampoUnico(this.masterDAO, "email"),
-            this.validacao.validaSenha(true),
-            this.validacao.validaNivelAcesso(true)
-        ], (req, res) => {
+    gerarRotaAdicionaUm(validacao) {
+        this.router.post(`/usuario`, validacao, (req, res) => {
             (async () => {
                 try {
-                    super.inicio(req, res, "Adicionando usuario...")
-                    const objeto = super.gerarObjeto(req)
+                    await super.inicio(req, res, "Adicionando usuario...")
+                    const objeto = await super.gerarObjeto(req)
                     objeto.senha = await bcrypt.hash(objeto.senha, 10)
                     await super.adicionaUm(req, res, objeto)
                 } catch (erro) {
@@ -122,24 +105,19 @@ module.exports = class UsuariosController extends Controller {
         })
     }
 
-    gerarRotaAtualizaUm() {
-        this.router.post(`/usuario/:id`, [
-            this.validacao.validaNome(false),
-            this.validacao.validaEmail(false),
-            this.validacao.validaSenha(false),
-            this.validacao.validaNivelAcesso(false)
-        ], (req, res) => {
+    gerarRotaAtualizaUm(validacao) {
+        this.router.post(`/usuario/:id`, validacao, (req, res) => {
             (async () => {
                 try {
-                    super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)
-                    const objeto = super.gerarObjeto(req)
-                    if(objeto.email){
+                    await super.inicio(req, res, `Atualizando o usuário com id = ${req.params.id}...`)
+                    const objeto = await super.gerarObjeto(req)
+                    if (objeto.email) {
                         const resultado = await this.masterDAO.buscaPorEmail(objeto.email)
-                        if( !( !resultado || (resultado && resultado.id == req.params.id) ) ){
+                        if (!(!resultado || (resultado && resultado.id == req.params.id))) {
                             throw new Error("Erro email ja cadastrado.")
                         }
                     }
-                    if(objeto.senha){
+                    if (objeto.senha) {
                         objeto.senha = await bcrypt.hash(objeto.senha, 10)
                     }
                     await super.atualizaUm(req, res, objeto)
@@ -159,6 +137,24 @@ module.exports = class UsuariosController extends Controller {
             res.json({})
             super.fim(req, res)
         })
+    }
+
+    validaSenha(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("senha"))
+        }
+        validacoes.push(this.validaMinMaxChars("senha", 8, 255))
+        return validacoes
+    }
+
+    validaNivelAcesso(obrigatorio) {
+        let validacoes = new Array()
+        if (obrigatorio) {
+            validacoes.push(this.validaNotNull("nivelAcesso"))
+        }
+        validacoes.push(this.validaInteiro("nivelAcesso", 0, 2))
+        return validacoes
     }
 
 }

@@ -1,19 +1,9 @@
-const Controller = require("./Controller")
+const PessoaJuridicaController = require("./PessoaJuridicaController")
 const FornecedoresDAO = require("../DAOs/FornecedoresDAO")
 
-module.exports = class FornecedoresController extends Controller{
+module.exports = class FornecedoresController extends PessoaJuridicaController{
     constructor(){
-        super(`fornecedores`, `fornecedor`, [ 'CNPJ',
-        'nome',
-        'email',
-        'cidade',
-        'dataAlteracao',
-        'dataCriacao',
-        'telefone',
-        'bairro',
-        'rua',
-        'numeroCasa',
-        'complemento' ], true, new FornecedoresDAO())
+        super(`fornecedores`, `fornecedor`, [], true, new FornecedoresDAO())
     }
 
 }

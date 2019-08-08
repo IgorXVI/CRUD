@@ -6,11 +6,11 @@ module.exports = class UsuariosDAO extends DAO {
     }
 
     async adiciona(usuario) {
-        return super.adiciona(usuario, `nome, email, senha, nivelAcesso, dataAlteracao, dataCriacao`)
+        return super.adiciona(usuario, `nome, email, senha, nivelAcesso`)
     }
 
     async atualizaPorID(usuario, id){
-        return super.atualizaPorColuna(usuario, id, `id`, `nome, email, senha, nivelAcesso, dataAlteracao`)
+        return super.atualizaPorColuna(usuario, id, `id`, `nome, email, senha, nivelAcesso`)
     }
 
     async deletaPorID(id){
