@@ -84,7 +84,7 @@ module.exports = class ProdutosController extends Controller {
         }
         validacoes.push(this.validaInteiro("fornecedor", 1))
         validacoes.push(body("fornecedor").custom(id => {
-            (async () => {
+            return (async () => {
                 const fornecedoresDAO = new DAOs.FornecedoresDAO()
                 const objeto = await fornecedoresDAO.buscaPorID(id)
                 if (!objeto) {

@@ -1,4 +1,4 @@
-const dbConnection = require("../database/db")
+const dbConnection = require("./db")
 
 module.exports = class DAO {
     constructor(tabela) {
@@ -30,11 +30,12 @@ module.exports = class DAO {
         return resultado
     }
 
-    async adiciona(objeto, colunasRecebidas) {
+    async adiciona(objeto) {
         objeto.dataAlteracao = this.dataDeHoje()
         objeto.dataCriacao = this.dataDeHoje()
-        let colunas = Object.assign("", colunasRecebidas);
-        colunas += `, dataAlteracao, dataCriacao`
+
+        let colunas = Object.keys(objeto).join(',')
+        colunas += `,dataAlteracao,dataCriacao`
         
         const valores = Object.values(objeto)
 
@@ -45,10 +46,11 @@ module.exports = class DAO {
         return this.runQuery(sql, valores)
     }
 
-    async atualizaPorColuna(objeto, colunaValor, colunaNome, colunasRecebidas) {
+    async atualizaPorColuna(objeto, colunaValor, colunaNome) {
         objeto.dataAlteracao = this.dataDeHoje()
-        let colunas = Object.assign("", colunasRecebidas);
-        colunas += `, dataAlteracao`
+
+        let colunas = Object.keys(objeto).join(',')
+        colunas += `,dataAlteracao`
 
         let valores = Object.values(objeto)
         valores.push(colunaValor)

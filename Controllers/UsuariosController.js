@@ -22,18 +22,15 @@ module.exports = class UsuariosController extends PessoaFisicaController {
     }
 
     gerarRotaLogin() {
-        let dadosBanco = undefined
-
         this.router.post(`/usuario/login`, [
             this.validaEmail(true),
             body("email").custom(valor => {
-                return this.masterDAO.buscaPorEmail(valor).then(objeto => {
+                return (async () => {
+                    const objeto = await this.masterDAO.buscaPorEmail(valor)
                     if (!objeto) {
-                        return Promise.reject(`O valor informado não está cadastrado.`);
-                    } else {
-                        dadosBanco = objeto
+                        throw new Error(`O valor informado não está cadastrado.`);
                     }
-                });
+                })()
             }).optional(),
             this.validaSenha(true),
             body("tokenEmJSON").isBoolean().withMessage("O valor deve ser booleano."),
@@ -42,6 +39,7 @@ module.exports = class UsuariosController extends PessoaFisicaController {
             (async () => {
                 try {
                     await super.inicio(req, res, "Fazendo login de usuario...")
+                    const dadosBanco = await this.masterDAO.buscaPorEmail(req.body.email)
                     const senhaEhValida = await bcrypt.compare(req.body.senha, dadosBanco.senha)
                     if (!senhaEhValida) {
                         throw new Error("Erro senha invalida.")

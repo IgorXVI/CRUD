@@ -25,7 +25,7 @@ module.exports = class EstoqueController extends AlgoComEnderecoController {
         }
         validacoes.push(this.validaInteiro("produto", 1))
         validacoes.push(body("produto").custom(id => {
-            (async () => {
+            return (async () => {
                 const produtosDAO = new DAOs.ProdutosDAO()
                 const objeto = await produtosDAO.buscaPorID(id)
                 if (!objeto) {

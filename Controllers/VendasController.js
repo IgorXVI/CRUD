@@ -168,7 +168,7 @@ module.exports = class VendasController extends Controller {
     validaListaDeProdutos(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(validaNotNull("listaDeProdutos"))
+            validacoes.push(this.validaNotNull("listaDeProdutos"))
         }
         validacoes.push(body("listaDeProdutos").custom(lista => {
             if(!(lista instanceof Array)){
@@ -217,7 +217,7 @@ module.exports = class VendasController extends Controller {
         }
         validacoes.push(this.validaInteiro("funcionario", 1))
         validacoes.push(body("funcionario").custom(id => {
-            (async () => {
+            return (async () => {
                 const funcionariosDAO = new DAOs.FuncionariosDAO()
                 const objeto = await funcionariosDAO.buscaPorID(id)
                 if (!objeto) {
@@ -231,11 +231,11 @@ module.exports = class VendasController extends Controller {
     validaCliente(obrigatorio) {
         let validacoes = new Array()
         if (obrigatorio) {
-            validacoes.push(validaNotNull("cliente"))
+            validacoes.push(this.validaNotNull("cliente"))
         }
-        validacoes.push(validaInteiro("cliente", 1).optional())
+        validacoes.push(this.validaInteiro("cliente", 1).optional())
         validacoes.push(body("cliente").custom(id => {
-            (async () => {
+            return (async () => {
                 const clientesDAO = new DAOs.CidadesDAO()
                 const objeto = await clientesDAO.buscaPorID(id)
                 if (!objeto) {
