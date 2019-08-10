@@ -1,142 +1,116 @@
 const express = require("express")
-const DAOs = require("../DAOs/DAOs")
-const { body } = require("express-validator/check")
 const _ = require('lodash')
 module.exports = class Controller {
-    constructor(nome, nomeSingular, atributos, gerarTodasRotas, masterDAO) {
+    constructor(model, naoGerarTodasRotas) {
         this.router = express.Router()
+        this.model = model
 
-        this.masterDAO = masterDAO
+        this.nomePlural = _.kebabCase(model.nomePlural)
+        this.nomeSingular = _.kebabCase(model.nomeSingular)
 
-        require("./APIURLs")[_.camelCase(nome)] = `api/${nome}/${nomeSingular}`
-
-        this.atributos = atributos
-        this.nome = nome
-        this.nomeSingular = nomeSingular
-
-        if (gerarTodasRotas) {
+        if(!naoGerarTodasRotas){
+            this.gerarRotaAdicionaUm()
+            this.gerarRotaAtualizaUm()
             this.gerarRotaBuscaTodos()
             this.gerarRotaBuscaUm()
-            this.gerarRotaAdicionaUm(this.gerarValidacao(true))
-            this.gerarRotaAtualizaUm(this.gerarValidacao(false))
             this.gerarRotaDeletaUm()
         }
-
-        this.gerarValidacao = this.gerarValidacao.bind(this)
-        this.gerarObjeto = this.gerarObjeto.bind(this)
     }
 
     gerarRotaBuscaTodos() {
-        this.router.get("/", (req, res) => {
-            (async () => {
-                try {
-                    await this.inicio(req, res, `Buscando ${this.nome}...`)
-                    await this.buscaTodos(req, res)
-                } catch (erro) {
-                    this.lidarComErro(erro, req, res)
-                }
-            })()
+        this.router.get(`/${this.nomePlural}`, async (req, res) => {
+            try {
+                await this.inicio(req, res, `Buscando ${this.nomePlural}...`)
+                await this.buscaTodos(req, res)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
+            }
         })
     }
 
-    gerarRotaAdicionaUm(validacao) {
-        this.router.post(`/${this.nomeSingular}`, validacao, (req, res) => {
-            (async () => {
-                try {
-                    await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-                    const objeto = await this.gerarObjeto(req)
-                    await this.adicionaUm(req, res, objeto)
-                } catch (erro) {
-                    this.lidarComErro(erro, req, res)
-                }
-            })()
+    gerarRotaAdicionaUm() {
+        this.router.post(`/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
+            try {
+                await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+                const objeto = await this.gerarObjeto(req)
+                await this.adicionaUm(req, res, objeto)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
+            }
         })
     }
 
     gerarRotaBuscaUm() {
-        this.router.get(`/${this.nomeSingular}/:id`, (req, res) => {
-            (async () => {
-                try {
-                    await this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
-                    await this.buscaUm(req, res)
-                } catch (erro) {
-                    this.lidarComErro(erro, req, res)
-                }
-            })()
+        this.router.get(`/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+            try {
+                await this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
+                await this.buscaUm(req, res)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
+            }
         })
     }
 
     gerarRotaDeletaUm() {
-        this.router.delete(`/${this.nomeSingular}/:id`, (req, res) => {
-            (async () => {
-                try {
-                    await this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
-                    await this.deletaUm(req, res)
-                } catch (erro) {
-                    this.lidarComErro(erro, req, res)
-                }
-            })()
+        this.router.delete(`/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+            try {
+                await this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
+                await this.deletaUm(req, res)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
+            }
         })
     }
 
-    gerarRotaAtualizaUm(validacao) {
-        this.router.post(`/${this.nomeSingular}/:id`, validacao, (req, res) => {
-            (async () => {
-                try {
-                    await this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
-                    const objeto = await this.gerarObjeto(req)
-                    await this.atualizaUm(req, res, objeto)
-                } catch (erro) {
-                    this.lidarComErro(erro, req, res)
-                }
-            })()
+    gerarRotaAtualizaUm() {
+        this.router.post(`/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+            try {
+                await this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
+                const objeto = await this.gerarObjeto(req)
+                await this.atualizaUm(req, res, objeto)
+            } catch (erro) {
+                this.lidarComErro(erro, req, res)
+            }
         })
     }
 
     async inicio(req, res, mensagem) {
-        console.log(`request id: ${req.id}, data: ${this.dataDeHoje()} -> ${mensagem}`)
-        const errosValidacao = req.validationErrors()
-        if (errosValidacao) {
-            throw new Error("Erro de validacao.")
-        }
+        console.log(`request id: ${req.id}, data: ${await this.dataDeHoje()} -> ${mensagem}`)
     }
 
     async fim(req, res) {
         res.end()
-        console.log(`request id: ${req.id}, data: ${this.dataDeHoje()} -> fim`)
+        console.log(`request id: ${req.id}, data: ${await this.dataDeHoje()} -> fim`)
     }
 
-    gerarValidacao(obrigatorio, excecoes) {
-        let excecoesArr = []
-        if (excecoes) {
-            excecoesArr = excecoes.map(excecao => `${excecao.charAt(0).toUpperCase()}${excecao.slice(1)}`)
-        }
-
-        const atributosArr = this.atributos.map(atributo => `${atributo.charAt(0).toUpperCase()}${atributo.slice(1)}`)
-
-        let validacaoArr = new Array()
-
-        for (let i = 0; i < atributosArr.length; i++) {
-
-            if ((excecoesArr.includes(atributosArr[i]))) {
-                validacaoArr.push(this[`valida${atributosArr[i]}`](!obrigatorio))
-            } else {
-                validacaoArr.push(this[`valida${atributosArr[i]}`](obrigatorio))
+    async lidarComErro(erro, req, res){
+        try {
+            const erros = JSON.parse(erro)
+            if(!(erros instanceof Array)){
+                let s = 400
+                if(erros.msg === "Erro no servidor."){
+                    s = 500
+                }
+                res.status(s).json({
+                    erros: [erros]
+                })
             }
-
+            else{
+                res.status(400).json({
+                    erros
+                })
+            }
         }
-        return validacaoArr
+        catch (e) {
+            console.log(e)
+            res.status(500).json({
+                erros: [{msg: "Erro no servidor."}]
+            })
+        }
+        this.fim(req, res)
     }
 
-    async gerarObjeto(req) {
-        let objeto = {}
-        for (let i = 0; i < this.atributos.length; i++) {
-            objeto[this.atributos[i]] = req.body[this.atributos[i]]
-        }
-        return objeto
-    }
-
-    dataDeHoje() {
+    async dataDeHoje() {
         return new Date().toISOString()
     }
 

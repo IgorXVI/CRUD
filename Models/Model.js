@@ -9,29 +9,28 @@ module.exports = class Model {
         nomesPlural[nomeSingular] = nomePlural
 
         this._lidarComErro = this._lidarComErro.bind(this)
-        this.gerarAtributosJSON = this.gerarAtributosJSON.bind(this)
+        this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
 
-        this._id = 0
         this._DAO = new DAO(nomePlural)
         this._errosValidacao = []
+        this.JSON = {}
+        this.JSON.id = 0
     }
 
     async id(novoId) {
         await this._validaInteiro("id", novoId, 1)
-        this._id = novoId
+        this.JSON.id = novoId
     }
 
     async _gerarAtributosJSON(objeto) {
         try {
-            let o = {}
             const keys = Object.keys(objeto)
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i]
                 try {
-                    if (!this[key]) {
-                        throw new Error(this._formataErro(key, objeto[key], "Parâmetro inválido."))
+                    if (this.JSON[key] === undefined || this.JSON[key] === null) {
+                        throw new Error(this._formataErro(key, undefined, "Parâmetro inválido."))
                     } else {
-                        o[key] = objeto[key]
                         await this[key](objeto[key])
                     }
                 } catch (e) {
@@ -40,8 +39,6 @@ module.exports = class Model {
             }
             if (this._errosValidacao.length > 0) {
                 throw new Error("Erro: erros de validação.")
-            } else {
-                return o
             }
         } catch (err) {
             throw new Error(await this._lidarComErro(err))
@@ -62,7 +59,7 @@ module.exports = class Model {
 
     async deletaUm() {
         try {
-            const info = await this._DAO.deletaPorColuna(this._id, "id")
+            const info = await this._DAO.deletaPorColuna(this.JSON.id, "id")
             if(info.changes === 0){
                 throw new Error("Erro: ID nao existe.")
             }
@@ -73,7 +70,7 @@ module.exports = class Model {
 
     async buscaUm() {
         try {
-            return await this._buscaObjetoPorID(this._id, this._DAO)
+            return await this._buscaObjetoPorID(this.JSON.id, this._DAO)
         } catch (e) {
             throw new Error(await this._lidarComErro(e))
         }
@@ -81,8 +78,8 @@ module.exports = class Model {
 
     async adicionaUm(objeto) {
         try {
-            const o = await this._gerarAtributosJSON(objeto)
-            await this._DAO.adiciona(o)
+            await this._gerarAtributosJSON(objeto)
+            await this._DAO.adiciona(this.JSON)
         } catch (e) {
             throw new Error(await this._lidarComErro(e))
         }
@@ -90,18 +87,8 @@ module.exports = class Model {
 
     async atualizaUm(objeto) {
         try {
-            let o = await this._gerarAtributosJSON(objeto)
-            const keys = Object.keys(o)
-
-            const objetoDB = await this._buscaObjetoPorID(this._id, this._DAO)
-
-            for (let i = 0; i < keys.length; i++) {
-                if (!o[keys[i]]) {
-                    o[keys[i]] = objetoDB[keys[i]]
-                }
-            }
-
-            await this._DAO.atualizaPorColuna(o, this._id, "id")
+            await this._gerarAtributosJSON(objeto)
+            await this._DAO.atualizaPorColuna(this.JSON, "id")
         } catch (e) {
             throw new Error(await this._lidarComErro(e))
         }
@@ -111,7 +98,7 @@ module.exports = class Model {
         try {
             let objeto = await DAO.buscaPorColuna(id, "id")
             if (!objeto) {
-                if (id === this._id) {
+                if (id === this.JSON.id) {
                     throw new Error("Erro: ID nao existe.")
                 } else {
                     console.log({
@@ -174,7 +161,7 @@ module.exports = class Model {
             return this._formataErro(undefined, undefined, "Erro de valor único.")
         }
         else if (erro.message.includes("Erro: ID nao existe.")) {
-            return this._formataErro("id", this._id, "O valor informado não está cadastrado.")
+            return this._formataErro("id", this.JSON.id, "O valor informado não está cadastrado.")
         } 
         else if (erro.message.includes("Erro: erros de validação.")) {
             return JSON.stringify(this._errosValidacao)
@@ -191,8 +178,15 @@ module.exports = class Model {
         }
     }
 
+    async _validaExiste(DAO, atributo, valor) {
+        const objeto = await DAO.buscaPorColuna(valor, "id")
+        if (!objeto) {
+            throw new Error(await this._formataErro(atributo, valor, "O valor informado não está cadastrado."))
+        }
+    }
+
     async _validaNotNull(atributo, valor) {
-        if (!valor) {
+        if (valor === undefined || valor === null) {
             throw new Error(await this._formataErro(atributo, valor, "O valor informado não pode ser nulo."))
         }
     }

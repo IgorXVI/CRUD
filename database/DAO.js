@@ -6,19 +6,19 @@ module.exports = class DAO {
         this._tabela = tabela
     }
 
-    runQuery(sql, valores){
+    async runQuery(sql, valores){
         const statement = this._connection.prepare(sql)
         const info = statement.run(valores)
         return info
     }
 
-    getQuery(sql, valores){
+    async getQuery(sql, valores){
         const statement = this._connection.prepare(sql)
         const resultado = statement.get(valores)
         return resultado
     }
 
-    allQuery(sql, valores){
+    async allQuery(sql, valores){
         const statement = this._connection.prepare(sql)
         let resultado = undefined
         if(valores){
@@ -31,8 +31,8 @@ module.exports = class DAO {
     }
 
     async adiciona(objeto) {
-        objeto.dataAlteracao = this.dataDeHoje()
-        objeto.dataCriacao = this.dataDeHoje()
+        objeto.dataAlteracao = await this.dataDeHoje()
+        objeto.dataCriacao = await this.dataDeHoje()
 
         let colunas = Object.keys(objeto).join(',')
         colunas += `,dataAlteracao,dataCriacao`
@@ -46,12 +46,14 @@ module.exports = class DAO {
         return this.runQuery(sql, valores)
     }
 
-    async atualizaPorColuna(objeto, colunaValor, colunaNome) {
-        objeto.dataAlteracao = this.dataDeHoje()
+    async atualizaPorColuna(objeto, colunaNome) {
+        objeto.dataAlteracao = await this.dataDeHoje()
 
         let colunas = Object.keys(objeto).join(',')
         colunas += `,dataAlteracao`
 
+        const colunaValor = JSON.parse(JSON.stringify(objeto[colunaNome]))
+        delete objeto[colunaNome]
         let valores = Object.values(objeto)
         valores.push(colunaValor)
 
@@ -83,7 +85,7 @@ module.exports = class DAO {
         return this.allQuery(sql)
     }
 
-    dataDeHoje() {
+    async dataDeHoje() {
         return new Date().toISOString()
     }
 

@@ -6,18 +6,18 @@ module.exports = class Ususarios extends PessoaFisica {
     constructor(nomeSingular, nomePlural) {
         super(nomeSingular, nomePlural)
 
-        this._senha = ""
-        this._nivelAcesso = 0
+        this.JSON.senha = ""
+        this.JSON.nivelAcesso = 0
     }
 
     async gerarJWT(objeto) {
         try {
             await this.gerarAtributosJSON(objeto)
-            const dadosBanco = await this._DAO.buscaPorColuna(this._email, "email")
+            const dadosBanco = await this._DAO.buscaPorColuna(this.JSON.email, "email")
             if (!dadosBanco) {
                 throw new Error("Erro: erro no gerador de JWT.")
             } else {
-                const senhaEhValida = await bcrypt.compare(this._senha, dadosBanco.senha)
+                const senhaEhValida = await bcrypt.compare(this.JSON.senha, dadosBanco.senha)
                 if (!senhaEhValida) {
                     throw new Error("Erro: erro no gerador de JWT.")
                 } else {
@@ -42,7 +42,7 @@ module.exports = class Ususarios extends PessoaFisica {
         await this._validaMinMaxChars("senha", novaSenha, 8, 255)
         try {
             const hash = await bcrypt.hash(novaSenha, 10)
-            this._senha = hash
+            this.JSON.senha = hash
         }
         catch(e){
             throw new Error(this._lidarComErro(e))
@@ -52,7 +52,7 @@ module.exports = class Ususarios extends PessoaFisica {
     async nivelAcesso(novoNivelAcesso) {
         await this._validaNotNull("nivelAcesso", novoNivelAcesso)
         await this._validaInteiro("nivelAcesso", novoNivelAcesso, 0, 2)
-        this._nivelAcesso = novoNivelAcesso
+        this.JSON.nivelAcesso = novoNivelAcesso
     }
 
     async _lidarComErro(erro) {
