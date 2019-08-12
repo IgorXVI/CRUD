@@ -18,10 +18,12 @@ module.exports = class Controller {
     }
 
     gerarRotaBuscaTodos() {
-        this.router.get(`/${this.nomePlural}`, async (req, res) => {
+        this.router.get(`api/${this.nomePlural}`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Buscando ${this.nomePlural}...`)
-                await this.buscaTodos(req, res)
+                const resultado = await this.model.buscaTodos()
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 this.lidarComErro(erro, req, res)
             }
@@ -29,11 +31,12 @@ module.exports = class Controller {
     }
 
     gerarRotaAdicionaUm() {
-        this.router.post(`/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
+        this.router.post(`api/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-                const objeto = await this.gerarObjeto(req)
-                await this.adicionaUm(req, res, objeto)
+                await this.model.adicionaUm(req.body)
+                res.status(200)
+                this.fim(req, res)
             } catch (erro) {
                 this.lidarComErro(erro, req, res)
             }
@@ -41,10 +44,12 @@ module.exports = class Controller {
     }
 
     gerarRotaBuscaUm() {
-        this.router.get(`/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.get(`api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
-                await this.buscaUm(req, res)
+                const resultado = await this.model.buscaUm(req.params.id)
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 this.lidarComErro(erro, req, res)
             }
@@ -52,10 +57,12 @@ module.exports = class Controller {
     }
 
     gerarRotaDeletaUm() {
-        this.router.delete(`/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.delete(`api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
-                await this.deletaUm(req, res)
+                await this.model.deletaUm(req.params.id)
+                res.status(200)
+                this.fim(req, res)
             } catch (erro) {
                 this.lidarComErro(erro, req, res)
             }
@@ -63,11 +70,10 @@ module.exports = class Controller {
     }
 
     gerarRotaAtualizaUm() {
-        this.router.post(`/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.post(`api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
-                const objeto = await this.gerarObjeto(req)
-                await this.atualizaUm(req, res, objeto)
+                await this.model.atualizaUm(req.body, req.params.id)
             } catch (erro) {
                 this.lidarComErro(erro, req, res)
             }
@@ -75,37 +81,27 @@ module.exports = class Controller {
     }
 
     async inicio(req, res, mensagem) {
-        console.log(`request id: ${req.id}, data: ${await this.dataDeHoje()} -> ${mensagem}`)
+        console.log(`request: ${req.id}, data: ${await this.dataDeHoje()} -> ${mensagem}`)
     }
 
     async fim(req, res) {
         res.end()
-        console.log(`request id: ${req.id}, data: ${await this.dataDeHoje()} -> fim`)
+        console.log(`request: ${req.id}, data: ${await this.dataDeHoje()} -> fim`)
     }
 
     async lidarComErro(erro, req, res){
         try {
-            const erros = JSON.parse(erro)
-            if(!(erros instanceof Array)){
-                let s = 400
-                if(erros.msg === "Erro no servidor."){
-                    s = 500
-                }
-                res.status(s).json({
-                    erros: [erros]
-                })
+            const err = JSON.parse(erro)
+            if(err.msg === "Erro no servidor."){
+                res.status(500).json(err)
             }
             else{
-                res.status(400).json({
-                    erros
-                })
+                res.status(400).json(err)
             }
         }
         catch (e) {
             console.log(e)
-            res.status(500).json({
-                erros: [{msg: "Erro no servidor."}]
-            })
+            res.status(500).json({msg: "Erro no servidor."})
         }
         this.fim(req, res)
     }

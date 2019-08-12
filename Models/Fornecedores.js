@@ -1,6 +1,6 @@
 const PessoaJuridica = require("./PessoaJuridica")
 
-module.exports = class Fornecedor extends PessoaJuridica {
+module.exports = class Fornecedores extends PessoaJuridica {
     constructor() {
         super("fornecedor", "fornecedores")
     }

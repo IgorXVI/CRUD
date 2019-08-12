@@ -12,37 +12,9 @@ module.exports = class Model {
         this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
 
         this._DAO = new DAO(nomePlural)
-        this._errosValidacao = []
+        this.errosValidacao = []
         this.JSON = {}
         this.JSON.id = 0
-    }
-
-    async id(novoId) {
-        await this._validaInteiro("id", novoId, 1)
-        this.JSON.id = novoId
-    }
-
-    async _gerarAtributosJSON(objeto) {
-        try {
-            const keys = Object.keys(objeto)
-            for (let i = 0; i < keys.length; i++) {
-                const key = keys[i]
-                try {
-                    if (this.JSON[key] === undefined || this.JSON[key] === null) {
-                        throw new Error(this._formataErro(key, undefined, "Parâmetro inválido."))
-                    } else {
-                        await this[key](objeto[key])
-                    }
-                } catch (e) {
-                    this._errosValidacao.push(JSON.parse(e))
-                }
-            }
-            if (this._errosValidacao.length > 0) {
-                throw new Error("Erro: erros de validação.")
-            }
-        } catch (err) {
-            throw new Error(await this._lidarComErro(err))
-        }
     }
 
     async buscaTodos() {
@@ -57,19 +29,21 @@ module.exports = class Model {
         }
     }
 
-    async deletaUm() {
+    async deletaUm(id) {
         try {
+            await this.id(id)
             const info = await this._DAO.deletaPorColuna(this.JSON.id, "id")
-            if(info.changes === 0){
-                throw new Error("Erro: ID nao existe.")
+            if (info.changes === 0) {
+                throw new Error("Erro: ID dos params nao existe.")
             }
         } catch (e) {
             throw new Error(await this._lidarComErro(e))
         }
     }
 
-    async buscaUm() {
+    async buscaUm(id) {
         try {
+            await this.id(id)
             return await this._buscaObjetoPorID(this.JSON.id, this._DAO)
         } catch (e) {
             throw new Error(await this._lidarComErro(e))
@@ -79,69 +53,90 @@ module.exports = class Model {
     async adicionaUm(objeto) {
         try {
             await this._gerarAtributosJSON(objeto)
-            await this._DAO.adiciona(this.JSON)
+            let o = JSON.parse(JSON.stringify(this.JSON))
+            delete o.id
+            await this._DAO.adiciona(o)
         } catch (e) {
             throw new Error(await this._lidarComErro(e))
         }
     }
 
-    async atualizaUm(objeto) {
+    async atualizaUm(objeto, id) {
         try {
             await this._gerarAtributosJSON(objeto)
-            await this._DAO.atualizaPorColuna(this.JSON, "id")
+            await this.id(id)
+            const info = await this._DAO.atualizaPorColuna(this.JSON, "id")
+            if (info.changes === 0) {
+                throw new Error("Erro: ID dos params nao existe.")
+            }
         } catch (e) {
             throw new Error(await this._lidarComErro(e))
+        }
+    }
+
+    async id(novoId) {
+        await this._validaInteiro("id", novoId, 1)
+        await this._validaExiste(this._DAO, "id", novoId)
+        this.JSON.id = novoId
+    }
+
+    async _gerarAtributosJSON(objeto) {
+        const keys = Object.keys(objeto)
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i]
+            try {
+                if (this.JSON[key] === undefined || this.JSON[key] === null) {
+                    throw new Error(this._formataErro(key, undefined, "Parâmetro inválido."))
+                }
+                await this[key](objeto[key])
+            } catch (e) {
+                this.errosValidacao.push(JSON.parse(e))
+            }
+        }
+        if (this.errosValidacao.length > 0) {
+            throw new Error("Erro: erros de validação.")
         }
     }
 
     async _buscaObjetoPorID(id, DAO) {
-        try {
-            let objeto = await DAO.buscaPorColuna(id, "id")
-            if (!objeto) {
-                if (id === this.JSON.id) {
-                    throw new Error("Erro: ID nao existe.")
-                } else {
-                    console.log({
-                        id,
-                        DAO
-                    })
-                    throw new Error("Erro: erro que nao poderia acontecer.")
-                }
-            } else {
-                objeto = await this._converterForeignKeyEmJSON(objeto)
-                return objeto
+        let objeto = await DAO.buscaPorColuna(id, "id")
+        if (!objeto) {
+            if (id === this.JSON.id) {
+                throw new Error("Erro: ID dos params nao existe.")
             }
-        } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            console.log({
+                id,
+                DAO
+            })
+            throw new Error("Erro: erro que nao poderia acontecer.")
+        } else {
+            objeto = await this._converterForeignKeyEmJSON(objeto)
+            return objeto
         }
     }
 
     async _converterForeignKeyEmJSON(objetoRecebido) {
-        try {
-            let objeto = objetoRecebido
-            const keys = Object.keys(objeto)
+        let objeto = objetoRecebido
+        const keys = Object.keys(objeto)
 
-            for (let i = 0; i < keys.length; i++) {
-                if (Object.keys(nomesPlural).includes(keys[i])) {
-                    let nomeSingular = keys[i]
-                    let nomePlural = nomesPlural[nomeSingular]
+        for (let i = 0; i < keys.length; i++) {
+            if (Object.keys(nomesPlural).includes(keys[i])) {
+                let nomeSingular = keys[i]
+                let nomePlural = nomesPlural[nomeSingular]
 
-                    const resultado = await this._buscaObjetoPorID(objeto[nomeSingular], new DAO(nomePlural))
+                const resultado = await this._buscaObjetoPorID(objeto[nomeSingular], new DAO(nomePlural))
 
-                    objeto[nomeSingular] = resultado
-                }
+                objeto[nomeSingular] = resultado
             }
-            return objeto
-        } catch (e) {
-            throw new Error(await this._lidarComErro(e))
         }
+        return objeto
     }
 
     async _formataErro(param, value, msg) {
         let erroFormatado = {
             param,
             value,
-            msg
+            msg,
         }
         const keys = Object.keys(erroFormatado)
         for (let i = 0; i < keys.length; i++) {
@@ -154,17 +149,10 @@ module.exports = class Model {
     }
 
     async _lidarComErro(erro) {
-        if (erro.message.includes("FOREIGN KEY constraint failed")) {
-            return this._formataErro(undefined, undefined, "Erro de Foreign Key.")
-        } 
-        else if(erro.message.includes("UNIQUE constraint failed")){
-            return this._formataErro(undefined, undefined, "Erro de valor único.")
-        }
-        else if (erro.message.includes("Erro: ID nao existe.")) {
-            return this._formataErro("id", this.JSON.id, "O valor informado não está cadastrado.")
-        } 
-        else if (erro.message.includes("Erro: erros de validação.")) {
-            return JSON.stringify(this._errosValidacao)
+        if (erro.message.includes("Erro: ID dos params nao existe.")) {
+            return this._formataErro("id", this.JSON.id, "ID inválido.")
+        } else if (erro.message.includes("Erro: erros de validação.")) {
+            return this._formataErro(undefined, this.errosValidacao, "Erros de validação.")
         } else {
             console.log(erro)
             return this._formataErro(undefined, undefined, undefined, "Erro no servidor.")
@@ -244,9 +232,15 @@ module.exports = class Model {
         }
     }
 
-    async _validaRegex(atributo, valor, regex){
-        if(!regex.test(valor)){
+    async _validaRegex(atributo, valor, regex) {
+        if (!regex.test(valor)) {
             throw new Error(await this._formataErro(atributo, valor, `O valor está em um formato inválido.`))
+        }
+    }
+
+    async _validaArray(atributo, valor) {
+        if (!(valor instanceof Array)) {
+            throw new Error(await this._formataErro(atributo, valor, "O valor deve ser um array."))
         }
     }
 }

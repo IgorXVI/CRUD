@@ -7,34 +7,22 @@ const _ = require('lodash');
 gerarDadosAleatorios(219)
 
 async function gerarDadosAleatorios(quantidade) {
-    const hash = await bcrypt.hash("perestroika", 10)
-    const usuarioMaster = {
-        nome: "Igor Almeida",
-        email: "inazumaseleven04@gmail.com",
-        senha: hash,
-        nivelAcesso: 0,
-        dataAlteracao: dataDeHoje(),
-        dataCriacao: dataDeHoje()
-    }
-
     for (let i = 0; i < quantidade; i++) {
-        axios.all([post("usuarios/usuario", usuarioMaster), post("cidades/cidade", gerarJSONCidades()), post("clientes/cliente", gerarJSONClientes()), post("funcionarios/funcionario", gerarJSONFuncionarios()), post("fornecedores/fornecedor", gerarJSONFornecedores()), post("produtos/produto", gerarJSONProdutos()), post("estoque/produto-estocado", gerarJSONEstoque())])
+        // axios.all([post("usuarios/usuario", usuarioMaster), post("cidades/cidade", gerarJSONCidades()), post("clientes/cliente", gerarJSONClientes()), post("funcionarios/funcionario", gerarJSONFuncionarios()), post("fornecedores/fornecedor", gerarJSONFornecedores()), post("produtos/produto", gerarJSONProdutos()), post("estoque/produto-estocado", gerarJSONEstoque())])
 
-        // console.log("usuario master: ")
-        // await post("usuarios/usuario", usuarioMaster)
-        // console.log(`\n\nIteracao: ${i}`)
-        // console.log("cidades:\n")
-        // await post("cidades/cidade", gerarJSONCidades())
-        // console.log("clientes:\n")
-        // await post("clientes/cliente", gerarJSONClientes())
-        // console.log("funcionarios:\n")
-        // await post("funcionarios/funcionario", gerarJSONFuncionarios())
-        // console.log("fornecedores:\n")
-        // await post("fornecedores/fornecedor", gerarJSONFornecedores())
-        // console.log("produtos:\n")
-        // await post("produtos/produto", gerarJSONProdutos())
-        // console.log("estoque:\n")
-        // await post("estoque/produto-estocado", gerarJSONEstoque())
+        console.log(`\n\nIteracao: ${i}`)
+        console.log("cidades:\n")
+        await post("cidades/cidade", gerarJSONCidades())
+        console.log("clientes:\n")
+        await post("clientes/cliente", gerarJSONClientes())
+        console.log("funcionarios:\n")
+        await post("funcionarios/funcionario", await gerarJSONFuncionarios())
+        console.log("fornecedores:\n")
+        await post("fornecedores/fornecedor", gerarJSONFornecedores())
+        console.log("produtos:\n")
+        await post("produtos/produto", gerarJSONProdutos())
+        console.log("estoque:\n")
+        await post("estoque/produto-estocado", gerarJSONEstoque())
     }
 }
 
@@ -118,7 +106,7 @@ function gerarJSONClientes() {
     return objeto
 }
 
-function gerarJSONFuncionarios() {
+async function gerarJSONFuncionarios() {
     let objeto = {}
     objeto.CPF = `${gerarStringDeNumerosAleatoria(3)}.${gerarStringDeNumerosAleatoria(3)}.${gerarStringDeNumerosAleatoria(3)}-${gerarStringDeNumerosAleatoria(2)}`
     objeto.nome = gerarStringAleatoria(10)
@@ -133,6 +121,8 @@ function gerarJSONFuncionarios() {
     objeto.telefone = `(${gerarStringDeNumerosAleatoria(2, 1, 9)}) 9${gerarStringDeNumerosAleatoria(1, 1, 9)}${gerarStringDeNumerosAleatoria(3, 0, 9)}-${gerarStringDeNumerosAleatoria(4, 0, 9)}`
     objeto.dataNasc = dataDeHoje().substring(0, 10)
     objeto.complemento = gerarStringAleatoria(50)
+    objeto.nivelAcesso = 2
+    objeto.senha = await bcrypt.hash("perestroika", 10)
     return objeto
 }
 
@@ -171,7 +161,12 @@ function gerarJSONEstoque() {
     let objeto = {}
     objeto.quantidade = Math.floor(Math.random() * 100)
     objeto.produto = 1
+    objeto.cidade = 1
     objeto.dataAlteracao = dataDeHoje()
     objeto.dataCriacao = dataDeHoje()
+    objeto.bairro = gerarStringAleatoria(10)
+    objeto.rua = gerarStringAleatoria(10)
+    objeto.numeroCasa = Math.floor(Math.random() * 100)
+    objeto.telefone = `(${gerarStringDeNumerosAleatoria(2, 1, 9)}) 9${gerarStringDeNumerosAleatoria(1, 1, 9)}${gerarStringDeNumerosAleatoria(3, 0, 9)}-${gerarStringDeNumerosAleatoria(4, 0, 9)}`
     return objeto
 }

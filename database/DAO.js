@@ -77,7 +77,12 @@ module.exports = class DAO {
 
     async buscarPorDuasColunas(colunaValor1, colunaValor2, colunaNome1, colunaNome2) {
         const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome1} = ? AND ${colunaNome2} = ?`
-        return this.allQuery(sql, [colunaValor1, colunaValor2])
+        return this.getQuery(sql, [colunaValor1, colunaValor2])
+    }
+
+    async buscaTodosPorColuna(colunaValor, colunaNome){
+        const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome} = ?`
+        return this.allQuery(sql, colunaValor)
     }
 
     async buscaTodos() {

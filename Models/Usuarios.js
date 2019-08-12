@@ -16,22 +16,20 @@ module.exports = class Ususarios extends PessoaFisica {
             const dadosBanco = await this._DAO.buscaPorColuna(this.JSON.email, "email")
             if (!dadosBanco) {
                 throw new Error("Erro: erro no gerador de JWT.")
-            } else {
-                const senhaEhValida = await bcrypt.compare(this.JSON.senha, dadosBanco.senha)
-                if (!senhaEhValida) {
-                    throw new Error("Erro: erro no gerador de JWT.")
-                } else {
-                    const token = jwt.sign({
-                            id: dadosBanco.id,
-                            nivelAcesso: dadosBanco.nivelAcesso
-                        },
-                        process.env.SECRET, {
-                            expiresIn: "1h"
-                        }
-                    )
-                    return token
-                }
             }
+            const senhaEhValida = await bcrypt.compare(this.JSON.senha, dadosBanco.senha)
+            if (!senhaEhValida) {
+                throw new Error("Erro: erro no gerador de JWT.")
+            }
+            const token = jwt.sign({
+                    id: dadosBanco.id,
+                    nivelAcesso: dadosBanco.nivelAcesso
+                },
+                process.env.SECRET, {
+                    expiresIn: "1h"
+                }
+            )
+            return token
         } catch (e) {
             throw new Error(this._lidarComErro(e))
         }
@@ -43,8 +41,7 @@ module.exports = class Ususarios extends PessoaFisica {
         try {
             const hash = await bcrypt.hash(novaSenha, 10)
             this.JSON.senha = hash
-        }
-        catch(e){
+        } catch (e) {
             throw new Error(this._lidarComErro(e))
         }
     }
