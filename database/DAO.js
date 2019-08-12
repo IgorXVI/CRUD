@@ -35,7 +35,6 @@ module.exports = class DAO {
         objeto.dataCriacao = await this.dataDeHoje()
 
         let colunas = Object.keys(objeto).join(',')
-        colunas += `,dataAlteracao,dataCriacao`
         
         const valores = Object.values(objeto)
 
@@ -50,7 +49,6 @@ module.exports = class DAO {
         objeto.dataAlteracao = await this.dataDeHoje()
 
         let colunas = Object.keys(objeto).join(',')
-        colunas += `,dataAlteracao`
 
         const colunaValor = JSON.parse(JSON.stringify(objeto[colunaNome]))
         delete objeto[colunaNome]

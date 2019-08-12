@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS funcionarios (
     rua VARCHAR(25) NOT NULL,
     numeroCasa INTEGER NOT NULL,
     telefone VARCHAR(15) NOT NULL,
-    dataNasc VARCHAR(10) NOT NULL,
+    dataNascimento VARCHAR(10) NOT NULL,
     senha VARCHAR(8) NOT NULL,
     nivelAcesso INTEGER NOT NULL,
     complemento VARCHAR(255),
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS produtos (
 	dataCriacao VARCHAR(24) NOT NULL,
     descricao TEXT NOT NULL,
     garantia INTEGER NOT NULL,
-	dataFabric VARCHAR(10) NOT NULL,
+	dataFabricacao VARCHAR(10) NOT NULL,
 	dataValidade VARCHAR(10) NOT NULL,
 	FOREIGN KEY (fornecedor) REFERENCES fornecedores(id)
 );

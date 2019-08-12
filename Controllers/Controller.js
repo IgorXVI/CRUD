@@ -18,7 +18,7 @@ module.exports = class Controller {
     }
 
     gerarRotaBuscaTodos() {
-        this.router.get(`api/${this.nomePlural}`, async (req, res) => {
+        this.router.get(`/api/${this.nomePlural}`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Buscando ${this.nomePlural}...`)
                 const resultado = await this.model.buscaTodos()
@@ -31,7 +31,7 @@ module.exports = class Controller {
     }
 
     gerarRotaAdicionaUm() {
-        this.router.post(`api/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
+        this.router.post(`/api/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
                 await this.model.adicionaUm(req.body)
@@ -44,7 +44,7 @@ module.exports = class Controller {
     }
 
     gerarRotaBuscaUm() {
-        this.router.get(`api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.get(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
                 const resultado = await this.model.buscaUm(req.params.id)
@@ -57,7 +57,7 @@ module.exports = class Controller {
     }
 
     gerarRotaDeletaUm() {
-        this.router.delete(`api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.delete(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
                 await this.model.deletaUm(req.params.id)
@@ -70,7 +70,7 @@ module.exports = class Controller {
     }
 
     gerarRotaAtualizaUm() {
-        this.router.post(`api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.post(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 await this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
                 await this.model.atualizaUm(req.body, req.params.id)
@@ -91,7 +91,7 @@ module.exports = class Controller {
 
     async lidarComErro(erro, req, res){
         try {
-            const err = JSON.parse(erro)
+            const err = JSON.parse(erro.message)
             if(err.msg === "Erro no servidor."){
                 res.status(500).json(err)
             }

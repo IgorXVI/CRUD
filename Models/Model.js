@@ -86,11 +86,11 @@ module.exports = class Model {
             const key = keys[i]
             try {
                 if (this.JSON[key] === undefined || this.JSON[key] === null) {
-                    throw new Error(this._formataErro(key, undefined, "Parâmetro inválido."))
+                    throw new Error(await this._formataErro(key, undefined, "Parâmetro inválido."))
                 }
                 await this[key](objeto[key])
             } catch (e) {
-                this.errosValidacao.push(JSON.parse(e))
+                this.errosValidacao.push(JSON.parse(e.message))
             }
         }
         if (this.errosValidacao.length > 0) {
@@ -226,8 +226,9 @@ module.exports = class Model {
     }
 
     async _validaDataISO8601(atributo, valor) {
-        const dataParsed = new Date(Date.parse(valor))
-        if (dataParsed.toISOString() !== valor) {
+        try {
+            Date.parse(valor)
+        } catch (e) {
             throw new Error(await this._formataErro(atributo, valor, `O valor deve estar no formato ISO8601.`))
         }
     }

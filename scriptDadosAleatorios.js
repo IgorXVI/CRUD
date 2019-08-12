@@ -4,31 +4,31 @@ require('dotenv').config()
 
 const _ = require('lodash');
 
-gerarDadosAleatorios(219)
+gerarDadosAleatorios(1)
 
 async function gerarDadosAleatorios(quantidade) {
     for (let i = 0; i < quantidade; i++) {
         // axios.all([post("usuarios/usuario", usuarioMaster), post("cidades/cidade", gerarJSONCidades()), post("clientes/cliente", gerarJSONClientes()), post("funcionarios/funcionario", gerarJSONFuncionarios()), post("fornecedores/fornecedor", gerarJSONFornecedores()), post("produtos/produto", gerarJSONProdutos()), post("estoque/produto-estocado", gerarJSONEstoque())])
 
         console.log(`\n\nIteracao: ${i}`)
-        console.log("cidades:\n")
+        console.log("cidades:")
         await post("cidades/cidade", gerarJSONCidades())
-        console.log("clientes:\n")
+        console.log("clientes:")
         await post("clientes/cliente", gerarJSONClientes())
-        console.log("funcionarios:\n")
+        console.log("funcionarios:")
         await post("funcionarios/funcionario", await gerarJSONFuncionarios())
-        console.log("fornecedores:\n")
+        console.log("fornecedores:")
         await post("fornecedores/fornecedor", gerarJSONFornecedores())
-        console.log("produtos:\n")
+        console.log("produtos:")
         await post("produtos/produto", gerarJSONProdutos())
-        console.log("estoque:\n")
-        await post("estoque/produto-estocado", gerarJSONEstoque())
+        console.log("estoque:")
+        await post("estoque/item-estocado", gerarJSONEstoque())
     }
 }
 
 async function post(url, dado) {
     try {
-        await axios.post(`http://192.168.1.118:${process.env.PORT}/api/${url}`, dado)
+        await axios.post(`http://192.168.1.104:${process.env.PORT}/api/${url}`, dado)
         console.log("sem erro")
     } catch (erro) {
         if (erro.response) {
@@ -84,8 +84,6 @@ function gerarJSONCidades() {
     objeto.nome = gerarStringAleatoria(29)
     objeto.UF = _.upperCase(gerarStringAleatoria(2, true)).replace(/\s/g, "")
     objeto.CEP = `${gerarStringDeNumerosAleatoria(5)}-${gerarStringDeNumerosAleatoria(3)}`
-    objeto.dataAlteracao = dataDeHoje()
-    objeto.dataCriacao = dataDeHoje()
     return objeto
 }
 
@@ -95,13 +93,11 @@ function gerarJSONClientes() {
     objeto.nome = gerarStringAleatoria(10)
     objeto.email = `${gerarStringAleatoria(10)}@${gerarStringAleatoria(5)}.com`
     objeto.cidade = 1
-    objeto.dataAlteracao = dataDeHoje()
-    objeto.dataCriacao = dataDeHoje()
     objeto.bairro = gerarStringAleatoria(10)
     objeto.rua = gerarStringAleatoria(10)
     objeto.numeroCasa = Math.floor(Math.random() * 100)
     objeto.telefone = `(${gerarStringDeNumerosAleatoria(2, 1, 9)}) 9${gerarStringDeNumerosAleatoria(1, 1, 9)}${gerarStringDeNumerosAleatoria(3, 0, 9)}-${gerarStringDeNumerosAleatoria(4, 0, 9)}`
-    objeto.dataNasc = dataDeHoje().substring(0, 10)
+    objeto.dataNascimento = dataDeHoje().substring(0, 10)
     objeto.complemento = gerarStringAleatoria(50)
     return objeto
 }
@@ -113,13 +109,11 @@ async function gerarJSONFuncionarios() {
     objeto.email = `${gerarStringAleatoria(10)}@${gerarStringAleatoria(5)}.com`
     objeto.salario = (Math.random() * (10000000000000 - 900) + 900)
     objeto.cidade = 1
-    objeto.dataAlteracao = dataDeHoje()
-    objeto.dataCriacao = dataDeHoje()
     objeto.bairro = gerarStringAleatoria(10)
     objeto.rua = gerarStringAleatoria(10)
     objeto.numeroCasa = Math.floor(Math.random() * 100)
     objeto.telefone = `(${gerarStringDeNumerosAleatoria(2, 1, 9)}) 9${gerarStringDeNumerosAleatoria(1, 1, 9)}${gerarStringDeNumerosAleatoria(3, 0, 9)}-${gerarStringDeNumerosAleatoria(4, 0, 9)}`
-    objeto.dataNasc = dataDeHoje().substring(0, 10)
+    objeto.dataNascimento = dataDeHoje().substring(0, 10)
     objeto.complemento = gerarStringAleatoria(50)
     objeto.nivelAcesso = 2
     objeto.senha = await bcrypt.hash("perestroika", 10)
@@ -132,8 +126,6 @@ function gerarJSONFornecedores() {
     objeto.nome = gerarStringAleatoria(10)
     objeto.email = `${gerarStringAleatoria(10)}@${gerarStringAleatoria(5)}.com`
     objeto.cidade = 1
-    objeto.dataAlteracao = dataDeHoje()
-    objeto.dataCriacao = dataDeHoje()
     objeto.telefone = `(${gerarStringDeNumerosAleatoria(2, 1, 9)}) 9${gerarStringDeNumerosAleatoria(1, 1, 9)}${gerarStringDeNumerosAleatoria(3, 0, 9)}-${gerarStringDeNumerosAleatoria(4, 0, 9)}`
     objeto.bairro = gerarStringAleatoria(10)
     objeto.rua = gerarStringAleatoria(10)
@@ -148,11 +140,9 @@ function gerarJSONProdutos() {
     objeto.categoria = gerarStringAleatoria(10)
     objeto.precoUnidade = (Math.random() * (10000000 - 1) + 1)
     objeto.fornecedor = 1
-    objeto.dataAlteracao = dataDeHoje()
-    objeto.dataCriacao = dataDeHoje()
     objeto.descricao = gerarStringAleatoria(50)
     objeto.garantia = Math.floor(Math.random() * 10)
-    objeto.dataFabric = dataDeHoje().substring(0, 10)
+    objeto.dataFabricacao = dataDeHoje().substring(0, 10)
     objeto.dataValidade = dataDeHoje().substring(0, 10)
     return objeto
 }
@@ -162,8 +152,6 @@ function gerarJSONEstoque() {
     objeto.quantidade = Math.floor(Math.random() * 100)
     objeto.produto = 1
     objeto.cidade = 1
-    objeto.dataAlteracao = dataDeHoje()
-    objeto.dataCriacao = dataDeHoje()
     objeto.bairro = gerarStringAleatoria(10)
     objeto.rua = gerarStringAleatoria(10)
     objeto.numeroCasa = Math.floor(Math.random() * 100)
