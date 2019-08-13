@@ -5,9 +5,6 @@ const jwt = require('jsonwebtoken')
 module.exports = class Ususarios extends PessoaFisica {
     constructor(nomeSingular, nomePlural) {
         super(nomeSingular, nomePlural)
-
-        this.JSON.senha = ""
-        this.JSON.nivelAcesso = 0
     }
 
     async gerarJWT(objeto) {
@@ -31,7 +28,7 @@ module.exports = class Ususarios extends PessoaFisica {
             )
             return token
         } catch (e) {
-            this._lidarComErro(e)
+            throw await this._lidarComErro(e)
         }
     }
 
@@ -39,24 +36,23 @@ module.exports = class Ususarios extends PessoaFisica {
         await this._validaNotNull("senha", novaSenha)
         await this._validaMinMaxChars("senha", novaSenha, 8, 255)
         try {
-            const hash = await bcrypt.hash(novaSenha, 10)
-            this.JSON.senha = hash
+            return bcrypt.hash(novaSenha, 10)
         } catch (e) {
-            this._lidarComErro(e)
+            throw await this._lidarComErro(e)
         }
     }
 
     async nivelAcesso(novoNivelAcesso) {
         await this._validaNotNull("nivelAcesso", novoNivelAcesso)
         await this._validaInteiro("nivelAcesso", novoNivelAcesso, 0, 2)
-        this.JSON.nivelAcesso = novoNivelAcesso
+        return novoNivelAcesso
     }
 
     async _lidarComErro(erro) {
         if (erro.message.includes("Erro: erro no gerador de JWT.")) {
-            throw new Error(await this._formataErro(undefined, undefined, "Email ou senha incorretos."))
+            return new Error(await this._formataErro(undefined, undefined, "Email ou senha incorretos."))
         } else {
-            super._lidarComErro(erro)
+            return super._lidarComErro(erro)
         }
     }
 

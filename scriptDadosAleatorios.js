@@ -8,7 +8,17 @@ gerarDadosAleatorios(1)
 
 async function gerarDadosAleatorios(quantidade) {
     for (let i = 0; i < quantidade; i++) {
-        axios.all([post("cidades/cidade", gerarJSONCidades()), post("clientes/cliente", gerarJSONClientes()), post("funcionarios/funcionario", await gerarJSONFuncionarios()), post("fornecedores/fornecedor", gerarJSONFornecedores()), post("produtos/produto", gerarJSONProdutos()), post("estoque/item-estocado", gerarJSONEstoque())])
+        post("vendas/venda", await gerarJSONVenda())
+
+        // axios.all([
+        //     post("cidades/cidade", gerarJSONCidades()), 
+        //     post("clientes/cliente", gerarJSONClientes()), 
+        //     post("funcionarios/funcionario", await gerarJSONFuncionarios()), 
+        //     post("fornecedores/fornecedor", gerarJSONFornecedores()), 
+        //     post("produtos/produto", gerarJSONProdutos()), 
+        //     post("estoque/item-estocado", gerarJSONEstoque()),
+        //     post("vendas/venda", await gerarJSONVenda())
+        // ])
 
         // console.log(`\n\nIteracao: ${i}`)
         // console.log("cidades:")
@@ -77,6 +87,27 @@ function gerarStringDeNumerosAleatoria(tamanho, minimo, maximo) {
 
 function dataDeHoje() {
     return new Date().toISOString()
+}
+
+async function gerarJSONVenda() {
+    let objeto = {}
+    objeto.funcionario = 1
+    objeto.cliente = 1
+    objeto.itensVenda = [
+        {
+            produto: 1,
+            quantidade: 100
+        },
+        {
+            produto: 2,
+            quantidade: 100
+        },
+        {
+            produto: 3,
+            quantidade: 100
+        }
+    ]
+    return objeto
 }
 
 function gerarJSONCidades() {

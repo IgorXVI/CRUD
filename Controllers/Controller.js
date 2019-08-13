@@ -9,7 +9,7 @@ module.exports = class Controller {
         this.nomePlural = _.kebabCase(model.nomePlural)
         this.nomeSingular = _.kebabCase(model.nomeSingular)
 
-        if(!naoGerarTodasRotas){
+        if (!naoGerarTodasRotas) {
             this.gerarRotaAdicionaUm()
             this.gerarRotaAtualizaUm()
             this.gerarRotaBuscaTodos()
@@ -26,7 +26,7 @@ module.exports = class Controller {
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
-                this.lidarComErro(erro, req, res)
+                await this.lidarComErro(erro, req, res)
             }
         })
     }
@@ -39,7 +39,7 @@ module.exports = class Controller {
                 res.status(200)
                 this.fim(req, res)
             } catch (erro) {
-                this.lidarComErro(erro, req, res)
+                await this.lidarComErro(erro, req, res)
             }
         })
     }
@@ -52,7 +52,7 @@ module.exports = class Controller {
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
-                this.lidarComErro(erro, req, res)
+                await this.lidarComErro(erro, req, res)
             }
         })
     }
@@ -65,7 +65,7 @@ module.exports = class Controller {
                 res.status(200)
                 this.fim(req, res)
             } catch (erro) {
-                this.lidarComErro(erro, req, res)
+                await this.lidarComErro(erro, req, res)
             }
         })
     }
@@ -76,7 +76,7 @@ module.exports = class Controller {
                 this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
                 await this.model.atualizaUm(req.body, req.params.id)
             } catch (erro) {
-                this.lidarComErro(erro, req, res)
+                await this.lidarComErro(erro, req, res)
             }
         })
     }
@@ -92,22 +92,26 @@ module.exports = class Controller {
         console.log(`request: ${req.id} -> fim`)
     }
 
-    async lidarComErro(erro, req, res){
+    async lidarComErro(erro, req, res) {
         try {
-            const err = JSON.parse(erro.message)
-            if(!err.msg){
-                throw new Error(erro.message)
+            let err = undefined
+            try{
+                err = JSON.parse(erro.message)
             }
-            if(err.msg === "Erro no servidor."){
-                res.status(500).json(err)
+            catch(e2){
+                throw erro
             }
-            else{
+            if (!err.msg) {
+                throw erro
+            } else {
                 res.status(400).json(err)
             }
-        }
-        catch (e) {
+        } catch (e) {
             console.log(e)
-            res.status(500).json({msg: "Erro no servidor."})
+            log(e)
+            res.status(500).json({
+                msg: "Erro no servidor."
+            })
         }
         this.fim(req, res)
     }

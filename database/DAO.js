@@ -48,10 +48,11 @@ module.exports = class DAO {
     async atualizaPorColuna(objeto, colunaNome) {
         objeto.dataAlteracao = await this.dataDeHoje()
 
+        const colunaValor = objeto[colunaNome]
+        delete objeto[colunaNome]
+
         let colunas = Object.keys(objeto).join(',')
 
-        const colunaValor = JSON.parse(JSON.stringify(objeto[colunaNome]))
-        delete objeto[colunaNome]
         let valores = Object.values(objeto)
         valores.push(colunaValor)
 

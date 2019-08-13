@@ -3,15 +3,12 @@ const AlgoComEndereco = require("./AlgoComEndereco")
 module.exports = class Pessoa extends AlgoComEndereco {
     constructor(nomeSingular, nomePlural) {
         super(nomeSingular, nomePlural)
-
-        this.JSON.email = ""
-        this.JSON.nome = ""
     }
 
     async nome(novoNome) {
         await this._validaNotNull("nome", novoNome)
         await this._validaMinMaxChars("nome", novoNome, 1, 100)
-        this.JSON.nome = novoNome
+        return novoNome
     }
 
     async email(novoEmail) {
@@ -19,7 +16,7 @@ module.exports = class Pessoa extends AlgoComEndereco {
         await this._validaMaxChars("email", novoEmail, 255)
         await this._validaCampoUnico(this._DAO, "email", novoEmail)
         await this._validaRegex("email", novoEmail, /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
-        this.JSON.email = novoEmail
+        return novoEmail
     }
 
 }
