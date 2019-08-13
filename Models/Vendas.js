@@ -76,7 +76,7 @@ module.exports = class Vendas extends Model {
                 await itensVendaDAO.adiciona(item)
             }
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -85,7 +85,7 @@ module.exports = class Vendas extends Model {
             this._gerarAtributosJSON(objeto)
             throw new Error("Esse objeto não pode utilizar o método atualizaUm().")
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -97,7 +97,7 @@ module.exports = class Vendas extends Model {
             }
             return arr
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -105,7 +105,7 @@ module.exports = class Vendas extends Model {
         try {
             return await this._gerarBuscaVenda(this.JSON.id)
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 

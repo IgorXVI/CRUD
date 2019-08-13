@@ -8,21 +8,21 @@ gerarDadosAleatorios(1)
 
 async function gerarDadosAleatorios(quantidade) {
     for (let i = 0; i < quantidade; i++) {
-        // axios.all([post("usuarios/usuario", usuarioMaster), post("cidades/cidade", gerarJSONCidades()), post("clientes/cliente", gerarJSONClientes()), post("funcionarios/funcionario", gerarJSONFuncionarios()), post("fornecedores/fornecedor", gerarJSONFornecedores()), post("produtos/produto", gerarJSONProdutos()), post("estoque/produto-estocado", gerarJSONEstoque())])
+        axios.all([post("cidades/cidade", gerarJSONCidades()), post("clientes/cliente", gerarJSONClientes()), post("funcionarios/funcionario", await gerarJSONFuncionarios()), post("fornecedores/fornecedor", gerarJSONFornecedores()), post("produtos/produto", gerarJSONProdutos()), post("estoque/item-estocado", gerarJSONEstoque())])
 
-        console.log(`\n\nIteracao: ${i}`)
-        console.log("cidades:")
-        await post("cidades/cidade", gerarJSONCidades())
-        console.log("clientes:")
-        await post("clientes/cliente", gerarJSONClientes())
-        console.log("funcionarios:")
-        await post("funcionarios/funcionario", await gerarJSONFuncionarios())
-        console.log("fornecedores:")
-        await post("fornecedores/fornecedor", gerarJSONFornecedores())
-        console.log("produtos:")
-        await post("produtos/produto", gerarJSONProdutos())
-        console.log("estoque:")
-        await post("estoque/item-estocado", gerarJSONEstoque())
+        // console.log(`\n\nIteracao: ${i}`)
+        // console.log("cidades:")
+        // await post("cidades/cidade", gerarJSONCidades())
+        // console.log("clientes:")
+        // await post("clientes/cliente", gerarJSONClientes())
+        // console.log("funcionarios:")
+        // await post("funcionarios/funcionario", await gerarJSONFuncionarios())
+        // console.log("fornecedores:")
+        // await post("fornecedores/fornecedor", gerarJSONFornecedores())
+        // console.log("produtos:")
+        // await post("produtos/produto", gerarJSONProdutos())
+        // console.log("estoque:")
+        // await post("estoque/item-estocado", gerarJSONEstoque())
     }
 }
 

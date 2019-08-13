@@ -25,7 +25,7 @@ module.exports = class Model {
             }
             return arr
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -37,7 +37,7 @@ module.exports = class Model {
                 throw new Error("Erro: ID dos params nao existe.")
             }
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -46,7 +46,7 @@ module.exports = class Model {
             await this.id(id)
             return await this._buscaObjetoPorID(this.JSON.id, this._DAO)
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -57,7 +57,7 @@ module.exports = class Model {
             delete o.id
             await this._DAO.adiciona(o)
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -70,7 +70,7 @@ module.exports = class Model {
                 throw new Error("Erro: ID dos params nao existe.")
             }
         } catch (e) {
-            throw new Error(await this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -150,12 +150,11 @@ module.exports = class Model {
 
     async _lidarComErro(erro) {
         if (erro.message.includes("Erro: ID dos params nao existe.")) {
-            return this._formataErro("id", this.JSON.id, "ID inválido.")
+            throw new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
         } else if (erro.message.includes("Erro: erros de validação.")) {
-            return this._formataErro(undefined, this.errosValidacao, "Erros de validação.")
+            throw new Error(await this._formataErro(undefined, this.errosValidacao, "Erros de validação."))
         } else {
-            console.log(erro)
-            return this._formataErro(undefined, undefined, undefined, "Erro no servidor.")
+            throw new Error(erro.message)
         }
     }
 

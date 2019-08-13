@@ -1,7 +1,6 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
-const expressValidator = require("express-validator")
 const cors = require('cors')
 var expressRequestId = require('express-request-id');
 // const middlewares = require("./middlewares")
@@ -9,7 +8,6 @@ var expressRequestId = require('express-request-id');
 const app = express()
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
-app.use(expressValidator())
 app.use(cookieParser())
 app.use(cors())
 app.use(expressRequestId())

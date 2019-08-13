@@ -31,7 +31,7 @@ module.exports = class Ususarios extends PessoaFisica {
             )
             return token
         } catch (e) {
-            throw new Error(this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -42,7 +42,7 @@ module.exports = class Ususarios extends PessoaFisica {
             const hash = await bcrypt.hash(novaSenha, 10)
             this.JSON.senha = hash
         } catch (e) {
-            throw new Error(this._lidarComErro(e))
+            this._lidarComErro(e)
         }
     }
 
@@ -54,7 +54,7 @@ module.exports = class Ususarios extends PessoaFisica {
 
     async _lidarComErro(erro) {
         if (erro.message.includes("Erro: erro no gerador de JWT.")) {
-            return this._formataErro(undefined, undefined, "Email ou senha incorretos.")
+            throw new Error(await this._formataErro(undefined, undefined, "Email ou senha incorretos."))
         } else {
             super._lidarComErro(erro)
         }

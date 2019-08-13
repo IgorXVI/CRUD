@@ -1,0 +1,180 @@
+2019.08.13, 00:47:19.0356 UTC -> request: 217acbd5-fde7-4a85-a6e7-1d7f6103e1d5, body: {"nome":"nTbziFiaZtwjMJaCYDzXKxPqKd","UF":"SQ","CEP":"91633-329"}, params: {} -> Adicionando cidade...
+2019.08.13, 00:47:19.0358 UTC -> INSERT INTO cidades (nome,UF,CEP,dataAlteracao,dataCriacao) VALUES ('nTbziFiaZtwjMJaCYDzXKxPqKd','SQ','91633-329','2019-08-13T00:47:19.358Z','2019-08-13T00:47:19.358Z')
+2019.08.13, 00:47:19.0451 UTC -> request: 217acbd5-fde7-4a85-a6e7-1d7f6103e1d5, body: {"nome":"nTbziFiaZtwjMJaCYDzXKxPqKd","UF":"SQ","CEP":"91633-329"}, params: {} -> fim
+2019.08.13, 00:47:19.0455 UTC -> request: 1e7d4616-7506-4970-af38-82c226ae6f8f, body: {"CPF":"350.709.219-18","nome":"ZOZkYF","email":"AXQiJ@qODol.com","cidade":1,"bairro":"YvtqjqSz","rua":"Ce","numeroCasa":84,"telefone":"(37) 96611-4814","dataNascimento":"2019-08-13","complemento":"yPXIlWehiVEkYUYURLvxINGUkqVpjrKhkMqElwjvoIEM"}, params: {} -> Adicionando cliente...
+2019.08.13, 00:47:19.0551 UTC -> request: 1e7d4616-7506-4970-af38-82c226ae6f8f, body: {"CPF":"350.709.219-18","nome":"ZOZkYF","email":"AXQiJ@qODol.com","cidade":1,"bairro":"YvtqjqSz","rua":"Ce","numeroCasa":84,"telefone":"(37) 96611-4814","dataNascimento":"2019-08-13","complemento":"yPXIlWehiVEkYUYURLvxINGUkqVpjrKhkMqElwjvoIEM"}, params: {} -> fim
+2019.08.13, 00:47:19.0456 UTC -> SELECT * FROM clientes WHERE email = 'AXQiJ@qODol.com'
+2019.08.13, 00:47:19.0457 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:47:19.0458 UTC -> INSERT INTO clientes (cidade,bairro,rua,numeroCasa,telefone,complemento,email,nome,CPF,dataNascimento,dataAlteracao,dataCriacao) VALUES (1.0,'YvtqjqSz','Ce',84.0,'(37) 96611-4814','yPXIlWehiVEkYUYURLvxINGUkqVpjrKh'/*+12 bytes*/,'AXQiJ@qODol.com','ZOZkYF','350.709.219-18','2019-08-13','2019-08-13T00:47:19.458Z','2019-08-13T00:47:19.458Z')
+2019.08.13, 00:47:19.0556 UTC -> request: 08a6b774-fc1f-425d-9db2-8e421428022b, body: {"CPF":"235.851.226-85","nome":"Nm","email":"uxdRwzcWb@eD.com","salario":8619447180833.277,"cidade":1,"bairro":"MeZHrIfTd","rua":"XLeYT","numeroCasa":72,"telefone":"(31) 97484-8818","dataNascimento":"2019-08-13","complemento":"oGXFhmjjHeQNyyHiEalLgrAjjyDdgWzfr","nivelAcesso":2,"senha":"$2b$10$aM6mhrm52Yn0DJ9jpsLAnOYF0jEIInNZP01J8fvF78ESpXPwJsyVW"}, params: {} -> Adicionando funcionario...
+2019.08.13, 00:47:19.0557 UTC -> SELECT * FROM funcionarios WHERE email = 'uxdRwzcWb@eD.com'
+2019.08.13, 00:47:19.0558 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:47:19.0560 UTC -> request: 97ef6c6d-ad20-468e-a099-fbc86ecd2dc1, body: {"CNPJ":"33.269.602/9570-00","nome":"dOyglSn","email":"gHZ@DSzNN.com","cidade":1,"telefone":"(84) 97523-3514","bairro":"pw","rua":"odj","numeroCasa":59,"complemento":"kmcp"}, params: {} -> Adicionando fornecedor...
+2019.08.13, 00:47:19.0561 UTC -> SELECT * FROM fornecedores WHERE email = 'gHZ@DSzNN.com'
+2019.08.13, 00:47:19.0562 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:47:19.0563 UTC -> INSERT INTO fornecedores (cidade,bairro,rua,numeroCasa,telefone,complemento,email,nome,CNPJ,dataAlteracao,dataCriacao) VALUES (1.0,'pw','odj',59.0,'(84) 97523-3514','kmcp','gHZ@DSzNN.com','dOyglSn','33.269.602/9570-00','2019-08-13T00:47:19.562Z','2019-08-13T00:47:19.562Z')
+2019.08.13, 00:47:19.0659 UTC -> request: 97ef6c6d-ad20-468e-a099-fbc86ecd2dc1, body: {"CNPJ":"33.269.602/9570-00","nome":"dOyglSn","email":"gHZ@DSzNN.com","cidade":1,"telefone":"(84) 97523-3514","bairro":"pw","rua":"odj","numeroCasa":59,"complemento":"kmcp"}, params: {} -> fim
+2019.08.13, 00:47:19.0661 UTC -> request: 39d703f8-445a-4687-91ab-661c8ea8364c, body: {"nome":"PmyMVaoVi","categoria":"UJUmuLdEyT","precoUnidade":4152486.621326719,"fornecedor":1,"descricao":"zh","garantia":7,"dataFabricacao":"2019-08-13","dataValidade":"2019-08-13"}, params: {} -> Adicionando produto...
+2019.08.13, 00:47:19.0663 UTC -> SELECT * FROM fornecedores WHERE id = 1.0
+2019.08.13, 00:47:19.0664 UTC -> INSERT INTO produtos (nome,categoria,precoUnidade,fornecedor,descricao,garantia,dataFabricacao,dataValidade,dataAlteracao,dataCriacao) VALUES ('PmyMVaoVi','UJUmuLdEyT',4152486.62132672,1.0,'zh',7.0,'2019-08-13','2019-08-13','2019-08-13T00:47:19.664Z','2019-08-13T00:47:19.664Z')
+2019.08.13, 00:47:19.0734 UTC -> request: 39d703f8-445a-4687-91ab-661c8ea8364c, body: {"nome":"PmyMVaoVi","categoria":"UJUmuLdEyT","precoUnidade":4152486.621326719,"fornecedor":1,"descricao":"zh","garantia":7,"dataFabricacao":"2019-08-13","dataValidade":"2019-08-13"}, params: {} -> fim
+2019.08.13, 00:47:19.0736 UTC -> request: 7e6d2a36-5018-469c-bcc6-478ee95d03bf, body: {"quantidade":6,"produto":1,"cidade":1,"bairro":"rdCUvGW","rua":"agKlE","numeroCasa":42,"telefone":"(79) 96806-0057"}, params: {} -> Adicionando item-estocado...
+2019.08.13, 00:47:19.0737 UTC -> SELECT * FROM produtos WHERE id = 1.0
+2019.08.13, 00:47:19.0738 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:47:19.0738 UTC -> INSERT INTO estoque (cidade,bairro,rua,numeroCasa,telefone,complemento,quantidade,produto,dataAlteracao,dataCriacao) VALUES (1.0,'rdCUvGW','agKlE',42.0,'(79) 96806-0057','',6.0,1.0,'2019-08-13T00:47:19.738Z','2019-08-13T00:47:19.738Z')
+2019.08.13, 00:47:19.0820 UTC -> request: 7e6d2a36-5018-469c-bcc6-478ee95d03bf, body: {"quantidade":6,"produto":1,"cidade":1,"bairro":"rdCUvGW","rua":"agKlE","numeroCasa":42,"telefone":"(79) 96806-0057"}, params: {} -> fim
+2019.08.13, 00:47:19.0910 UTC -> INSERT INTO funcionarios (cidade,bairro,rua,numeroCasa,telefone,complemento,email,nome,CPF,dataNascimento,senha,nivelAcesso,salario,dataAlteracao,dataCriacao) VALUES (1.0,'MeZHrIfTd','XLeYT',72.0,'(31) 97484-8818','oGXFhmjjHeQNyyHiEalLgrAjjyDdgWzf'/*+1 bytes*/,'uxdRwzcWb@eD.com','Nm','235.851.226-85','2019-08-13','$2b$10$cZi3avmBWuc8PQ46qSJ19en.h'/*+28 bytes*/,2.0,8619447180833.28,'2019-08-13T00:47:19.910Z','2019-08-13T00:47:19.910Z')
+2019.08.13, 00:47:20.0001 UTC -> request: 08a6b774-fc1f-425d-9db2-8e421428022b, body: {"CPF":"235.851.226-85","nome":"Nm","email":"uxdRwzcWb@eD.com","salario":8619447180833.277,"cidade":1,"bairro":"MeZHrIfTd","rua":"XLeYT","numeroCasa":72,"telefone":"(31) 97484-8818","dataNascimento":"2019-08-13","complemento":"oGXFhmjjHeQNyyHiEalLgrAjjyDdgWzfr","nivelAcesso":2,"senha":"$2b$10$aM6mhrm52Yn0DJ9jpsLAnOYF0jEIInNZP01J8fvF78ESpXPwJsyVW"}, params: {} -> fim
+2019.08.13, 00:47:45.0674 UTC -> Conectado ao banco de dados SQLite database/data.db
+2019.08.13, 00:47:45.0679 UTC -> CREATE TABLE IF NOT EXISTS cidades (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome VARCHAR(30) NOT NULL,
+    UF VARCHAR(2) NOT NULL,
+    CEP VARCHAR(9) NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+    dataCriacao VARCHAR(24) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS clientes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    CPF VARCHAR(14) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    cidade INTEGER NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+    bairro VARCHAR(25) NOT NULL,
+    rua VARCHAR(25) NOT NULL,
+    numeroCasa INTEGER NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    dataNascimento VARCHAR(10) NOT NULL,
+    complemento VARCHAR(255),
+    FOREIGN KEY (cidade) REFERENCES cidades(id)
+);
+
+CREATE TABLE IF NOT EXISTS funcionarios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    CPF VARCHAR(14) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+	salario REAL NOT NULL,
+    cidade INTEGER NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+    bairro VARCHAR(25) NOT NULL,
+    rua VARCHAR(25) NOT NULL,
+    numeroCasa INTEGER NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    dataNascimento VARCHAR(10) NOT NULL,
+    senha VARCHAR(8) NOT NULL,
+    nivelAcesso INTEGER NOT NULL,
+    complemento VARCHAR(255),
+    FOREIGN KEY (cidade) REFERENCES cidades(id)
+);
+
+CREATE TABLE IF NOT EXISTS fornecedores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    CNPJ VARCHAR(18) NOT NULL,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    cidade INTEGER NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    bairro VARCHAR(25) NOT NULL,
+    rua VARCHAR(25) NOT NULL,
+    numeroCasa INTEGER NOT NULL,
+    complemento VARCHAR(255),
+	FOREIGN KEY (cidade) REFERENCES cidades(id)
+);
+
+CREATE TABLE IF NOT EXISTS produtos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome VARCHAR(100) NOT NULL,
+	categoria VARCHAR(100),  
+    precoUnidade REAL NOT NULL,
+    fornecedor INTEGER NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+    descricao TEXT NOT NULL,
+    garantia INTEGER NOT NULL,
+	dataFabricacao VARCHAR(10) NOT NULL,
+	dataValidade VARCHAR(10) NOT NULL,
+	FOREIGN KEY (fornecedor) REFERENCES fornecedores(id)
+);
+
+CREATE TABLE IF NOT EXISTS estoque (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    quantidade INTEGER NOT NULL,
+    produto INTEGER NOT NULL,
+    telefone VARCHAR(15) NOT NULL,
+    bairro VARCHAR(25) NOT NULL,
+    rua VARCHAR(25) NOT NULL,
+    numeroCasa INTEGER NOT NULL,
+    complemento VARCHAR(255),
+    cidade INTEGER NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+	FOREIGN KEY (produto) REFERENCES produtos(id)
+);
+
+CREATE TABLE IF NOT EXISTS vendas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    valorTotal REAL NOT NULL,
+    funcionario INTEGER NOT NULL,
+    cliente INTEGER NOT NULL,
+    dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+	FOREIGN KEY (funcionario) REFERENCES funcionarios(id),
+	FOREIGN KEY (cliente) REFERENCES clientes(id)
+);
+
+CREATE TABLE IF NOT EXISTS itensVenda (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    valorTotal REAL NOT NULL,
+	quantidade INTEGER NOT NULL,
+    produto INTEGER NOT NULL,
+    venda INTEGER NOT NULL,
+    dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+	FOREIGN KEY (produto) REFERENCES produtos(id),
+	FOREIGN KEY (venda) REFERENCES vendas(id)
+);
+
+CREATE TABLE IF NOT EXISTS transportes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+	quantidade INTEGER NOT NULL,
+    estoque INTEGER NOT NULL,
+    itemVenda INTEGER NOT NULL,
+    dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+	FOREIGN KEY (estoque) REFERENCES estoque(id),
+	FOREIGN KEY (itemVenda) REFERENCES itensVenda(id)
+);
+2019.08.13, 00:54:45.0402 UTC -> request: 73c31707-8787-4608-963c-c903aeefa1f6, body: {"nome":"GqSque","UF":"EO","CEP":"84803-420"}, params: {} -> Adicionando cidade...
+2019.08.13, 00:54:45.0404 UTC -> INSERT INTO cidades (nome,UF,CEP,dataAlteracao,dataCriacao) VALUES ('GqSque','EO','84803-420','2019-08-13T00:54:45.404Z','2019-08-13T00:54:45.404Z')
+2019.08.13, 00:54:45.0486 UTC -> request: 73c31707-8787-4608-963c-c903aeefa1f6, body: {"nome":"GqSque","UF":"EO","CEP":"84803-420"}, params: {} -> fim
+2019.08.13, 00:54:45.0490 UTC -> request: 41d7be95-6bce-444e-a3fb-ebdb4f5c90f8, body: {"CPF":"532.524.613-85","nome":"Q","email":"xd@aeLhC.com","cidade":1,"bairro":"RBnX","rua":"llFoVYl","numeroCasa":79,"telefone":"(14) 93312-4581","dataNascimento":"2019-08-13","complemento":"ATXCxDIHhGWXEZvyamQQZOiScgbxuPlgbe"}, params: {} -> Adicionando cliente...
+2019.08.13, 00:54:45.0491 UTC -> SELECT * FROM clientes WHERE email = 'xd@aeLhC.com'
+2019.08.13, 00:54:45.0492 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:54:45.0493 UTC -> INSERT INTO clientes (cidade,bairro,rua,numeroCasa,telefone,complemento,email,nome,CPF,dataNascimento,dataAlteracao,dataCriacao) VALUES (1.0,'RBnX','llFoVYl',79.0,'(14) 93312-4581','ATXCxDIHhGWXEZvyamQQZOiScgbxuPlg'/*+2 bytes*/,'xd@aeLhC.com','Q','532.524.613-85','2019-08-13','2019-08-13T00:54:45.493Z','2019-08-13T00:54:45.493Z')
+2019.08.13, 00:54:45.0590 UTC -> request: 41d7be95-6bce-444e-a3fb-ebdb4f5c90f8, body: {"CPF":"532.524.613-85","nome":"Q","email":"xd@aeLhC.com","cidade":1,"bairro":"RBnX","rua":"llFoVYl","numeroCasa":79,"telefone":"(14) 93312-4581","dataNascimento":"2019-08-13","complemento":"ATXCxDIHhGWXEZvyamQQZOiScgbxuPlgbe"}, params: {} -> fim
+2019.08.13, 00:54:45.0600 UTC -> request: ff8b45e0-f17a-4523-aee4-df3826d02d52, body: {"CNPJ":"60.834.065/6644-92","nome":"Fz","email":"yho@uRf.com","cidade":1,"telefone":"(51) 94846-1021","bairro":"x","rua":"iWZT","numeroCasa":94,"complemento":"UcQTuMUSnYAEwabXwiBYHXWyPnYzuXz"}, params: {} -> Adicionando fornecedor...
+2019.08.13, 00:54:45.0601 UTC -> SELECT * FROM fornecedores WHERE email = 'yho@uRf.com'
+2019.08.13, 00:54:45.0601 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:54:45.0602 UTC -> INSERT INTO fornecedores (cidade,bairro,rua,numeroCasa,telefone,complemento,email,nome,CNPJ,dataAlteracao,dataCriacao) VALUES (1.0,'x','iWZT',94.0,'(51) 94846-1021','UcQTuMUSnYAEwabXwiBYHXWyPnYzuXz','yho@uRf.com','Fz','60.834.065/6644-92','2019-08-13T00:54:45.602Z','2019-08-13T00:54:45.602Z')
+2019.08.13, 00:54:45.0698 UTC -> request: ff8b45e0-f17a-4523-aee4-df3826d02d52, body: {"CNPJ":"60.834.065/6644-92","nome":"Fz","email":"yho@uRf.com","cidade":1,"telefone":"(51) 94846-1021","bairro":"x","rua":"iWZT","numeroCasa":94,"complemento":"UcQTuMUSnYAEwabXwiBYHXWyPnYzuXz"}, params: {} -> fim
+2019.08.13, 00:54:45.0700 UTC -> request: 1edf58da-cd6f-4aa7-a73e-18e16ba7bfa1, body: {"nome":"JZRW","categoria":"XaweQxZpYc","precoUnidade":9983457.344613634,"fornecedor":1,"descricao":"hqJMSxynRkDAxwpvsUjBmjLfQBoWfIiJhPXqSfjUlxQFS","garantia":0,"dataFabricacao":"2019-08-13","dataValidade":"2019-08-13"}, params: {} -> Adicionando produto...
+2019.08.13, 00:54:45.0701 UTC -> SELECT * FROM fornecedores WHERE id = 1.0
+2019.08.13, 00:54:45.0702 UTC -> INSERT INTO produtos (nome,categoria,precoUnidade,fornecedor,descricao,garantia,dataFabricacao,dataValidade,dataAlteracao,dataCriacao) VALUES ('JZRW','XaweQxZpYc',9983457.34461363,1.0,'hqJMSxynRkDAxwpvsUjBmjLfQBoWfIiJ'/*+13 bytes*/,0.0,'2019-08-13','2019-08-13','2019-08-13T00:54:45.702Z','2019-08-13T00:54:45.702Z')
+2019.08.13, 00:54:45.0785 UTC -> request: 1edf58da-cd6f-4aa7-a73e-18e16ba7bfa1, body: {"nome":"JZRW","categoria":"XaweQxZpYc","precoUnidade":9983457.344613634,"fornecedor":1,"descricao":"hqJMSxynRkDAxwpvsUjBmjLfQBoWfIiJhPXqSfjUlxQFS","garantia":0,"dataFabricacao":"2019-08-13","dataValidade":"2019-08-13"}, params: {} -> fim
+2019.08.13, 00:54:45.0786 UTC -> request: c7d6ce91-21fd-4cee-b9d2-7391a6d3243a, body: {"quantidade":10,"produto":1,"cidade":1,"bairro":"KXV","rua":"GuJtuAY","numeroCasa":34,"telefone":"(41) 94831-0441"}, params: {} -> Adicionando item-estocado...
+2019.08.13, 00:54:45.0787 UTC -> SELECT * FROM produtos WHERE id = 1.0
+2019.08.13, 00:54:45.0788 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:54:45.0789 UTC -> INSERT INTO estoque (cidade,bairro,rua,numeroCasa,telefone,complemento,quantidade,produto,dataAlteracao,dataCriacao) VALUES (1.0,'KXV','GuJtuAY',34.0,'(41) 94831-0441','',10.0,1.0,'2019-08-13T00:54:45.789Z','2019-08-13T00:54:45.789Z')
+2019.08.13, 00:54:45.0865 UTC -> request: c7d6ce91-21fd-4cee-b9d2-7391a6d3243a, body: {"quantidade":10,"produto":1,"cidade":1,"bairro":"KXV","rua":"GuJtuAY","numeroCasa":34,"telefone":"(41) 94831-0441"}, params: {} -> fim
+2019.08.13, 00:54:45.0596 UTC -> request: 3f66fe35-8cad-4726-a285-02c7fcb8a443, body: {"CPF":"455.690.086-41","nome":"v","email":"mCyeJy@cRm.com","salario":989211313196.9135,"cidade":1,"bairro":"WtHTB","rua":"fd","numeroCasa":52,"telefone":"(25) 93650-0543","dataNascimento":"2019-08-13","complemento":"OLaswfaPuEyouUwQsI","nivelAcesso":2,"senha":"$2b$10$VniMpSyuruNYYSP.MV40u..UbrqqeDzlZiwbxN9lFaoNTgEZpxbN."}, params: {} -> Adicionando funcionario...
+2019.08.13, 00:54:45.0597 UTC -> SELECT * FROM funcionarios WHERE email = 'mCyeJy@cRm.com'
+2019.08.13, 00:54:45.0597 UTC -> SELECT * FROM cidades WHERE id = 1.0
+2019.08.13, 00:54:45.0966 UTC -> INSERT INTO funcionarios (cidade,bairro,rua,numeroCasa,telefone,complemento,email,nome,CPF,dataNascimento,senha,nivelAcesso,salario,dataAlteracao,dataCriacao) VALUES (1.0,'WtHTB','fd',52.0,'(25) 93650-0543','OLaswfaPuEyouUwQsI','mCyeJy@cRm.com','v','455.690.086-41','2019-08-13','$2b$10$7Dme31DMWGEYxzW7.zfptum38'/*+28 bytes*/,2.0,989211313196.913,'2019-08-13T00:54:45.966Z','2019-08-13T00:54:45.966Z')
+2019.08.13, 00:54:46.0039 UTC -> request: 3f66fe35-8cad-4726-a285-02c7fcb8a443, body: {"CPF":"455.690.086-41","nome":"v","email":"mCyeJy@cRm.com","salario":989211313196.9135,"cidade":1,"bairro":"WtHTB","rua":"fd","numeroCasa":52,"telefone":"(25) 93650-0543","dataNascimento":"2019-08-13","complemento":"OLaswfaPuEyouUwQsI","nivelAcesso":2,"senha":"$2b$10$VniMpSyuruNYYSP.MV40u..UbrqqeDzlZiwbxN9lFaoNTgEZpxbN."}, params: {} -> fim
