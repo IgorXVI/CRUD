@@ -7,8 +7,7 @@ module.exports = class Model {
         this.nomePlural = nomePlural
 
         nomesPlural[nomeSingular] = nomePlural
-
-        this._lidarComErro = this._lidarComErro.bind(this)
+        
         this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
 
         this._DAO = new DAO(nomePlural)

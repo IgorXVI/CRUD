@@ -11,17 +11,22 @@ module.exports = class Cidades extends Model{
         return novoNome
     }
 
-    async UF(novoUF) {
-        await this._validaNotNull("UF", novoUF)
-        await this._validaFixoChars("UF", novoUF, 2)
-        return novoUF
+    async pais(novoPais) {
+        await this._validaNotNull("pais", novoPais)
+        await this._validaFixoChars("pais", novoPais, 2)
+        return novoPais
     }
 
-    async CEP(novoCEP){
-        await this._validaNotNull("CEP", novoCEP)
-        await this._validaFixoChars("CEP", novoCEP, 9)
-        await this._validaRegex("CEP", novoCEP, /^[0-9]{5}-[\d]{3}$/)
-        return novoCEP
+    async latitude(novaLatitude){
+        await this._validaNotNull("latitude", novaLatitude)
+        await this._validaInteiro("latitude", novaLatitude)
+        return novaLatitude
+    }
+
+    async longitude(novaLongitude){
+        await this._validaNotNull("longitude", novaLongitude)
+        await this._validaInteiro("longitude", novaLongitude)
+        return novaLongitude
     }
 
 }

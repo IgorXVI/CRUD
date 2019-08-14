@@ -5,7 +5,7 @@ require('dotenv').config()
 
 const _ = require('lodash');
 
-gerarDadosAleatorios(100)
+gerarDadosAleatorios(10)
 
 async function gerarDadosAleatorios(quantidade) {
     for (let i = 0; i < quantidade; i++) {
@@ -171,7 +171,7 @@ function gerarJSONProdutos() {
 function gerarJSONEstoque() {
     let objeto = {}
     objeto.quantidade = Math.floor(Math.random() * 100)
-    objeto.produto = 1
+    objeto.produto = Math.floor(Math.random() * 3) + 1  
     objeto.cidade = 1
     objeto.bairro = gerarStringAleatoria(10)
     objeto.rua = gerarStringAleatoria(10)
