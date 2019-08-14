@@ -4,6 +4,7 @@ const DAO = require("../database/DAO")
 module.exports = class Vendas extends Model {
     constructor() {
         super("venda", "vendas")
+        this.clienteCidade = {}
     }
 
     async adicionaUm(objeto) {
@@ -36,16 +37,17 @@ module.exports = class Vendas extends Model {
 
             const itemId = (await itensVendaDAO.adiciona(item)).lastInsertRowid
             for (let j = 0; j < listaEstoque.length; j++) {
-                let est = listaEstoque[j]
-    
+                let est = JSON.parse(JSON.stringify(listaEstoque[j]))
+
                 const transporte = {
                     estoque: est.id,
                     itemVenda: itemId,
                     quantidade: est.quantidadeTransporte
                 }
                 await transportesDAO.adiciona(transporte)
-    
+
                 delete est.quantidadeTransporte
+                est.cidade = est.cidade.id
                 await estoqueDAO.atualizaPorColuna(est, "id")
             }
 
@@ -105,13 +107,14 @@ module.exports = class Vendas extends Model {
     async cliente(novoCliente) {
         await this._validaNotNull("cliente", novoCliente)
         await this._validaInteiro("cliente", novoCliente, 1)
-        await this._validaExiste(new DAO("clientes"), "cliente", novoCliente)
+        this.clienteCidade = await this._validaExiste(new DAO("clientes"), "cliente", novoCliente)
         return novoCliente
     }
 
     async itensVenda(novosItensVenda) {
         const produtosDAO = new DAO("produtos")
         const estoqueDAO = new DAO("estoque")
+        const cidadesDAO = new DAO("cidades")
 
         let novosItensVenda2 = []
         let IDsDeProdutos = []
@@ -147,20 +150,53 @@ module.exports = class Vendas extends Model {
             valorTotal += o.valorTotal
 
             let estoques = await estoqueDAO.buscaTodosPorColuna(o.produto.id, "produto")
-            let estoquesQuantidade = 0
             if (estoques.length) {
+                let estoquesQuantidade = 0
+
+                let estoques2 = []
                 for (let j = 0; j < estoques.length; j++) {
                     let est = estoques[j]
-                    
-                    estoquesQuantidade += est.quantidade
+                    est.cidade = await cidadesDAO.buscaPorColuna(est.cidade, "id")
+                    const latEstoque = est.cidade.latitude
+                    const lonEstoque = est.cidade.longitude
+                    const latCliente = this.clienteCidade.latitude
+                    const lonCliente = this.clienteCidade.longitude
+                    est.distanciaDoCliente = await this._distanciaEntreCoordenadas(latEstoque, lonEstoque, latCliente, lonCliente)
+                    if (est.quantidade > 0) {
+                        estoquesQuantidade += est.quantidade
+                        estoques2.push(est)
+                    }
+                }
 
-                    if (estoquesQuantidade >= o.quantidade) {
+                if (estoquesQuantidade < o.quantidade) {
+                    throw new Error(await this._formataErro(`itensVenda, index: ${i}`, JSON.stringify(novosItensVenda[i]), `O produto informado não possui quantidade suficiente no estoque para realizar essa venda.`))
+                }
+
+                estoques = estoques2.sort((a, b) => a.distanciaDoCliente - b.distanciaDoCliente)
+
+                estoquesQuantidade = 0
+                for (let j = 0; j < estoques.length; j++) {
+                    let est = estoques[j]
+
+                    let diferenca = o.quantidade - estoquesQuantidade
+                    if(est.quantidade >= diferenca){
+                        estoquesQuantidade = o.quantidade
+                        est.quantidade -= diferenca
+                        est.quantidadeTransporte = diferenca
+                    }
+                    else{
+                        estoquesQuantidade += est.quantidade
+                        est.quantidadeTransporte = est.quantidade
+                        est.quantidade = 0
+                    }
+
+                    delete est.distanciaDoCliente
+                    estLista.push(est)
+
+                    if(estoquesQuantidade === o.quantidade){
                         break
                     }
                 }
-            }
-            if (estoquesQuantidade < o.quantidade) {
-                throw new Error(await this._formataErro(`itensVenda, index: ${i}`, JSON.stringify(novosItensVenda[i]), `O produto informado não possui quantidade suficiente no estoque para realizar essa venda.`))
             }
 
             novosItensVenda2.push(o)
@@ -177,7 +213,6 @@ module.exports = class Vendas extends Model {
         const produtosDAO = new DAO("produtos")
         const estoqueDAO = new DAO("estoque")
         const transportesDAO = new DAO("transportes")
-        const cidadesDAO = new DAO("cidades")
 
         let venda = await this._buscaObjetoPorID(id, this._DAO)
         let itensVenda = await itensVendaDAO.buscaTodosPorColuna(id, "venda")
@@ -192,10 +227,10 @@ module.exports = class Vendas extends Model {
                         let t = transportes[j]
                         delete t.itemVenda
 
-                        const estoque = await estoqueDAO.buscaPorColuna(t.estoque, "id")
+                        const estoque = await this._buscaObjetoPorID(t.estoque, estoqueDAO)
                         delete t.estoque
                         t.enderecoEstoque = {
-                            cidade: await this._buscaObjetoPorID(estoque.cidade, cidadesDAO),
+                            cidade: estoque.cidade,
                             telefone: estoque.telefone,
                             bairro: estoque.bairro,
                             rua: estoque.rua,
@@ -204,25 +239,24 @@ module.exports = class Vendas extends Model {
                         }
                     }
                 }
-                item.transportes = transportes
 
-                itensVenda[i] = item
+                item.transportes = transportes
             }
         }
         venda.itensVenda = itensVenda
         return venda
     }
 
-    async _distanciaEntreCoordenadas(lat1, lon1, lat2, lon2){
+    async _distanciaEntreCoordenadas(lat1, lon1, lat2, lon2) {
         const RaioTerra = 6371
-        const omega1 = lat1 * (Math.PI/180)
-        const omega2 = lat2 * (Math.PI/180)
-        const omegaD = (lat2 - lat1) * (Math.PI/180)
-        const lambdaD = (lon2 - lon1) * (Math.PI/180)
+        const omega1 = lat1 * (Math.PI / 180)
+        const omega2 = lat2 * (Math.PI / 180)
+        const omegaD = (lat2 - lat1) * (Math.PI / 180)
+        const lambdaD = (lon2 - lon1) * (Math.PI / 180)
 
-        const a = Math.pow( Math.sin(omegaD/2), 2 ) + Math.cos(omega1) + Math.cos(omega2) + Math.pow( Math.sin(lambdaD/2), 2 )
+        const a = Math.pow(Math.sin(omegaD / 2), 2) + Math.cos(omega1) + Math.cos(omega2) + Math.pow(Math.sin(lambdaD / 2), 2)
 
-        const c = 2 * Math.atan2( Math.sqrt(a), Math.sqrt(1 - a) )
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
         const d = RaioTerra * c
 

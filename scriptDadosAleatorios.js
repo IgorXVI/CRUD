@@ -103,8 +103,9 @@ async function gerarJSONVenda() {
 function gerarJSONCidades() {
     let objeto = {}
     objeto.nome = gerarStringAleatoria(29)
-    objeto.UF = _.upperCase(gerarStringAleatoria(2, true)).replace(/\s/g, "")
-    objeto.CEP = `${gerarStringDeNumerosAleatoria(5)}-${gerarStringDeNumerosAleatoria(3)}`
+    objeto.pais = _.upperCase(gerarStringAleatoria(2, true)).replace(/\s/g, "")
+    objeto.latitude = (Math.random() * 90).toFixed(10)
+    objeto.longitude =  (Math.random() * 180).toFixed(10)
     return objeto
 }
 

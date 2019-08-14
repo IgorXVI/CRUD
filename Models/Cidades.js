@@ -19,13 +19,13 @@ module.exports = class Cidades extends Model{
 
     async latitude(novaLatitude){
         await this._validaNotNull("latitude", novaLatitude)
-        await this._validaInteiro("latitude", novaLatitude)
+        await this._validaDecimal("latitude", novaLatitude, -90, 90)
         return novaLatitude
     }
 
     async longitude(novaLongitude){
         await this._validaNotNull("longitude", novaLongitude)
-        await this._validaInteiro("longitude", novaLongitude)
+        await this._validaDecimal("longitude", novaLongitude, -180, 180)
         return novaLongitude
     }
 

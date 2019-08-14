@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS cidades (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome VARCHAR(30) NOT NULL,
-    latitude INTEGER NOT NULL,
-    longitude INTEGER NOT NULL,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
     pais VARCHAR(2) NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
     dataCriacao VARCHAR(24) NOT NULL

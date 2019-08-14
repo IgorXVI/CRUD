@@ -139,6 +139,9 @@ module.exports = class Model {
         if (!objeto) {
             throw new Error(await this._formataErro(atributo, valor, "O valor informado não está cadastrado."))
         }
+        else {
+            return objeto
+        }
     }
 
     async _validaNotNull(atributo, valor) {
@@ -174,8 +177,8 @@ module.exports = class Model {
             maximo = 1.79769e+308
         }
 
-        if (!(Number(valor) === valor && valor % 1 !== 0) || valor.length > maximo || valor.length < minimo) {
-            throw new Error(await this._formataErro(atributo, valor, `O valor deve ser um número de ponto flutuante, com um ponto separando a parte inteira da parte decimal, e estar entre ${minimo} e ${maximo}`))
+        if (Number(valor) % 1 === 0 || Number(valor) > maximo || Number(valor) < minimo) {
+            throw new Error(await this._formataErro(atributo, Number(valor), `O valor deve ser um número de ponto flutuante, com um ponto separando a parte inteira da parte decimal, e estar entre ${minimo} e ${maximo}`))
         }
     }
 
@@ -188,8 +191,8 @@ module.exports = class Model {
             maximo = 9223372036854775808
         }
 
-        if (!(Number(valor) == valor && valor % 1 == 0) || valor.length > maximo || valor.length < minimo) {
-            throw new Error(await this._formataErro(atributo, valor, `O valor deve ser um número inteiro e estar entre ${minimo} e ${maximo}`))
+        if (Number(valor) % 1 !== 0 || Number(valor) > maximo || Number(valor) < minimo) {
+            throw new Error(await this._formataErro(atributo, Number(valor), `O valor deve ser um número inteiro e estar entre ${minimo} e ${maximo}`))
         }
     }
 
