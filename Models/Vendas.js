@@ -7,104 +7,125 @@ module.exports = class Vendas extends Model {
     }
 
     async adicionaUm(objeto) {
-        try {
-            const itensVendaDAO = new DAO("itensVenda")
-            const estoqueDAO = new DAO("estoque")
+        const itensVendaDAO = new DAO("itensVenda")
+        const estoqueDAO = new DAO("estoque")
+        const transportesDAO = new DAO("transportes")
 
-            let json = await this._gerarAtributosJSON(objeto)
+        let json = await this._gerarAtributosJSON(objeto)
 
-            let valorTotal = 0
+        let valorTotal = 0
 
-            for (let i = 0; i < json.itensVenda.length; i++) {
-                let o = json.itensVenda[i]
-                o.valorTotal = o.produto.precoUnidade * o.quantidade
-                valorTotal += o.valorTotal
-                json.itensVenda[i] = o
+        for (let i = 0; i < json.itensVenda.length; i++) {
+            let o = json.itensVenda[i]
+            o.valorTotal = o.produto.precoUnidade * o.quantidade
+            valorTotal += o.valorTotal
+            json.itensVenda[i] = o
+        }
+
+        let venda = {
+            valorTotal,
+            funcionario: json.funcionario,
+            cliente: json.cliente
+        }
+
+        const vendaId = (await this._DAO.adiciona(venda)).lastInsertRowid
+
+        for (let i = 0; i < json.itensVenda.length; i++) {
+            let o = json.itensVenda[i]
+            let item = {
+                valorTotal: o.valorTotal,
+                quantidade: o.quantidade,
+                produto: o.produto.id,
+                venda: vendaId
             }
+            const ultimoId = (await itensVendaDAO.adiciona(item)).lastInsertRowid
+            let estoques = await estoqueDAO.buscaTodosPorColuna(o.produto.id, "produto")
+            let estLista = []
+            let estoquesQuantidade = 0
+            let quantidadeO = o.quantidade
+            if (estoques.length) {
+                for (let j = 0; j < estoques.length; j++) {
+                    let est = estoques[j]
+                    est.quantidadeTransporte = 0
 
-            let venda = {
-                valorTotal,
-                funcionario: json.funcionario,
-                cliente: json.cliente
-            }
-
-            const vendaId = (await this._DAO.adiciona(venda)).lastInsertRowid
-
-            for (let i = 0; i < json.itensVenda.length; i++) {
-                let o = json.itensVenda[i]
-                let item = {
-                    valorTotal: o.valorTotal,
-                    quantidade: o.quantidade,
-                    produto: o.produto.id,
-                    venda: vendaId
-                }
-                const ultimoId = (await itensVendaDAO.adiciona(item)).lastInsertRowid
-                let estoques = await estoqueDAO.buscaTodosPorColuna(o.produto.id, "produto")
-                let estLista = []
-                let estoquesQuantidade = 0
-                let quantidadeO = o.quantidade
-                if (estoques.length) {
-                    estoques = estoques.sort((a, b) => b.quantidade - a.quantidade)
-                    for (let j = 0; j < estoques.length; j++) {
-                        let est = estoques[j]
-                        est.quantidadeTransporte = 0
-
-                        if (est.quantidade > quantidadeO) {
-                            est.quantidade -= quantidadeO
-                            estoquesQuantidade += quantidadeO
-                            est.quantidadeTransporte += quantidadeO
-                        } else {
-                            estoquesQuantidade += est.quantidade
-                            est.quantidadeTransporte += est.quantidade
-                            est.quantidade = 0
-                        }
-
-                        estLista.push(est)
-
-                        quantidadeO -= estoquesQuantidade
-
-                        if (estoquesQuantidade === o.quantidade) {
-                            this._atualizarEstoques(estLista, ultimoId)
-                            break
-                        }
+                    if (est.quantidade > quantidadeO) {
+                        est.quantidade -= quantidadeO
+                        estoquesQuantidade += quantidadeO
+                        est.quantidadeTransporte += quantidadeO
+                    } else {
+                        estoquesQuantidade += est.quantidade
+                        est.quantidadeTransporte += est.quantidade
+                        est.quantidade = 0
                     }
-                    if (estoquesQuantidade < o.quantidade) {
-                        throw new Error(await this._formataErro(`itensVenda, index: ${i}, param: quantidade`, o.quantidade, `O produto informado não possui quantidade suficiente no estoque para realizar essa venda.`))
+
+                    estLista.push(est)
+
+                    quantidadeO -= estoquesQuantidade
+
+                    if (estoquesQuantidade === o.quantidade) {
+                        for (let i = 0; i < estLista.length; i++) {
+                            let est = estLista[i]
+                
+                            const transporte = {
+                                estoque: est.id,
+                                itemVenda: ultimoId,
+                                quantidade: est.quantidadeTransporte
+                            }
+                            transportesDAO.adiciona(transporte)
+                
+                            delete est.quantidadeTransporte
+                            estoqueDAO.atualizaPorColuna(est, "id")
+                        }
+                        break
                     }
                 }
+                if (estoquesQuantidade < o.quantidade) {
+                    throw new Error(await this._formataErro(`itensVenda, index: ${i}, param: quantidade`, o.quantidade, `O produto informado não possui quantidade suficiente no estoque para realizar essa venda.`))
+                }
             }
-        } catch (e) {
-            throw await this._lidarComErro(e)
         }
     }
 
     async atualizaUm(objeto) {
-        try {
-            this._gerarAtributosJSON(objeto)
-            throw new Error("Esse objeto não pode utilizar o método atualizaUm().")
-        } catch (e) {
-            throw await this._lidarComErro(e)
-        }
+        this._gerarAtributosJSON(objeto)
+        throw new Error("Esse objeto não pode utilizar o método atualizaUm().")
     }
 
     async buscaTodos() {
-        try {
-            let arr = await this._DAO.buscaTodos()
-            for (let i = 0; i < arr.length; i++) {
-                arr[i] = this._gerarBuscaVenda(arr[i].id)
-            }
-            return Promise.all(arr)
-        } catch (e) {
-            throw await this._lidarComErro(e)
+        let arr = await this._DAO.buscaTodos()
+        for (let i = 0; i < arr.length; i++) {
+            arr[i] = this._gerarBuscaVenda(arr[i].id)
         }
+        return Promise.all(arr)
     }
 
     async buscaUm(id) {
-        try {
-            const ID = await this.id(id)
-            return this._gerarBuscaVenda(ID)
-        } catch (e) {
-            throw await this._lidarComErro(e)
+        const ID = await this.id(id)
+        return this._gerarBuscaVenda(ID)
+    }
+
+    async deletaUm(id) {
+        const ID = await this.id(id)
+
+        const itensVendaDAO = new DAO("itensVenda")
+        const transportesDAO = new DAO("transportes")
+
+        const itensVenda = await itensVendaDAO.buscaTodosPorColuna(ID, "venda")
+        for (let i = 0; i < itensVenda.length; i++) {
+            const item = itensVenda[i]
+
+            const transportes = await transportesDAO.buscaTodosPorColuna(item.id, "itemVenda")
+            for (let j = 0; j < transportes.length; j++) {
+                const t = transportes[j]
+                await transportesDAO.deletaPorColuna(t.id, "id")
+            }
+
+            await itensVendaDAO.deletaPorColuna(item.id, "id")
+        }
+
+        const info = await this._DAO.deletaPorColuna(ID, "id")
+        if (info.changes === 0) {
+            throw new Error("Erro: ID dos params nao existe.")
         }
     }
 
@@ -131,10 +152,10 @@ module.exports = class Vendas extends Model {
         for (let i = 0; i < novosItensVenda.length; i++) {
             let o = novosItensVenda[i]
             if (!o.produto) {
-                throw await this._formataErro(`itensVenda, index: ${i}`, o, "Todos os JSONs dentro do valor devem ter o atributo produto.")
+                throw new Error(await this._formataErro(`itensVenda, index: ${i}`, o, "Todos os JSONs dentro do valor devem ter o atributo produto."))
             }
             if (!o.quantidade) {
-                throw await this._formataErro(`itensVenda, index: ${i}`, o, "Todos os JSONs dentro do valor devem ter o atributo quantidade.")
+                throw new Error(await this._formataErro(`itensVenda, index: ${i}`, o, "Todos os JSONs dentro do valor devem ter o atributo quantidade."))
             }
 
             await this._validaInteiro(`itensVenda, index: ${i}, param: produto`, o.produto, 1)
@@ -142,11 +163,11 @@ module.exports = class Vendas extends Model {
 
             const produto = await produtosDAO.buscaPorColuna(o.produto, "id")
             if (!produto) {
-                throw await this._formataErro(`itensVenda, index: ${i}, param: produto`, o.produto, "O valor informado não está cadastrado.")
+                throw new Error(await this._formataErro(`itensVenda, index: ${i}, param: produto`, o.produto, "O valor informado não está cadastrado."))
             }
 
             if (IDsDeProdutos.includes(produto.id)) {
-                throw await this._formataErro(`itensVenda, index: ${i}, param: produto`, o.produto, "Não podem existir dois itens com o mesmo produto na mesma venda.")
+                throw new Error(await this._formataErro(`itensVenda, index: ${i}, param: produto`, o.produto, "Não podem existir dois itens com o mesmo produto na mesma venda."))
             } else {
                 IDsDeProdutos.push(produto.id)
             }
@@ -176,7 +197,7 @@ module.exports = class Vendas extends Model {
                         let t = transportes[j]
 
                         t.estoque = await estoqueDAO.buscaPorColuna(t.estoque, "id")
-                        
+
                     }
                 }
                 item.transportes = transportes
@@ -186,25 +207,6 @@ module.exports = class Vendas extends Model {
         }
         venda.itensVenda = itensVenda
         return venda
-    }
-
-    async _atualizarEstoques(lista, itemId) {
-        const estoqueDAO = new DAO("estoque")
-        const transportesDAO = new DAO("transportes")
-
-        for (let i = 0; i < lista.length; i++) {
-            let est = lista[i]
-
-            const transporte = {
-                estoque: est.id,
-                itemVenda: itemId,
-                quantidade: est.quantidadeTransporte
-            }
-            transportesDAO.adiciona(transporte)
-
-            delete est.quantidadeTransporte
-            estoqueDAO.atualizaPorColuna(est, "id")
-        }
     }
 
 }

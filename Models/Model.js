@@ -16,58 +16,38 @@ module.exports = class Model {
     }
 
     async buscaTodos() {
-        try {
-            let arr = await this._DAO.buscaTodos()
-            for (let i = 0; i < arr.length; i++) {
-                arr[i] = this._buscaObjetoPorID(arr[i].id, this._DAO)
-            }
-            return Promise.all(arr)
-        } catch (e) {
-            throw await this._lidarComErro(e)
+        let arr = await this._DAO.buscaTodos()
+        for (let i = 0; i < arr.length; i++) {
+            arr[i] = this._buscaObjetoPorID(arr[i].id, this._DAO)
         }
+        return Promise.all(arr)
     }
 
     async deletaUm(id) {
-        try {
-            const ID = await this.id(id)
-            const info = await this._DAO.deletaPorColuna(ID, "id")
-            if (info.changes === 0) {
-                throw new Error("Erro: ID dos params nao existe.")
-            }
-        } catch (e) {
-            throw await this._lidarComErro(e)
+        const ID = await this.id(id)
+        const info = await this._DAO.deletaPorColuna(ID, "id")
+        if (info.changes === 0) {
+            throw new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
         }
     }
 
     async buscaUm(id) {
-        try {
-            const ID = await this.id(id)
-            return await this._buscaObjetoPorID(ID, this._DAO)
-        } catch (e) {
-            throw await this._lidarComErro(e)
-        }
+        const ID = await this.id(id)
+        return await this._buscaObjetoPorID(ID, this._DAO)
     }
 
     async adicionaUm(objeto) {
-        try {
-            const o = await this._gerarAtributosJSON(objeto)
-            delete o.id
-            await this._DAO.adiciona(o)
-        } catch (e) {
-            throw await this._lidarComErro(e)
-        }
+        const o = await this._gerarAtributosJSON(objeto)
+        delete o.id
+        await this._DAO.adiciona(o)
     }
 
     async atualizaUm(objeto, id) {
-        try {
-            const o = await this._gerarAtributosJSON(objeto)
-            o.id = await this.id(id)
-            const info = await this._DAO.atualizaPorColuna(o, "id")
-            if (info.changes === 0) {
-                throw new Error("Erro: ID dos params nao existe.")
-            }
-        } catch (e) {
-            throw await this._lidarComErro(e)
+        const o = await this._gerarAtributosJSON(objeto)
+        o.id = await this.id(id)
+        const info = await this._DAO.atualizaPorColuna(o, "id")
+        if (info.changes === 0) {
+            throw new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
         }
     }
 
@@ -93,7 +73,7 @@ module.exports = class Model {
             }
         }
         if (this.errosValidacao.length > 0) {
-            throw new Error("Erro: erros de validação.")
+            throw new Error(await this._formataErro(undefined, this.errosValidacao, "Erros de validação."))
         }
         return o
     }
@@ -102,7 +82,7 @@ module.exports = class Model {
         let objeto = await DAO.buscaPorColuna(id, "id")
         if (!objeto) {
             if (id === this.JSON.id) {
-                throw new Error("Erro: ID dos params nao existe.")
+                throw new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
             }
             console.log({
                 id,
@@ -146,16 +126,6 @@ module.exports = class Model {
             }
         }
         return JSON.stringify(erroFormatado)
-    }
-
-    async _lidarComErro(erro) {
-        if (erro.message && erro.message.includes("Erro: ID dos params nao existe.")) {
-            return new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
-        } else if (erro.message && erro.message.includes("Erro: erros de validação.")) {
-            return new Error(await this._formataErro(undefined, this.errosValidacao, "Erros de validação."))
-        } else {
-            return erro
-        }
     }
 
     async _validaCampoUnico(DAO, atributo, valor) {
@@ -219,7 +189,7 @@ module.exports = class Model {
             maximo = 9223372036854775808
         }
 
-        if (!(Number(valor) === valor && valor % 1 === 0) || valor.length > maximo || valor.length < minimo) {
+        if (!(Number(valor) == valor && valor % 1 == 0) || valor.length > maximo || valor.length < minimo) {
             throw new Error(await this._formataErro(atributo, valor, `O valor deve ser um número inteiro e estar entre ${minimo} e ${maximo}`))
         }
     }

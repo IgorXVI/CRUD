@@ -1,44 +1,35 @@
 const bcrypt = require("bcrypt")
 const axios = require("axios")
+const ip = require("ip")
 require('dotenv').config()
 
 const _ = require('lodash');
 
-gerarDadosAleatorios(1)
+gerarDadosAleatorios(100)
 
 async function gerarDadosAleatorios(quantidade) {
     for (let i = 0; i < quantidade; i++) {
-        post("vendas/venda", await gerarJSONVenda())
-
-        // axios.all([
-        //     post("cidades/cidade", gerarJSONCidades()), 
-        //     post("clientes/cliente", gerarJSONClientes()), 
-        //     post("funcionarios/funcionario", await gerarJSONFuncionarios()), 
-        //     post("fornecedores/fornecedor", gerarJSONFornecedores()), 
-        //     post("produtos/produto", gerarJSONProdutos()), 
-        //     post("estoque/item-estocado", gerarJSONEstoque()),
-        //     post("vendas/venda", await gerarJSONVenda())
-        // ])
-
-        // console.log(`\n\nIteracao: ${i}`)
-        // console.log("cidades:")
-        // await post("cidades/cidade", gerarJSONCidades())
-        // console.log("clientes:")
-        // await post("clientes/cliente", gerarJSONClientes())
-        // console.log("funcionarios:")
-        // await post("funcionarios/funcionario", await gerarJSONFuncionarios())
-        // console.log("fornecedores:")
-        // await post("fornecedores/fornecedor", gerarJSONFornecedores())
-        // console.log("produtos:")
-        // await post("produtos/produto", gerarJSONProdutos())
-        // console.log("estoque:")
-        // await post("estoque/item-estocado", gerarJSONEstoque())
+        console.log(`\n\nIteracao: ${i}`)
+        console.log("cidades:")
+        await post("cidades/cidade", gerarJSONCidades())
+        console.log("clientes:")
+        await post("clientes/cliente", gerarJSONClientes())
+        console.log("funcionarios:")
+        await post("funcionarios/funcionario", await gerarJSONFuncionarios())
+        console.log("fornecedores:")
+        await post("fornecedores/fornecedor", gerarJSONFornecedores())
+        console.log("produtos:")
+        await post("produtos/produto", gerarJSONProdutos())
+        console.log("estoque:")
+        await post("estoque/item-estocado", gerarJSONEstoque())
+        console.log("venda: ")
+        await post(`vendas/venda`, await gerarJSONVenda())
     }
 }
 
 async function post(url, dado) {
     try {
-        await axios.post(`http://192.168.1.104:${process.env.PORT}/api/${url}`, dado)
+        await axios.post(`http://${ip.address()}:${process.env.PORT}/api/${url}`, dado)
         console.log("sem erro")
     } catch (erro) {
         if (erro.response) {
@@ -46,7 +37,7 @@ async function post(url, dado) {
             console.log(erro.response.data)
         } else if (erro.request) {
             console.log("erro request")
-            console.log(erro)
+            console.log(erro.errno)
         } else {
             console.log("outro erro")
             console.log(erro)
@@ -93,8 +84,7 @@ async function gerarJSONVenda() {
     let objeto = {}
     objeto.funcionario = 1
     objeto.cliente = 1
-    objeto.itensVenda = [
-        {
+    objeto.itensVenda = [{
             produto: 1,
             quantidade: 100
         },
