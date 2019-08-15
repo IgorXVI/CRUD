@@ -1,7 +1,8 @@
-const AlgoComEndereco = require("./AlgoComEndereco")
-const DAO = require("../database/DAO")
+const Model = require("./Model")
+const Produtos = require("./Produtos")
+const Armazens = require("./Armazens")
 
-module.exports = class Estoque extends AlgoComEndereco {
+module.exports = class Estoque extends Model {
     constructor() {
         super("itemEstocado", "estoque")
     }
@@ -13,10 +14,13 @@ module.exports = class Estoque extends AlgoComEndereco {
     }
 
     async produto(novoProduto) {
-        await this._validaNotNull("produto", novoProduto)
-        await this._validaInteiro("produto", novoProduto, 1)
-        await this._validaExiste(new DAO("produtos"), "produto", novoProduto)
-        return novoProduto
+        const produtos = new Produtos()
+        return produtos.id(novoProduto)
+    }
+
+    async armazem(novoArmazem){
+        const armazens = new Armazens()
+        return armazens.id(novoArmazem)
     }
 
 }

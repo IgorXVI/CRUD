@@ -80,6 +80,15 @@ CREATE TABLE IF NOT EXISTS estoque (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     quantidade INTEGER NOT NULL,
     produto INTEGER NOT NULL,
+    armazem INTEGER NOT NULL,
+	dataAlteracao VARCHAR(24) NOT NULL,
+	dataCriacao VARCHAR(24) NOT NULL,
+	FOREIGN KEY (produto) REFERENCES produtos(id)
+    FOREIGN KEY (armazem) REFERENCES armazens(id)
+);
+
+CREATE TABLE IF NOT EXISTS armazens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     telefone VARCHAR(15) NOT NULL,
     bairro VARCHAR(25) NOT NULL,
     rua VARCHAR(25) NOT NULL,
@@ -87,8 +96,7 @@ CREATE TABLE IF NOT EXISTS estoque (
     complemento VARCHAR(255),
     cidade INTEGER NOT NULL,
 	dataAlteracao VARCHAR(24) NOT NULL,
-	dataCriacao VARCHAR(24) NOT NULL,
-	FOREIGN KEY (produto) REFERENCES produtos(id)
+	dataCriacao VARCHAR(24) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS vendas (
@@ -117,10 +125,12 @@ CREATE TABLE IF NOT EXISTS itensVenda (
 CREATE TABLE IF NOT EXISTS transportes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
 	quantidade INTEGER NOT NULL,
-    estoque INTEGER NOT NULL,
-    itemVenda INTEGER NOT NULL,
+    armazem INTEGER NOT NULL,
+    cliente INTEGER NOT NULL,
+    produto INTEGER NOT NULL,
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-	FOREIGN KEY (estoque) REFERENCES estoque(id),
-	FOREIGN KEY (itemVenda) REFERENCES itensVenda(id)
+	FOREIGN KEY (armazem) REFERENCES armazens(id),
+	FOREIGN KEY (cliente) REFERENCES clientes(id),
+    FOREIGN KEY (produto) REFERENCES produtos(id)
 );

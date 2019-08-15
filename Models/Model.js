@@ -14,25 +14,22 @@ module.exports = class Model {
         this.errosValidacao = []
     }
 
-    async buscaTodos() {
-        let arr = await this._DAO.buscaTodos()
-        for (let i = 0; i < arr.length; i++) {
-            arr[i] = this._buscaObjetoPorID(arr[i].id, this._DAO)
-        }
-        return Promise.all(arr)
+    async buscaTodos(query) {
+        let o = await this._gerarAtributosJSON(query)
+        return this._DAO.buscaTodos(o)
     }
 
     async deletaUm(id) {
         const ID = await this.id(id)
         const info = await this._DAO.deletaPorColuna(ID, "id")
         if (info.changes === 0) {
-            throw new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
+            throw new Error(await this._formataErro("id", ID, "ID inválido."))
         }
     }
 
     async buscaUm(id) {
         const ID = await this.id(id)
-        return await this._buscaObjetoPorID(ID, this._DAO)
+        return this._buscaObjetoPorID(ID, this._DAO)
     }
 
     async adicionaUm(objeto) {
@@ -46,13 +43,13 @@ module.exports = class Model {
         o.id = await this.id(id)
         const info = await this._DAO.atualizaPorColuna(o, "id")
         if (info.changes === 0) {
-            throw new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
+            throw new Error(await this._formataErro("id", o.id, "ID inválido."))
         }
     }
 
     async id(novoId) {
-        await this._validaInteiro("id", novoId, 1)
-        await this._validaExiste(this._DAO, "id", novoId)
+        await this._validaInteiro(`id`, novoId, 1)
+        await this._validaExiste(novoId)
         return novoId
     }
 
@@ -80,14 +77,7 @@ module.exports = class Model {
     async _buscaObjetoPorID(id, DAO) {
         let objeto = await DAO.buscaPorColuna(id, "id")
         if (!objeto) {
-            if (id === this.JSON.id) {
-                throw new Error(await this._formataErro("id", this.JSON.id, "ID inválido."))
-            }
-            console.log({
-                id,
-                DAO
-            })
-            throw new Error("Erro: erro que nao poderia acontecer.")
+            throw new Error(await this._formataErro(`id da tabela ${DAO._tabela}`, id, `ID inválido.`))
         } else {
             objeto = await this._converterForeignKeyEmJSON(objeto)
             return objeto
@@ -117,6 +107,7 @@ module.exports = class Model {
             param,
             value
         }
+        erroFormatado.msg = `${this.nomeSingular}: ${msg}`
         const keys = Object.keys(erroFormatado)
         for (let i = 0; i < keys.length; i++) {
             const key = keys[i]
@@ -127,17 +118,17 @@ module.exports = class Model {
         return JSON.stringify(erroFormatado)
     }
 
-    async _validaCampoUnico(DAO, atributo, valor) {
-        const objeto = await DAO.buscaPorColuna(valor, atributo)
+    async _validaCampoUnico(atributo, valor) {
+        const objeto = await this._DAO.buscaPorColuna(valor, atributo)
         if (objeto) {
             throw new Error(await this._formataErro(atributo, valor, "O valor informado já está cadastrado."))
         }
     }
 
-    async _validaExiste(DAO, atributo, valor) {
-        const objeto = await DAO.buscaPorColuna(valor, "id")
+    async _validaExiste(id) {
+        const objeto = await this._DAO.buscaPorColuna(id, "id")
         if (!objeto) {
-            throw new Error(await this._formataErro(atributo, valor, "O valor informado não está cadastrado."))
+            throw new Error(await this._formataErro(`id`, id, "O valor informado não está cadastrado."))
         }
         else {
             return objeto

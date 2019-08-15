@@ -2,8 +2,9 @@ const express = require("express")
 const bodyParser = require("body-parser")
 const cookieParser = require("cookie-parser")
 const cors = require('cors')
-var expressRequestId = require('express-request-id');
+const expressRequestId = require('express-request-id')
 // const middlewares = require("./middlewares")
+
 
 const app = express()
 app.use(bodyParser.urlencoded({extended: false}))
@@ -28,5 +29,6 @@ app.use((new(require("../Controllers/FornecedoresController"))).router)
 app.use((new(require("../Controllers/FuncionariosController"))).router)
 app.use((new(require("../Controllers/ProdutosController"))).router)
 app.use((new(require("../Controllers/VendasController"))).router)
+app.use((new(require("../Controllers/ArmazensController"))).router)
 
 module.exports = app

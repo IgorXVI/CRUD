@@ -3,7 +3,7 @@ const Controller = require("./Controller")
 
 module.exports = class FuncionariosController extends Controller {
     constructor(){
-        super(new Funcionarios())
+        super(Funcionarios)
     }
 }
 

@@ -1,5 +1,5 @@
 const Model = require("./Model")
-const DAO = require("../database/DAO")
+const Fornecedores = require("./Fornecedores")
 
 module.exports = class Produtos extends Model {
     constructor(){
@@ -49,10 +49,8 @@ module.exports = class Produtos extends Model {
     }
 
     async fornecedor(novoFornecedor) {
-        await this._validaNotNull("fornecedor", novoFornecedor)
-        await this._validaInteiro("fornecedor", novoFornecedor, 1)
-        await this._validaExiste(new DAO("fornecedores"), "fornecedor", novoFornecedor)
-        return novoFornecedor
+        const fornecedores = new Fornecedores()
+        return fornecedores.id(novoFornecedor)
     }
 
 }

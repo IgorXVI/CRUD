@@ -3,6 +3,6 @@ const Controller = require("./Controller")
 
 module.exports = class ClientesController extends Controller {
     constructor(){
-        super(new Clientes())
+        super(Clientes)
     }
 }

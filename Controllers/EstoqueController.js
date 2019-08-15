@@ -3,6 +3,6 @@ const Controller = require("./Controller")
 
 module.exports = class EstoqueController extends Controller {
     constructor(){
-        super(new Estoque())
+        super(Estoque)
     }
 }

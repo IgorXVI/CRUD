@@ -84,8 +84,13 @@ module.exports = class DAO {
         return this.allQuery(sql, colunaValor)
     }
 
-    async buscaTodos() {
-        const sql = `SELECT * FROM ${this._tabela}`
+    async buscaTodos(query){
+        let sql = `SELECT * FROM ${this._tabela}`
+        if(query && Object.keys(query).length > 0){
+            const keys = Object.keys(query)
+            let sql2 = ` WHERE ${keys.map(k => `${k} = ?`).join(" AND ")}`
+            sql = `${sql}${sql2}`
+        }
         return this.allQuery(sql)
     }
 

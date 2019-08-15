@@ -10,20 +10,33 @@ gerarDadosAleatorios(10)
 async function gerarDadosAleatorios(quantidade) {
     for (let i = 0; i < quantidade; i++) {
         console.log(`\n\nIteracao: ${i}`)
+
         console.log("cidades:")
         await post("cidades/cidade", gerarJSONCidades())
+        await post("cidades/cidade", {})
+
         console.log("clientes:")
         await post("clientes/cliente", gerarJSONClientes())
+        await post("clientes/cliente", {})
+        
         console.log("funcionarios:")
         await post("funcionarios/funcionario", await gerarJSONFuncionarios())
+        await post("funcionarios/funcionario", {})
+        
         console.log("fornecedores:")
         await post("fornecedores/fornecedor", gerarJSONFornecedores())
+        await post("fornecedores/fornecedor", {})
+        
         console.log("produtos:")
         await post("produtos/produto", gerarJSONProdutos())
+        await post("produtos/produto", {})
+        
         console.log("estoque:")
         await post("estoque/item-estocado", gerarJSONEstoque())
-        console.log("venda: ")
-        await post(`vendas/venda`, await gerarJSONVenda())
+        await post("estoque/item-estocado", {})
+        
+        // console.log("venda: ")
+        // await post(`vendas/venda`, await gerarJSONVenda())
     }
 }
 

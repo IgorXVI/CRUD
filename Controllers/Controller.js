@@ -2,12 +2,13 @@ const express = require("express")
 const log = require('log-to-file')
 const _ = require('lodash')
 module.exports = class Controller {
-    constructor(model, naoGerarTodasRotas) {
+    constructor(Model, naoGerarTodasRotas) {
         this.router = express.Router()
-        this.model = model
+        this.Model = Model
+        this.model = new Model()
 
-        this.nomePlural = _.kebabCase(model.nomePlural)
-        this.nomeSingular = _.kebabCase(model.nomeSingular)
+        this.nomePlural = _.kebabCase(this.model.nomePlural)
+        this.nomeSingular = _.kebabCase(this.model.nomeSingular)
 
         if (!naoGerarTodasRotas) {
             this.gerarRotaAdicionaUm()
@@ -20,9 +21,10 @@ module.exports = class Controller {
 
     gerarRotaBuscaTodos() {
         this.router.get(`/api/${this.nomePlural}`, async (req, res) => {
+            this.model = new this.Model()
             try {
                 this.inicio(req, res, `Buscando ${this.nomePlural}...`)
-                const resultado = await this.model.buscaTodos()
+                const resultado = await this.model.buscaTodos(req.query)
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -33,6 +35,7 @@ module.exports = class Controller {
 
     gerarRotaAdicionaUm() {
         this.router.post(`/api/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
+            this.model = new this.Model()
             try {
                 this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
                 await this.model.adicionaUm(req.body)
@@ -46,6 +49,7 @@ module.exports = class Controller {
 
     gerarRotaBuscaUm() {
         this.router.get(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+            this.model = new this.Model()
             try {
                 this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
                 const resultado = await this.model.buscaUm(req.params.id)
@@ -59,6 +63,7 @@ module.exports = class Controller {
 
     gerarRotaDeletaUm() {
         this.router.delete(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+            this.model = new this.Model()
             try {
                 this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
                 await this.model.deletaUm(req.params.id)
@@ -72,6 +77,7 @@ module.exports = class Controller {
 
     gerarRotaAtualizaUm() {
         this.router.post(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+            this.model = new this.Model()
             try {
                 this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
                 await this.model.atualizaUm(req.body, req.params.id)

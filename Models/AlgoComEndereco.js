@@ -1,5 +1,5 @@
 const Model = require("./Model")
-const DAO = require("../database/DAO")
+const Cidades = require("./Cidades")
 
 module.exports = class AlgoComEndereco extends Model {
     constructor(nomeSingular, nomePlural) {
@@ -7,10 +7,8 @@ module.exports = class AlgoComEndereco extends Model {
     }
 
     async cidade(novaCidade) {
-        await this._validaNotNull("cidade", novaCidade)
-        await this._validaInteiro("cidade", novaCidade, 1)
-        await this._validaExiste(new DAO("cidades"), "cidade", novaCidade)
-        return novaCidade
+        const cidades = new Cidades()
+        return cidades.id(novaCidade)
     }
 
     async bairro(novoBairro) {
