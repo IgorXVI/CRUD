@@ -30,7 +30,8 @@
     "ip": "^1.1.5",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
-    "log-to-file": "^2.0.1"
+    "log-to-file": "^2.0.1",
+    "sanitizer": "^0.1.3"
   },
   "devDependencies": {
     "eslint": "^6.1.0"

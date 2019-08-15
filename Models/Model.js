@@ -1,5 +1,6 @@
 const DAO = require("../database/DAO")
 const nomesPlural = require("./nomesPlural")
+const sanitizer = require('sanitizer')
 
 module.exports = class Model {
     constructor(nomeSingular, nomePlural) {
@@ -64,6 +65,10 @@ module.exports = class Model {
                     throw new Error(await this._formataErro(key, undefined, "Parâmetro inválido."))
                 }
                 o[key] = await this[key](objeto[key])
+                if(o[key] instanceof String){
+                    o[key] = sanitizer.escape(o[key])
+                    o[key] = sanitizer.sanitize(o[key])
+                }
             } catch (e) {
                 this.errosValidacao.push(JSON.parse(e.message))
             }
