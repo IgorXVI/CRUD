@@ -15,37 +15,49 @@ module.exports = class Model {
         this.errosValidacao = []
     }
 
-    async buscaTodos(query) {
-        let o = await this._gerarAtributosJSON(query)
-        return this._DAO.buscaTodos(o)
-    }
-
-    async deletaUm(id) {
-        const ID = await this.id(id)
-        const info = await this._DAO.deletaPorColuna(ID, "id")
-        if (info.changes === 0) {
-            throw new Error(await this._formataErro("id", ID, "ID inválido."))
-        }
+    async busca(query) {
+        const q = await this._gerarAtributosJSON(query)
+        return this._DAO.busca(q)
     }
 
     async buscaUm(id) {
-        const ID = await this.id(id)
-        return this._buscaObjetoPorID(ID, this._DAO)
+        await this.id(id)
+        return this._buscaObjetoPorID(id, this._DAO)
     }
 
-    async adicionaUm(objeto) {
+    async deleta(query){
+        const q = await this._gerarAtributosJSON(query)
+        await this._DAO.deleta(q)
+    }
+
+    async deletaUm(id) {
+        await this.id(id)
+        await this._DAO.deleta({id})
+    }
+
+    async atualiza(objeto, query) {
         const o = await this._gerarAtributosJSON(objeto)
-        delete o.id
-        await this._DAO.adiciona(o)
+        const q = await this._gerarAtributosJSON(query)
+        await this._DAO.atualiza(o, q)
     }
 
     async atualizaUm(objeto, id) {
         const o = await this._gerarAtributosJSON(objeto)
-        o.id = await this.id(id)
-        const info = await this._DAO.atualizaPorColuna(o, "id")
-        if (info.changes === 0) {
-            throw new Error(await this._formataErro("id", o.id, "ID inválido."))
+        await this.id(id)
+        await this._DAO.atualiza(o, {id})
+    }
+
+    async adiciona(listaObjetos){
+        let l = []
+        for(let i = 0; i < listaObjetos.length; i++){
+            l.push(this.adicionaUm(listaObjetos[i]))
         }
+        Promise.all(l)
+    }
+
+    async adicionaUm(objeto) {
+        const o = await this._gerarAtributosJSON(objeto)
+        await this._DAO.adiciona(o)
     }
 
     async id(novoId) {

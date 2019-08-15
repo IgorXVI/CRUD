@@ -45,53 +45,44 @@ module.exports = class DAO {
         return this.runQuery(sql, valores)
     }
 
-    async atualizaPorColuna(objeto, colunaNome) {
+    async atualiza(objeto, query){
         objeto.dataAlteracao = await this.dataDeHoje()
-
-        const colunaValor = objeto[colunaNome]
-        delete objeto[colunaNome]
 
         let colunas = Object.keys(objeto).join(',')
 
         let valores = Object.values(objeto)
-        valores.push(colunaValor)
 
         const colunasEPlaceholders = colunas.split(",").map(nome => `${nome} = ?`).join(",")
 
-        const sql = `UPDATE ${this._tabela} SET ${colunasEPlaceholders} WHERE ${colunaNome} = ?`
+        const sql = `UPDATE ${this._tabela} SET ${colunasEPlaceholders}`
 
-        return this.runQuery(sql, valores)
+        const q = await this.gerarQuery(sql, query)
+        q.valores = valores.concat(q.valores)
+        return this.runQuery(q.sql, q.valores)
     }
 
-    async deletaPorColuna(colunaValor, colunaNome) {
-        const sql = `DELETE FROM ${this._tabela} WHERE ${colunaNome} = ?`
-
-        return this.runQuery(sql, colunaValor)
+    async deleta(query){
+        const q = await this.gerarQuery(`DELETE FROM ${this._tabela}`, query)
+        return this.runQuery(q.sql, q.valores)
     }
 
-    async buscaPorColuna(colunaValor, colunaNome) {
-        const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome} = ?`
-        return this.getQuery(sql, colunaValor)
+    async busca(query){
+        const q = await this.gerarQuery(`SELECT * FROM ${this._tabela}`, query)
+        return this.allQuery(q.sql, q.valores)
     }
 
-    async buscarPorDuasColunas(colunaValor1, colunaValor2, colunaNome1, colunaNome2) {
-        const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome1} = ? AND ${colunaNome2} = ?`
-        return this.getQuery(sql, [colunaValor1, colunaValor2])
-    }
-
-    async buscaTodosPorColuna(colunaValor, colunaNome){
-        const sql = `SELECT * FROM ${this._tabela} WHERE ${colunaNome} = ?`
-        return this.allQuery(sql, colunaValor)
-    }
-
-    async buscaTodos(query){
-        let sql = `SELECT * FROM ${this._tabela}`
+    async gerarQuery(sql, query){
         if(query && Object.keys(query).length > 0){
             const keys = Object.keys(query)
             let sql2 = ` WHERE ${keys.map(k => `${k} = ?`).join(" AND ")}`
-            sql = `${sql}${sql2}`
+            return {
+                sql: `${sql}${sql2}`,
+                valores: Object.values(query) 
+            }
         }
-        return this.allQuery(sql)
+        return {
+            sql
+        }
     }
 
     async dataDeHoje() {

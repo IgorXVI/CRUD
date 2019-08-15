@@ -6,7 +6,7 @@ module.exports = class VendasController extends Controller {
         super(Vendas, true)
 
         this.gerarRotaAdicionaUm()
-        this.gerarRotaBuscaTodos()
+        this.gerarRotaBusca()
         this.gerarRotaBuscaUm()
         this.gerarRotaDeletaUm()
     }
@@ -57,63 +57,6 @@ module.exports = class VendasController extends Controller {
             }
 
         }
-    }
-
-    async atualizaUm(objeto) {
-        this._gerarAtributosJSON(objeto)
-        throw new Error("Esse objeto não pode utilizar o método atualizaUm().")
-    }
-
-    async buscaTodos() {
-        let arr = await this._DAO.buscaTodos()
-        for (let i = 0; i < arr.length; i++) {
-            arr[i] = this._gerarBuscaVenda(arr[i].id)
-        }
-        return Promise.all(arr)
-    }
-
-    async buscaUm(id) {
-        const ID = await this.id(id)
-        return this._gerarBuscaVenda(ID)
-    }
-
-    async deletaUm(id) {
-        const ID = await this.id(id)
-
-        const itensVendaDAO = new DAO("itensVenda")
-        const transportesDAO = new DAO("transportes")
-
-        const itensVenda = await itensVendaDAO.buscaTodosPorColuna(ID, "venda")
-        for (let i = 0; i < itensVenda.length; i++) {
-            const item = itensVenda[i]
-
-            const transportes = await transportesDAO.buscaTodosPorColuna(item.id, "itemVenda")
-            for (let j = 0; j < transportes.length; j++) {
-                const t = transportes[j]
-                await transportesDAO.deletaPorColuna(t.id, "id")
-            }
-
-            await itensVendaDAO.deletaPorColuna(item.id, "id")
-        }
-
-        const info = await this._DAO.deletaPorColuna(ID, "id")
-        if (info.changes === 0) {
-            throw new Error("Erro: ID dos params nao existe.")
-        }
-    }
-
-    async funcionario(novoFuncionario) {
-        await this._validaNotNull("funcionario", novoFuncionario)
-        await this._validaInteiro("funcionario", novoFuncionario, 1)
-        await this._validaExiste(new DAO("funcionarios"), "funcionario", novoFuncionario)
-        return novoFuncionario
-    }
-
-    async cliente(novoCliente) {
-        await this._validaNotNull("cliente", novoCliente)
-        await this._validaInteiro("cliente", novoCliente, 1)
-        this.clienteCidade = await this._validaExiste(new DAO("clientes"), "cliente", novoCliente)
-        return novoCliente
     }
 
     async itensVenda(novosItensVenda) {
@@ -211,45 +154,6 @@ module.exports = class VendasController extends Controller {
             listaEstoque: estLista,
             valorTotal
         }
-    }
-
-    async _gerarBuscaVenda(id) {
-        const itensVendaDAO = new DAO("itensVenda")
-        const produtosDAO = new DAO("produtos")
-        const estoqueDAO = new DAO("estoque")
-        const transportesDAO = new DAO("transportes")
-
-        let venda = await this._buscaObjetoPorID(id, this._DAO)
-        let itensVenda = await itensVendaDAO.buscaTodosPorColuna(id, "venda")
-        if (itensVenda.length) {
-            for (let i = 0; i < itensVenda.length; i++) {
-                let item = itensVenda[i]
-                item.produto = await this._buscaObjetoPorID(item.produto, produtosDAO)
-
-                let transportes = await transportesDAO.buscaTodosPorColuna(item.id, "itemVenda")
-                if (transportes.length) {
-                    for (let j = 0; j < transportes.length; j++) {
-                        let t = transportes[j]
-                        delete t.itemVenda
-
-                        const estoque = await this._buscaObjetoPorID(t.estoque, estoqueDAO)
-                        delete t.estoque
-                        t.enderecoEstoque = {
-                            cidade: estoque.cidade,
-                            telefone: estoque.telefone,
-                            bairro: estoque.bairro,
-                            rua: estoque.rua,
-                            numeroCasa: estoque.numeroCasa,
-                            complemento: estoque.complemento
-                        }
-                    }
-                }
-
-                item.transportes = transportes
-            }
-        }
-        venda.itensVenda = itensVenda
-        return venda
     }
 
     async _distanciaEntreCoordenadas(lat1, lon1, lat2, lon2) {
