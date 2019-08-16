@@ -8,11 +8,11 @@ module.exports = class Ususarios extends PessoaFisica {
 
     async gerarJWT(objeto) {
         await this.gerarAtributosJSON(objeto)
-        const dadosBanco = await this._DAO.buscaPorColuna(this.JSON.email, "email")
+        const dadosBanco = await this._DAO.busca({email: objeto.email})
         if (!dadosBanco) {
             throw new Error(await this._formataErro(undefined, undefined, "Email ou senha incorretos."))
         }
-        const senhaEhValida = await bcrypt.compare(this.JSON.senha, dadosBanco.senha)
+        const senhaEhValida = await bcrypt.compare(objeto.senha, dadosBanco.senha)
         if (!senhaEhValida) {
             throw new Error(await this._formataErro(undefined, undefined, "Email ou senha incorretos."))
         }
@@ -27,13 +27,13 @@ module.exports = class Ususarios extends PessoaFisica {
         return token
     }
 
-    async senha(novaSenha) {
+    async senhaAttr(novaSenha) {
         await this._validaNotNull("senha", novaSenha)
         await this._validaMinMaxChars("senha", novaSenha, 8, 255)
         return bcrypt.hash(novaSenha, 10)
     }
 
-    async nivelAcesso(novoNivelAcesso) {
+    async nivelAcessoAttr(novoNivelAcesso) {
         await this._validaNotNull("nivelAcesso", novoNivelAcesso)
         await this._validaInteiro("nivelAcesso", novoNivelAcesso, 0, 2)
         return novoNivelAcesso

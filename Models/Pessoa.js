@@ -5,13 +5,13 @@ module.exports = class Pessoa extends AlgoComEndereco {
         super(nomeSingular, nomePlural)
     }
 
-    async nome(novoNome) {
+    async nomeAttr(novoNome) {
         await this._validaNotNull("nome", novoNome)
         await this._validaMinMaxChars("nome", novoNome, 1, 100)
         return novoNome
     }
 
-    async email(novoEmail) {
+    async emailAttr(novoEmail) {
         await this._validaNotNull("email", novoEmail)
         await this._validaMaxChars("email", novoEmail, 255)
         await this._validaCampoUnico("email", novoEmail)

@@ -5,22 +5,25 @@ const Funcionarios = require("./Funcionarios")
 module.exports = class Vendas extends Model {
     constructor() {
         super("venda", "vendas")
+
+        this.clienteFK = {}
+        this.funcionarioFK = {}
     }
 
-    async valorTotal(novoValorTotal){
+    async valorTotalAttr(novoValorTotal){
         await this._validaNotNull("valorTotal", novoValorTotal)
         await this._validaDecimal("valorTotal", novoValorTotal, 0)
         return novoValorTotal
     }
 
-    async cliente(novoCliente){
+    async clienteAttr(novoCliente){
         const clientes = new Clientes()
-        return clientes.id(novoCliente)
+        return await clientes.idAttr(novoCliente)
     }
 
-    async functionario(novoFuncionario){
+    async funcionarioAttr(novoFuncionario){
         const funcionarios = new Funcionarios()
-        return funcionarios.id(novoFuncionario)
+        return await funcionarios.idAttr(novoFuncionario)
     }
 
 }

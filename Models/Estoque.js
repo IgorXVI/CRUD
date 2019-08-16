@@ -1,26 +1,28 @@
 const Model = require("./Model")
 const Produtos = require("./Produtos")
 const Armazens = require("./Armazens")
-
 module.exports = class Estoque extends Model {
     constructor() {
         super("itemEstocado", "estoque")
+
+        this.produtoFK = {}
+        this.armazemFK = {}
     }
 
-    async quantidade(novaQuantidade) {
+    async quantidadeAttr(novaQuantidade) {
         await this._validaNotNull("quantidade", novaQuantidade)
         await this._validaInteiro("quantidade", novaQuantidade, 0)
         return novaQuantidade
     }
 
-    async produto(novoProduto) {
+    async produtoAttr(novoProduto) {
         const produtos = new Produtos()
-        return produtos.id(novoProduto)
+        return await produtos.idAttr(novoProduto)
     }
 
-    async armazem(novoArmazem){
+    async armazemAttr(novoArmazem){
         const armazens = new Armazens()
-        return armazens.id(novoArmazem)
+        return await armazens.idAttr(novoArmazem)
     }
 
 }

@@ -1,32 +1,29 @@
 const Model = require("./Model")
-const Produtos = require("./Produtos")
-const Clientes = require("./Clientes")
+const ItensVenda = require("./ItensVenda")
 const Armazens = require("./Armazens")
 
 module.exports = class Transportes extends Model {
     constructor(){
         super("transporte", "transportes")
+
+        this.itemVendaFK = {}
+        this.armazemFk = {}
     }
 
-    async quantidade(novaQuantidade){
+    async quantidadeAttr(novaQuantidade){
         await this._validaNotNull("quantiade", novaQuantidade)
         await this._validaInteiro("quantidade", novaQuantidade, 1)
         return novaQuantidade
     }
 
-    async produto(novoProduto){
-        const produtos = new Produtos()
-        return produtos.id(novoProduto)
+    async itemVendaAttr(novoItemVenda){
+        const itensVenda = new ItensVenda()
+        return await itensVenda.idAttr(novoItemVenda)
     }
 
-    async cliente(novoCliente){
-        const clientes = new Clientes()
-        return clientes.id(novoCliente)
-    }
-
-    async armazem(novoArmazem){
+    async armazemAttr(novoArmazem){
         const armazens = new Armazens()
-        return armazens.id(novoArmazem)
+        return await armazens.idAttr(novoArmazem)
     }
 
 }

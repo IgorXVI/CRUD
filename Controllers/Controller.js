@@ -6,6 +6,8 @@ module.exports = class Controller {
         this.router = express.Router()
         this.Model = Model
 
+        this.proxy = "/api"
+
         this.nomePlural = _.kebabCase((new Model()).nomePlural)
         this.nomeSingular = _.kebabCase((new Model()).nomeSingular)
 
@@ -19,10 +21,10 @@ module.exports = class Controller {
     }
 
     gerarRotaBusca() {
-        this.router.get(`/api/${this.nomePlural}`, async (req, res) => {
+        this.router.get(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             const model = new this.Model()
             try {
-                await this.inicio(req, res, `Buscando varios ${this.nomePlural}...`)
+                await this.inicio(req, res, `Buscando ${this.nomePlural}...`)
                 const resultado = await model.busca(req.query)
                 res.status(200).json(resultado)
                 await this.fim(req, res)
@@ -33,7 +35,7 @@ module.exports = class Controller {
     }
 
     gerarRotaBuscaUm() {
-        this.router.get(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.get(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             const model = new this.Model()
             try {
                 await this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
@@ -46,11 +48,11 @@ module.exports = class Controller {
         })
     }
 
-    gerarRotaAdiciona(){
-        this.router.post(`/api/${this.nomePlural}`, async (req, res) => {
+    gerarRotaAdiciona() {
+        this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             const model = new this.Model()
             try {
-                await this.inicio(req, res, `Adicionando varios ${this.nomePlural}...`)
+                await this.inicio(req, res, `Adicionando ${this.nomePlural}...`)
                 await model.adiciona(req.body)
                 res.status(200)
                 await this.fim(req, res)
@@ -61,7 +63,7 @@ module.exports = class Controller {
     }
 
     gerarRotaAdicionaUm() {
-        this.router.post(`/api/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
+        this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
             const model = new this.Model()
             try {
                 await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
@@ -75,10 +77,10 @@ module.exports = class Controller {
     }
 
     gerarRotaDeleta() {
-        this.router.delete(`/api/${this.nomePlural}`, async (req, res) => {
+        this.router.delete(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             const model = new this.Model()
             try {
-                await this.inicio(req, res, `Deletando varios ${this.nomePlural}...`)
+                await this.inicio(req, res, `Deletando ${this.nomePlural}...`)
                 await model.deleta(req.query)
                 res.status(200)
                 await this.fim(req, res)
@@ -89,7 +91,7 @@ module.exports = class Controller {
     }
 
     gerarRotaDeletaUm() {
-        this.router.delete(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.delete(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             const model = new this.Model()
             try {
                 await this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
@@ -103,10 +105,10 @@ module.exports = class Controller {
     }
 
     gerarRotaAtualiza() {
-        this.router.post(`/api/${this.nomePlural}`, async (req, res) => {
+        this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             const model = new this.Model()
             try {
-                await this.inicio(req, res, `Atualizando varios ${this.nomePlural}...`)
+                await this.inicio(req, res, `Atualizando ${this.nomePlural}...`)
                 await model.atualiza(req.body, req.query)
                 res.status(200)
                 await this.fim(req, res)
@@ -117,7 +119,7 @@ module.exports = class Controller {
     }
 
     gerarRotaAtualizaUm() {
-        this.router.post(`/api/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
+        this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             const model = new this.Model()
             try {
                 await this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
@@ -143,20 +145,11 @@ module.exports = class Controller {
 
     async lidarComErro(erro, req, res) {
         try {
-            let err = undefined
-            try {
-                err = JSON.parse(erro.message)
-            } catch (e2) {
-                throw erro
-            }
-            if (!err.msg) {
-                throw erro
-            } else {
-                res.status(400).json(err)
-            }
+            let err = JSON.parse(erro.message)
+            res.status(400).json(err)
         } catch (e) {
-            console.log(e)
-            log(e)
+            console.log(erro)
+            log(erro)
             res.status(500).json({
                 msg: "Erro no servidor."
             })

@@ -72,12 +72,31 @@ module.exports = class DAO {
     }
 
     async gerarQuery(sql, query){
-        if(query && Object.keys(query).length > 0){
-            const keys = Object.keys(query)
-            let sql2 = ` WHERE ${keys.map(k => `${k} = ?`).join(" AND ")}`
+        if(query){
+            const q = JSON.parse(JSON.stringify(query))
+
+            let sqlOrdem = ""
+            if(q.ordem && q.ordenarPor){
+                sqlOrdem = ` ORDER BY ${q.ordenarPor} ${q.ordem}`
+                delete q.ordenarPor
+                delete q.ordem
+            }
+
+            let sqlLimite = ""
+            if(q.limite){
+                sqlLimite = ` LIMIT ${q.limite}`
+                delete q.limite
+            }
+
+            let sqlWhere = ""
+            const keys = Object.keys(q)
+            if(keys.length > 0){
+                sqlWhere = ` WHERE ${keys.map(k => `${k} = ?`).join(" AND ")}`
+            }
+            
             return {
-                sql: `${sql}${sql2}`,
-                valores: Object.values(query) 
+                sql: `${sql}${sqlWhere}${sqlOrdem}${sqlLimite}`,
+                valores: Object.values(q) 
             }
         }
         return {

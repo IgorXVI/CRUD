@@ -119,18 +119,16 @@ CREATE TABLE IF NOT EXISTS itensVenda (
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (produto) REFERENCES produtos(id),
-	FOREIGN KEY (venda) REFERENCES vendas(id)
+	FOREIGN KEY (venda) REFERENCES vendas(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS transportes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
 	quantidade INTEGER NOT NULL,
     armazem INTEGER NOT NULL,
-    cliente INTEGER NOT NULL,
-    produto INTEGER NOT NULL,
+    itemVenda INTEGER NOT NULL,
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
 	FOREIGN KEY (armazem) REFERENCES armazens(id),
-	FOREIGN KEY (cliente) REFERENCES clientes(id),
-    FOREIGN KEY (produto) REFERENCES produtos(id)
+	FOREIGN KEY (itemVenda) REFERENCES itensVenda(id) ON DELETE CASCADE
 );
