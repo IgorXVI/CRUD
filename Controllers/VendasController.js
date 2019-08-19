@@ -1,39 +1,30 @@
 const Vendas = require("../Models/Vendas")
 const Controller = require("./Controller")
-// const ItensVenda = require("../Models/ItensVenda")
+const ItensVenda = require("../Models/ItensVenda")
+const Transportes = require("../Models/Transportes")
 
 module.exports = class VendasController extends Controller {
     constructor(){
-        super(Vendas, false)
+        super(new Vendas())
+
+        this.itensVenda = new ItensVenda()
+        this.transportes = new Transportes()
+
+        this.gerarRotaAdionaUmItem()
     }
 
-    // gerarRotaAdiciona(){
-    //     this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
-    //         const model = new this.Model()
-    //         try {
-    //             await this.inicio(req, res, `Adicionando varios ${this.nomePlural}...`)
-    //             await model.adiciona(req.body)
-    //             res.status(200)
-    //             await this.fim(req, res)
-    //         } catch (erro) {
-    //             await this.lidarComErro(erro, req, res)
-    //         }
-    //     })
-    // }
-
-    // gerarRotaAdicionaUm() {
-    //     this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
-    //         const model = new this.Model()
-    //         try {
-    //             await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-    //             await model.adicionaUm(req.body)
-    //             res.status(200)
-    //             await this.fim(req, res)
-    //         } catch (erro) {
-    //             await this.lidarComErro(erro, req, res)
-    //         }
-    //     })
-    // }
+    gerarRotaAdionaUmItem(){
+        this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id/${this.itensVenda.nomePlural}`, async (req, res) => {
+            try {
+                await this.inicio(req, res, `Adicionando ${this.nomeSingular}: ${this.itensVenda.nomePlural}...`)
+                await this.model.adicionaUm(req.body)
+                res.status(200)
+                await this.fim(req, res)
+            } catch (erro) {
+                await this.lidarComErro(erro, req, res)
+            }
+        })
+    }
 
     // validaItensVenda(itens){
     //     const itensVenda = new ItensVenda()

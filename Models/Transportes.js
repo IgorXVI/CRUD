@@ -1,6 +1,4 @@
 const Model = require("./Model")
-const ItensVenda = require("./ItensVenda")
-const Armazens = require("./Armazens")
 
 module.exports = class Transportes extends Model {
     constructor(){
@@ -10,20 +8,20 @@ module.exports = class Transportes extends Model {
         this.armazemFk = {}
     }
 
-    async quantidadeAttr(novaQuantidade){
-        await this._validaNotNull("quantiade", novaQuantidade)
-        await this._validaInteiro("quantidade", novaQuantidade, 1)
+    async quantidadeAttr(novaQuantidade, local){
+        await this._validaNotNull("quantiade", novaQuantidade, local)
+        await this._validaInteiro("quantidade", novaQuantidade, 1, undefined, local)
         return novaQuantidade
     }
 
-    async itemVendaAttr(novoItemVenda){
-        const itensVenda = new ItensVenda()
-        return await itensVenda.idAttr(novoItemVenda)
+    async itemVendaAttr(novoItemVenda, local){
+        await this._validaFK("itemVenda", "itensVenda", novoItemVenda, local)
+        return novoItemVenda
     }
 
-    async armazemAttr(novoArmazem){
-        const armazens = new Armazens()
-        return await armazens.idAttr(novoArmazem)
+    async armazemAttr(novoArmazem, local){
+        await this._validaFK("armazem", "armazens", novoArmazem, local)
+        return novoArmazem
     }
 
 }

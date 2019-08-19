@@ -7,14 +7,16 @@ module.exports = class Ususarios extends PessoaFisica {
     }
 
     async gerarJWT(objeto) {
-        await this.gerarAtributosJSON(objeto)
+        await this._gerarAtributosJSON(objeto, "attrs")
         const dadosBanco = await this._DAO.busca({email: objeto.email})
         if (!dadosBanco) {
-            throw new Error(await this._formataErro(undefined, undefined, "Email ou senha incorretos."))
+           await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", "attrs")
+           throw new Error("Erros de validação.")
         }
         const senhaEhValida = await bcrypt.compare(objeto.senha, dadosBanco.senha)
         if (!senhaEhValida) {
-            throw new Error(await this._formataErro(undefined, undefined, "Email ou senha incorretos."))
+            await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", "attrs")
+            throw new Error("Erros de validação.")
         }
         const token = jwt.sign({
                 id: dadosBanco.id,
@@ -27,15 +29,15 @@ module.exports = class Ususarios extends PessoaFisica {
         return token
     }
 
-    async senhaAttr(novaSenha) {
-        await this._validaNotNull("senha", novaSenha)
-        await this._validaMinMaxChars("senha", novaSenha, 8, 255)
+    async senhaAttr(novaSenha, local) {
+        await this._validaNotNull("senha", novaSenha, local)
+        await this._validaMinMaxChars("senha", novaSenha, 8, 255, local)
         return bcrypt.hash(novaSenha, 10)
     }
 
-    async nivelAcessoAttr(novoNivelAcesso) {
-        await this._validaNotNull("nivelAcesso", novoNivelAcesso)
-        await this._validaInteiro("nivelAcesso", novoNivelAcesso, 0, 2)
+    async nivelAcessoAttr(novoNivelAcesso, local) {
+        await this._validaNotNull("nivelAcesso", novoNivelAcesso, local)
+        await this._validaInteiro("nivelAcesso", novoNivelAcesso, 0, 2, local)
         return novoNivelAcesso
     }
 

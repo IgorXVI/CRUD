@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS clientes (
     telefone VARCHAR(15) NOT NULL,
     dataNascimento VARCHAR(10) NOT NULL,
     complemento VARCHAR(255),
+    senha VARCHAR(8) NOT NULL,
+    nivelAcesso INTEGER NOT NULL,
     FOREIGN KEY (cidade) REFERENCES cidades(id)
 );
 
@@ -102,11 +104,9 @@ CREATE TABLE IF NOT EXISTS armazens (
 CREATE TABLE IF NOT EXISTS vendas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     valorTotal REAL NOT NULL,
-    funcionario INTEGER NOT NULL,
     cliente INTEGER NOT NULL,
     dataAlteracao VARCHAR(24) NOT NULL,
 	dataCriacao VARCHAR(24) NOT NULL,
-	FOREIGN KEY (funcionario) REFERENCES funcionarios(id),
 	FOREIGN KEY (cliente) REFERENCES clientes(id)
 );
 

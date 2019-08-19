@@ -5,9 +5,9 @@ module.exports = class Funcionarios extends Usuarios {
         super("funcionario", "funcionarios")
     }
 
-    async salarioAttr(novoSalario) {
-        await this._validaNotNull("salario", novoSalario)
-        await this._validaDecimal("salario", novoSalario, 0)
+    async salarioAttr(novoSalario, local) {
+        await this._validaNotNull("salario", novoSalario, local)
+        await this._validaDecimal("salario", novoSalario, 0, undefined, local)
         return novoSalario
     }
 
