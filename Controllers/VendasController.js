@@ -1,29 +1,59 @@
-const Vendas = require("../Models/Vendas")
+const ErrorHelper = require("../Helpers/ErrorHelper")
+
+const log = require('log-to-file')
+
 const Controller = require("./Controller")
+
+const Vendas = require("../Models/Vendas")
 const ItensVenda = require("../Models/ItensVenda")
 const Transportes = require("../Models/Transportes")
 
 module.exports = class VendasController extends Controller {
     constructor(){
-        super(new Vendas())
+        super(new Vendas(), true)
 
         this.itensVenda = new ItensVenda()
         this.transportes = new Transportes()
 
-        this.gerarRotaAdionaUmItem()
+        this.gerarRotaAdionaItens()
     }
 
-    gerarRotaAdionaUmItem(){
+    gerarRotaAdionaItens(){
         this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id/${this.itensVenda.nomePlural}`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Adicionando ${this.nomeSingular}: ${this.itensVenda.nomePlural}...`)
-                await this.model.adicionaUm(req.body)
-                res.status(200)
-                await this.fim(req, res)
+                this.inicio(req, res, `Adicionando ${this.nomeSingular}: ${this.itensVenda.nomePlural}...`)
+
+                
+
+                const resultado = await this.itensVenda.adiciona(req.body)
+                res.status(200).json(resultado)
+
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
         })
+    }
+
+    async lidarComErro(erro, req, res) {
+        const errorHelper = new ErrorHelper()
+        if(erro.message.includes("Erros de validação.")){
+            if(this.itensVenda.errosValidacao.errors.length > 0){
+                res.status(400).json(await this.itensVenda.pegarErrosValidacao())
+            }
+            else if(this.transportes.errosValidacao.errors.length > 0){
+                res.status(400).json(await this.transportes.pegarErrosValidacao())
+            }
+            else{
+                res.status(400).json(await this.model.pegarErrosValidacao())
+            }
+        }
+        else{
+            console.log(erro)
+            log(erro)
+            res.status(500).json(await errorHelper.formatError(undefined, undefined, "Erro no servidor"))
+        }
+        this.fim(req, res)
     }
 
     // validaItensVenda(itens){

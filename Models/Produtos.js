@@ -2,9 +2,7 @@ const Model = require("./Model")
 
 module.exports = class Produtos extends Model {
     constructor(){
-        super("produto", "produtos")
-
-        this.fornecedorFK = {}
+        super("produto", "produtos", ["nome", "categoria", "precoUnidade", "descricao", "garantia", "dataFabricacao", "dataValidade", "fornecedor"])
     }
 
     async nomeAttr(novoNome, local){

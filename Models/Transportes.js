@@ -2,10 +2,7 @@ const Model = require("./Model")
 
 module.exports = class Transportes extends Model {
     constructor(){
-        super("transporte", "transportes")
-
-        this.itemVendaFK = {}
-        this.armazemFk = {}
+        super("transporte", "transportes", ["quantidade", "itemVenda", "armazem"])
     }
 
     async quantidadeAttr(novaQuantidade, local){

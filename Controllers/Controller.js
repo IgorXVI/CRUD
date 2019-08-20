@@ -25,10 +25,10 @@ module.exports = class Controller {
     gerarRotaBusca() {
         this.router.get(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Buscando ${this.nomePlural}...`)
+                this.inicio(req, res, `Buscando ${this.nomePlural}...`)
                 const resultado = await this.model.busca(req.query)
                 res.status(200).json(resultado)
-                await this.fim(req, res)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -38,10 +38,10 @@ module.exports = class Controller {
     gerarRotaBuscaUm() {
         this.router.get(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
+                this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
                 const resultado = await this.model.buscaUm(req.params.id)
                 res.status(200).json(resultado)
-                await this.fim(req, res)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -51,10 +51,10 @@ module.exports = class Controller {
     gerarRotaAdiciona() {
         this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Adicionando ${this.nomePlural}...`)
-                await this.model.adiciona(req.body)
-                res.status(200)
-                await this.fim(req, res)
+                this.inicio(req, res, `Adicionando ${this.nomePlural}...`)
+                const resultado = await this.model.adiciona(req.body)
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -64,10 +64,10 @@ module.exports = class Controller {
     gerarRotaAdicionaUm() {
         this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-                await this.model.adicionaUm(req.body)
-                res.status(200)
-                await this.fim(req, res)
+                this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
+                const resultado = await this.model.adicionaUm(req.body)
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -77,10 +77,10 @@ module.exports = class Controller {
     gerarRotaDeleta() {
         this.router.delete(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Deletando ${this.nomePlural}...`)
-                await this.model.deleta(req.query)
-                res.status(200)
-                await this.fim(req, res)
+                this.inicio(req, res, `Deletando ${this.nomePlural}...`)
+                const resultado = await this.model.deleta(req.query)
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -90,10 +90,10 @@ module.exports = class Controller {
     gerarRotaDeletaUm() {
         this.router.delete(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
-                await this.model.deletaUm(req.params.id)
-                res.status(200)
-                await this.fim(req, res)
+                this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
+                const resultado = await this.model.deletaUm(req.params.id)
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -103,10 +103,10 @@ module.exports = class Controller {
     gerarRotaAtualiza() {
         this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Atualizando ${this.nomePlural}...`)
-                await this.model.atualiza(req.body, req.query)
-                res.status(200)
-                await this.fim(req, res)
+                this.inicio(req, res, `Atualizando ${this.nomePlural}...`)
+                const resultado = await this.model.atualiza(req.body, req.query)
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -116,10 +116,10 @@ module.exports = class Controller {
     gerarRotaAtualizaUm() {
         this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
-                await this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
-                await this.model.atualizaUm(req.body, req.params.id)
-                res.status(200)
-                await this.fim(req, res)
+                this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
+                const resultado = await this.model.atualizaUm(req.body, req.params.id)
+                res.status(200).json(resultado)
+                this.fim(req, res)
             } catch (erro) {
                 await this.lidarComErro(erro, req, res)
             }
@@ -140,7 +140,7 @@ module.exports = class Controller {
     async lidarComErro(erro, req, res) {
         const errorHelper = new ErrorHelper()
         if(erro.message.includes("Erros de validação.")){
-            res.status(500).json(this.model.pegarErrosValidacao())
+            res.status(400).json(await this.model.pegarErrosValidacao())
         }
         else{
             console.log(erro)

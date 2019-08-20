@@ -2,8 +2,8 @@ const PessoaFisica = require("./PessoaFisica")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
 module.exports = class Ususarios extends PessoaFisica {
-    constructor(nomeSingular, nomePlural) {
-        super(nomeSingular, nomePlural)
+    constructor(nomeSingular, nomePlural, camposObrigatorios) {
+        super(nomeSingular, nomePlural, camposObrigatorios.concat(["senha", "nivelAcesso"]))
     }
 
     async gerarJWT(objeto) {

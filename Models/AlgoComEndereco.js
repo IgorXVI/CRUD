@@ -1,8 +1,8 @@
 const Model = require("./Model")
 
 module.exports = class AlgoComEndereco extends Model {
-    constructor(nomeSingular, nomePlural) {
-        super(nomeSingular, nomePlural)
+    constructor(nomeSingular, nomePlural, camposObrigatorios) {
+        super(nomeSingular, nomePlural, camposObrigatorios.concat(["cidade", "bairro", "rua", "numeroCasa", "telefone", "complemento"]))
     }
 
     async cidadeAttr(novaCidade, local) {

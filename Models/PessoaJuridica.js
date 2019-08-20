@@ -1,8 +1,8 @@
 const Pessoa = require("./Pessoa")
 
 module.exports = class PessoaJuridica extends Pessoa {
-    constructor(nomeSingular, nomePlural) {
-        super(nomeSingular, nomePlural)
+    constructor(nomeSingular, nomePlural, camposObrigatorios) {
+        super(nomeSingular, nomePlural, camposObrigatorios.concat(["CPNPJ"]))
     }
 
     async CNPJAttr(novoCNPJ, local) {

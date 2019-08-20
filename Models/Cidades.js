@@ -2,7 +2,7 @@ const Model = require("./Model")
 
 module.exports = class Cidades extends Model{
     constructor(){
-        super("cidade", "cidades")
+        super("cidade", "cidades", ["nome", "pais", "latitude", "longitude"])
     }
 
     async nomeAttr(novoNome, local){

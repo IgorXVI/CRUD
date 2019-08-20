@@ -4,7 +4,7 @@ const nomesPlural = require("./nomesPlural")
 const ErrorHelper = require("../Helpers/ErrorHelper")
 
 module.exports = class Model {
-    constructor(nomeSingular, nomePlural) {
+    constructor(nomeSingular, nomePlural, attrsValidacao) {
         this.nomeSingular = nomeSingular
         this.nomePlural = nomePlural
 
@@ -13,19 +13,36 @@ module.exports = class Model {
         nomesPlural[nomeSingular] = nomePlural
 
         this._DAO = new DAO(nomePlural)
+
         this.errosValidacao = {
             msg: "Erros de validação.",
             errors: []
         }
+
+        this.attrsValidacao = {
+            id: this._validaId,
+            dataAlteracao: this._validaDataAlteracao,
+            dataCriacao: this._validaDataCriacao,
+            ordem: this._validaOrdem,
+            ordenarPor: this._validaOrdenarPor,
+            limite: this._validaLimite
+        }
+
+        Object.assign(this.attrsValidacao, attrsValidacao)
     }
 
-    pegarErrosValidacao() {
+    async pegarErrosValidacao() {
         const r = JSON.parse(JSON.stringify(this.errosValidacao))
         this.errosValidacao = {
             msg: "Erros de validação",
             errors: []
         }
         return r
+    }
+
+    async adicionaErroValidacao(param, value, msg, location) {
+        const errorHelper = new ErrorHelper()
+        this.errosValidacao.errors.push(await errorHelper.formataErro(param, value, msg, location))
     }
 
     async busca(query) {
@@ -38,37 +55,42 @@ module.exports = class Model {
     }
 
     async buscaUm(id) {
-        const q = await this._gerarAtributosJSON({
+        const resultado = (await this.busca({
             id
-        }, "query")
-        let objeto = await this._DAO.busca(q)
-        return this._converterForeignKeyEmJSON(objeto)
+        }))[0]
+        if (!resultado) {
+            return {}
+        }
+        return resultado
     }
 
     async deleta(query) {
         const q = await this._gerarAtributosJSON(query, "query")
-        await this._DAO.deleta(q)
+        const changes = (await this._DAO.deleta(q)).changes
+        return {
+            changes
+        }
     }
 
     async deletaUm(id) {
-        const q = this._gerarAtributosJSON({
+        return this.deleta({
             id
-        }, "query")
-        await this._DAO.deleta(q)
+        })
     }
 
     async atualiza(objeto, query) {
         const o = await this._gerarAtributosJSON(objeto, "attrs")
         const q = await this._gerarAtributosJSON(query, "query")
-        await this._DAO.atualiza(o, q)
+        const changes = (await this._DAO.atualiza(o, q)).changes
+        return {
+            changes
+        }
     }
 
     async atualizaUm(objeto, id) {
-        const o = await this._gerarAtributosJSON(objeto, "attrs")
-        const q = await this._gerarAtributosJSON({
+        return this.atualiza(objeto, {
             id
-        }, "query")
-        await this._DAO.atualiza(o, q)
+        })
     }
 
     async adiciona(listaObjetos) {
@@ -76,71 +98,19 @@ module.exports = class Model {
         for (let i = 0; i < listaObjetos.length; i++) {
             l.push(this.adicionaUm(listaObjetos[i]))
         }
-        Promise.all(l)
+        return Promise.all(l)
     }
 
     async adicionaUm(objeto) {
-        const o = await this._gerarAtributosJSON(objeto, "attrs")
-        await this._DAO.adiciona(o)
-    }
-
-    async adicionaErroValidacao(param, value, msg, location) {
-        const errorHelper = new ErrorHelper()
-        this.errosValidacao.errors.push(await errorHelper.formataErro(param, value, msg, location))
-    }
-
-    async idAttr(novoId, local) {
-        await this._validaNotNull("id", novoId, "attrs")
-        await this._validaInteiro(`id`, novoId, 1, undefined, "attrs")
-
-        const objeto = await this._DAO.busca({
-            id: novoId
-        })
-
-        if (objeto.length === 0) {
-            await this.adicionaErroValidacao(`${this.nomeSingular}: id`, novoId, "O valor informado não está cadastrado.", local)
-        }
-
-        return novoId
-    }
-
-    async dataAlteracaoAttrQuery(data) {
-        await this._validaDataISO8601("dataAlteracao", data, "query")
-        return data
-    }
-
-    async dataCriacaoAttrQuery(data) {
-        await this._validaDataISO8601("dataCriacao", data, "query")
-        return data
-    }
-
-    async ordemAttrQuery(ordem) {
-        if (ordem !== "ASC" && ordem !== "DESC") {
-            await this.adicionaErroValidacao("ordem", ordem, "A ordem deve ser ASC ou DESC", "query")
-        }
-        return ordem
-    }
-
-    async ordenarPorAttrQuery(ordenarPor) {
-        const key = `${ordenarPor}Attr`
-        if (this[key] === undefined || this[key] === null) {
-            await this.adicionaErroValidacao("ordenarPor", ordenarPor, "Parâmetro inválido.", "query")
-        }
-        return ordenarPor
-    }
-
-    async limiteAttrQuery(limite) {
-        await this._validaNotNull("limite", limite, "query")
-        await this._validaInteiro("limite", limite, 1, undefined, "query")
-        return limite
+        let o = await this._gerarAtributosJSON(objeto, "attrs")
+        const id = (await this._DAO.adiciona(o)).lastInsertRowid
+        o.id = id
+        return this._converterForeignKeyEmJSON(o)
     }
 
     async _gerarAtributosJSON(objeto, local) {
-        const keys = Object.keys(objeto)
+        const keys = Object.keys(this.attrsValidacao)
         let o = {}
-        if (keys.length === 0) {
-            await this.adicionaErroValidacao(undefined, objeto, "O objeto não pode ser vazio.", local)
-        } else {
             for (let i = 0; i < keys.length; i++) {
                 let key = `${keys[i]}Attr`
                 let keyQ = `${key}Query`
@@ -160,7 +130,6 @@ module.exports = class Model {
                     o[keys[i]] = sanitizer.sanitize(o[keys[i]])
                 }
             }
-        }
         if (this.errosValidacao.errors.length > 0) {
             throw new Error("Erros de validação.")
         }
@@ -187,28 +156,82 @@ module.exports = class Model {
         return o
     }
 
-    async _validaFK(nomeSingular, nomePlural, FK, local){
+    async _validaId(novoId, local) {
+        await this._validaNotNull("id", novoId, local)
+        await this._validaInteiro(`id`, novoId, 1, undefined, local)
+    }
+
+    async _validaDataAlteracao(data, local) {
+        if (local !== "query" && data) {
+            await this.adicionaErroValidacao("dataAlteracao", data, "Parâmetro inválido.", local)
+        } else {
+            await this._validaDataISO8601("dataAlteracao", data, "query")
+        }
+    }
+
+    async _validaDataCriacao(data, local) {
+        if (local !== "query" && data) {
+            await this.adicionaErroValidacao("dataCriacao", data, "Parâmetro inválido.", local)
+        } else {
+            await this._validaDataISO8601("dataCriacao", data, "query")
+        }
+    }
+
+    async _validaOrdem(ordem, local) {
+        if (local !== "query" && ordem) {
+            await this.adicionaErroValidacao("ordem", ordem, "Parâmetro inválido.", local)
+        } else {
+            if (ordem !== "ASC" && ordem !== "DESC") {
+                await this.adicionaErroValidacao("ordem", ordem, "A ordem deve ser ASC ou DESC", "query")
+            }
+        }
+    }
+
+    async _validaOrdenarPor(ordenarPor, local) {
+        if (local !== "query" && ordenarPor) {
+            await this.adicionaErroValidacao("ordenarPor", ordenarPor, "Parâmetro inválido.", local)
+        } else {
+            if (!Object.keys(this.attrsValidacao).includes(ordenarPor)) {
+                await this.adicionaErroValidacao("ordenarPor", ordenarPor, "Parâmetro inválido.", "query")
+            }
+        }
+    }
+
+    async _validaLimite(limite, local) {
+        if (local !== "query" && limite) {
+            await this.adicionaErroValidacao("limite", limite, "Parâmetro inválido.", local)
+        } else {
+            await this._validaNotNull("limite", limite, "query")
+            await this._validaInteiro("limite", limite, 1, undefined, "query")
+        }
+    }
+
+    async _validaFK(nomeSingular, nomePlural, FK, local) {
         await this._validaNotNull(nomeSingular, FK, local)
         await this._validaInteiro(nomeSingular, FK, 1, local)
 
         const DAOFK = new DAO(nomePlural)
-        const objeto = await DAOFK.busca({id: FK})
-        if(objeto.length === 0){
+        const objeto = await DAOFK.busca({
+            id: FK
+        })
+        if (objeto.length === 0) {
             await this.adicionaErroValidacao(nomeSingular, FK, "O valor informado não está cadastrado", local)
         }
     }
 
     async _validaCampoUnico(atributo, valor, local) {
-        let query = {}
-        query[atributo] = valor
-        const objeto = await this._DAO.busca(query)
-        if (objeto.length > 0) {
-            await this.adicionaErroValidacao(atributo, valor, "O valor informado já está cadastrado.", local)
+        if (local === "attrs") {
+            let query = {}
+            query[atributo] = valor
+            const objeto = await this._DAO.busca(query)
+            if (objeto.length > 0) {
+                await this.adicionaErroValidacao(atributo, valor, "O valor informado já está cadastrado.", local)
+            }
         }
     }
 
     async _validaNotNull(atributo, valor, local) {
-        if (valor === undefined || valor === null) {
+        if (valor === null) {
             await this.adicionaErroValidacao(atributo, valor, "O valor informado não pode ser nulo.", local)
         }
     }

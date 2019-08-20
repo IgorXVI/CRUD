@@ -1,8 +1,8 @@
 const AlgoComEndereco = require("./AlgoComEndereco")
 
 module.exports = class Pessoa extends AlgoComEndereco {
-    constructor(nomeSingular, nomePlural) {
-        super(nomeSingular, nomePlural)
+    constructor(nomeSingular, nomePlural, camposObrigatorios) {
+        super(nomeSingular, nomePlural, camposObrigatorios.concat(["nome", "email"]))
     }
 
     async nomeAttr(novoNome, local) {

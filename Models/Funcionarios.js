@@ -2,7 +2,7 @@ const Usuarios = require("./Usuarios")
 
 module.exports = class Funcionarios extends Usuarios {
     constructor(){
-        super("funcionario", "funcionarios")
+        super("funcionario", "funcionarios", ["salario"])
     }
 
     async salarioAttr(novoSalario, local) {
