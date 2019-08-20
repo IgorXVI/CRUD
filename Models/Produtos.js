@@ -1,26 +1,55 @@
 const Model = require("./Model")
 
 module.exports = class Produtos extends Model {
-    constructor(){
+    constructor() {
         super("produto", "produtos")
 
         Object.assign(this.attrsValidacao, {
-            nome: this._validaNome,
-            categoria: this._validaCategoria,
-            precoUnidade: this._validaPrecoUnidade,
-            descricao: this._validaDescricao,
-            garantia: this._validaGarantia,
-            dataFabricacao: this._validaDataFabricacao,
-            dataValidade: this._validaDataValidade,
-            fornecedor: this._validaFornecedor
+            nome: {
+                validacao: this._validaNome,
+                sql: `VARCHAR(100) NOT NULL UNIQUE`
+            },
+            categoria: {
+                validacao: this._validaCategoria,
+                sql: `VARCHAR(100) NOT NULL`
+            },
+            precoUnidade: {
+                validacao: this._validaPrecoUnidade,
+                sql: `REAL NOT NULL`
+            },
+            descricao: {
+                validacao: this._validaDescricao,
+                sql: `TEXT NOT NULL`
+            },
+            garantia: {
+                validacao: this._validaGarantia,
+                sql: `INTEGER NOT NULL`
+            },
+            dataFabricacao: {
+                validacao: this._validaDataFabricacao,
+                sql: `VARCHAR(10) NOT NULL`
+            },
+            dataValidade: {
+                validacao: this._validaDataValidade,
+                sql: `VARCHAR(10) NOT NULL`
+            },
+            fornecedor: {
+                validacao: this._validaFornecedor,
+                sql: `INTEGER NOT NULL`,
+                fk: {
+                    tabela: `fornecedores`,
+                    attr: `id`
+                }
+            }
         })
 
         this._gerarSchema()
     }
 
-    async _validaNome(novoNome, local){
+    async _validaNome(novoNome, local) {
         await this._validaNotNull("nome", novoNome, local)
         await this._validaMinMaxChars("nome", novoNome, 1, 100, local)
+        await this._validaCampoUnico("nome", novoNome, local)
     }
 
     async _validaCategoria(novaCategoria, local) {

@@ -7,27 +7,35 @@ module.exports = class Ususarios extends PessoaFisica {
         super(nomeSingular, nomePlural)
 
         Object.assign(this.attrsValidacao, {
-            senha: this._validaSenha,
-            nivelAcesso: this._validaNivelAcesso
+            senha: {
+                validacao: this._validaSenha,
+                sql: `VARCHAR(8) NOT NULL`
+            },
+            nivelAcesso: {
+                validacao: this._validaNivelAcesso,
+                sql: `INTEGER NOT NULL`
+            }
         })
 
         this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
     }
 
-    async _gerarAtributosJSON(objeto, local){
+    async _gerarAtributosJSON(objeto, local) {
         let o = await super._gerarAtributosJSON(objeto, local)
-        if(o.senha && local === "attrs"){
+        if (o.senha && local === "attrs") {
             o.senha = await bcrypt.hash(o.senha, 10)
         }
-        return o   
+        return o
     }
 
     async gerarJWT(objeto) {
         await this._gerarAtributosJSON(objeto, "attrs")
-        const dadosBanco = await this._DAO.busca({email: objeto.email})
+        const dadosBanco = await this._DAO.busca({
+            email: objeto.email
+        })
         if (!dadosBanco) {
-           await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", "attrs")
-           throw new Error("Erros de validação.")
+            await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", "attrs")
+            throw new Error("Erros de validação.")
         }
         const senhaEhValida = await bcrypt.compare(objeto.senha, dadosBanco.senha)
         if (!senhaEhValida) {

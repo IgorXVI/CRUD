@@ -5,14 +5,21 @@ module.exports = class PessoaFisica extends Pessoa {
         super(nomeSingular, nomePlural)
 
         Object.assign(this.attrsValidacao, {
-            CPF: this._validaCPF,
-            dataNascimento: this._validaDataNascimento
+            CPF: {
+                validacao: this._validaCPF,
+                sql: `VARCHAR(14) NOT NULL UNIQUE`
+            },
+            dataNascimento: {
+                validacao: this._validaDataNascimento,
+                sql: `VARCHAR(10) NOT NULL`
+            }
         })
     }
 
     async _validaCPF(novoCPF, local) {
         await this._validaNotNull("CPF", novoCPF, local)
         await this._validaFixoChars("CPF", novoCPF, 14, local)
+        await this._validaCampoUnico("CPF", novoCPF, local)
         await this._validaRegex("CPF", novoCPF, /^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$/, local)
     }
 
