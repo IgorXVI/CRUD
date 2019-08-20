@@ -6,7 +6,7 @@ module.exports = class Ususarios extends PessoaFisica {
     constructor(nomeSingular, nomePlural) {
         super(nomeSingular, nomePlural)
 
-        Object.assign(this.attrsValidacao, {
+        Object.assign(this.attrs, {
             senha: {
                 validacao: this._validaSenha,
                 sql: `VARCHAR(8) NOT NULL`

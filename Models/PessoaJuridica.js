@@ -4,7 +4,7 @@ module.exports = class PessoaJuridica extends Pessoa {
     constructor(nomeSingular, nomePlural) {
         super(nomeSingular, nomePlural)
 
-        Object.assign(this.attrsValidacao, {
+        Object.assign(this.attrs, {
             CNPJ: {
                 validacao: this._validaCNPJ,
                 sql: `VARCHAR(18) NOT NULL UNIQUE`

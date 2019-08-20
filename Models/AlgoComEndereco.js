@@ -4,7 +4,7 @@ module.exports = class AlgoComEndereco extends Model {
     constructor(nomeSingular, nomePlural) {
         super(nomeSingular, nomePlural)
 
-        Object.assign(this.attrsValidacao, {
+        Object.assign(this.attrs, {
             cidade: {
                 validacao: this._validaCidade,
                 sql: `INTEGER NOT NULL`,

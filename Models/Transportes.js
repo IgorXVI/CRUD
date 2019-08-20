@@ -4,7 +4,7 @@ module.exports = class Transportes extends Model {
     constructor() {
         super("transporte", "transportes")
 
-        Object.assign(this.attrsValidacao, {
+        Object.assign(this.attrs, {
             quantidade: {
                 validacao: this._validaQuantidade,
                 sql: `INTEGER NOT NULL`

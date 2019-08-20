@@ -118,10 +118,9 @@ module.exports = class Model {
         return this._converterForeignKeyEmJSON(o)
     }
 
-    _gerarSchema() {
+    async _gerarSchema() {
         try {
-            console.log(Object.keys(this.attrs))
-            this._DAO.criarSchema(this.attrs)
+            await this._DAO.criarSchema(this.attrs)
         } catch (e) {
             log(e)
             console.log(e)

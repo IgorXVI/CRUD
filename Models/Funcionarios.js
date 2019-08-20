@@ -4,7 +4,7 @@ module.exports = class Funcionarios extends Usuarios {
     constructor() {
         super("funcionario", "funcionarios")
 
-        Object.assign(this.attrsValidacao, {
+        Object.assign(this.attrs, {
             salario: {
                 validacao: this._validaSalario,
                 sql: `REAL NOT NULL`

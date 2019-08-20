@@ -40,7 +40,9 @@ module.exports = class DAO {
     }
 
     async criarSchema(attrs) {
-        let sql = `CREATE TABLE IF NOT EXISTS ${this._tabela}( `
+        let sql = `CREATE TABLE IF NOT EXISTS ${this._tabela} (\n`
+
+        let listaFKs = []
 
         const keys = Object.keys(attrs)
         for (let i = 0; i < keys.length; i++) {
@@ -50,18 +52,28 @@ module.exports = class DAO {
                 sql += `${k} ${attrs[k].sql}`
 
                 if (attrs[k].fk) {
-                    sql += `, FOREIGN KEY (${k}) REFERENCES ${attrs[k].fk.tabela}(${attrs[k].fk.attr})`
+                    listaFKs.push(`FOREIGN KEY (${k}) REFERENCES ${attrs[k].fk.tabela}(${attrs[k].fk.attr})`)
                 }
 
-                if (i != keys.length - 1) {
-                    sql += `, `
+                if (i != keys.length - 1 || listaFKs.length > 0) {
+                    sql += `,\n`
                 }
             }
         }
 
-        sql += ` );`
+        for (let i = 0; i < listaFKs.length; i++) {
+            const l = listaFKs[i]
 
-        await this.runQuery(sql)
+            sql += l
+
+            if (i != listaFKs.length - 1) {
+                sql += `,\n`
+            }
+        }
+
+        sql += `\n);`
+
+        return await this.runQuery(sql)
     }
 
     async adiciona(objeto) {

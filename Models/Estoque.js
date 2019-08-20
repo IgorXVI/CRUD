@@ -3,7 +3,7 @@ module.exports = class Estoque extends Model {
     constructor() {
         super("itemEstocado", "estoque")
 
-        Object.assign(this.attrsValidacao, {
+        Object.assign(this.attrs, {
             quantidade: {
                 validacao: this._validaQuantidade,
                 sql: `INTEGER NOT NULL`

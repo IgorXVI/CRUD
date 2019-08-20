@@ -4,7 +4,7 @@ module.exports = class Produtos extends Model {
     constructor() {
         super("produto", "produtos")
 
-        Object.assign(this.attrsValidacao, {
+        Object.assign(this.attrs, {
             nome: {
                 validacao: this._validaNome,
                 sql: `VARCHAR(100) NOT NULL UNIQUE`
