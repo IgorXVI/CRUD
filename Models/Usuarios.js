@@ -1,9 +1,25 @@
 const PessoaFisica = require("./PessoaFisica")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
+
 module.exports = class Ususarios extends PessoaFisica {
-    constructor(nomeSingular, nomePlural, camposObrigatorios) {
-        super(nomeSingular, nomePlural, camposObrigatorios.concat(["senha", "nivelAcesso"]))
+    constructor(nomeSingular, nomePlural) {
+        super(nomeSingular, nomePlural)
+
+        Object.assign(this.attrsValidacao, {
+            senha: this._validaSenha,
+            nivelAcesso: this._validaNivelAcesso
+        })
+
+        this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
+    }
+
+    async _gerarAtributosJSON(objeto, local){
+        let o = await super._gerarAtributosJSON(objeto, local)
+        if(o.senha && local === "attrs"){
+            o.senha = await bcrypt.hash(o.senha, 10)
+        }
+        return o   
     }
 
     async gerarJWT(objeto) {
@@ -29,16 +45,14 @@ module.exports = class Ususarios extends PessoaFisica {
         return token
     }
 
-    async senhaAttr(novaSenha, local) {
+    async _validaSenha(novaSenha, local) {
         await this._validaNotNull("senha", novaSenha, local)
         await this._validaMinMaxChars("senha", novaSenha, 8, 255, local)
-        return bcrypt.hash(novaSenha, 10)
     }
 
-    async nivelAcessoAttr(novoNivelAcesso, local) {
+    async _validaNivelAcesso(novoNivelAcesso, local) {
         await this._validaNotNull("nivelAcesso", novoNivelAcesso, local)
         await this._validaInteiro("nivelAcesso", novoNivelAcesso, 0, 2, local)
-        return novoNivelAcesso
     }
 
 }

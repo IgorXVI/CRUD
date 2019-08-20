@@ -1,23 +1,45 @@
 const Model = require("./Model")
 module.exports = class Estoque extends Model {
     constructor() {
-        super("itemEstocado", "estoque", ["quantidade", "produto", "armazem"])
+        super("itemEstocado", "estoque")
+
+        Object.assign(this.attrsValidacao, {
+            quantidade: {
+                validacao: this._validaQuantidade,
+                sql: `INTEGER NOT NULL`
+            },
+            produto: {
+                validacao: this._validaProduto,
+                sql: `INTEGER NOT NULL`,
+                fk: {
+                    tabela: `produtos`,
+                    attr: `id`
+                }
+            },
+            armazem: {
+                validacao: this._validaArmazem,
+                sql: `INTEGER NOT NULL`,
+                fk: {
+                    tabela: `armazens`,
+                    attr: `id`
+                }
+            }
+        })
+
+        this._gerarSchema()
     }
 
-    async quantidadeAttr(novaQuantidade, local) {
+    async _validaQuantidade(novaQuantidade, local) {
         await this._validaNotNull("quantidade", novaQuantidade, local)
         await this._validaInteiro("quantidade", novaQuantidade, 0, undefined, local)
-        return novaQuantidade
     }
 
-    async produtoAttr(novoProduto, local) {
+    async _validaProduto(novoProduto, local) {
         await this._validaFK("produto", "produtos", novoProduto, local)
-        return novoProduto
     }
 
-    async armazemAttr(novoArmazem, local){
+    async _validaArmazem(novoArmazem, local) {
         await this._validaFK("armazem", "armazens", novoArmazem, local)
-        return novoArmazem
     }
 
 }

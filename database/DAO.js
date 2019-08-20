@@ -6,28 +6,62 @@ module.exports = class DAO {
         this._tabela = tabela
     }
 
-    async runQuery(sql, valores){
+    async runQuery(sql, valores) {
         const statement = this._connection.prepare(sql)
-        const info = statement.run(valores)
+        let info = undefined
+        if (valores) {
+            info = statement.run(valores)
+        } else {
+            info = statement.run()
+        }
         return info
     }
 
-    async getQuery(sql, valores){
+    async getQuery(sql, valores) {
         const statement = this._connection.prepare(sql)
-        const resultado = statement.get(valores)
+        let resultado = undefined
+        if (valores) {
+            resultado = statement.get(valores)
+        } else {
+            resultado = statement.get()
+        }
         return resultado
     }
 
-    async allQuery(sql, valores){
+    async allQuery(sql, valores) {
         const statement = this._connection.prepare(sql)
         let resultado = undefined
-        if(valores){
+        if (valores) {
             resultado = statement.all(valores)
-        }
-        else{
+        } else {
             resultado = statement.all()
         }
         return resultado
+    }
+
+    async criarSchema(attrs) {
+        let sql = `CREATE TABLE IF NOT EXISTS ${this._tabela}( `
+
+        const keys = Object.keys(attrs)
+        for (let i = 0; i < keys.length; i++) {
+            const k = keys[i]
+
+            if (attrs[k].sql) {
+                sql += `${k} ${attrs[k].sql}`
+
+                if (attrs[k].fk) {
+                    sql += `, FOREIGN KEY (${k}) REFERENCES ${attrs[k].fk.tabela}(${attrs[k].fk.attr})`
+                }
+
+                if (i != keys.length - 1) {
+                    sql += `, `
+                }
+            }
+        }
+
+        sql += ` );`
+
+        await this.runQuery(sql)
     }
 
     async adiciona(objeto) {
@@ -35,17 +69,17 @@ module.exports = class DAO {
         objeto.dataCriacao = await this.dataDeHoje()
 
         let colunas = Object.keys(objeto).join(',')
-        
+
         const valores = Object.values(objeto)
 
         const placeholders = valores.map(() => '?').join(',')
 
         const sql = `INSERT INTO ${this._tabela} (${colunas}) VALUES (${placeholders})`
-        
+
         return this.runQuery(sql, valores)
     }
 
-    async atualiza(objeto, query){
+    async atualiza(objeto, query) {
         objeto.dataAlteracao = await this.dataDeHoje()
 
         let colunas = Object.keys(objeto).join(',')
@@ -61,42 +95,42 @@ module.exports = class DAO {
         return this.runQuery(q.sql, q.valores)
     }
 
-    async deleta(query){
+    async deleta(query) {
         const q = await this.gerarQuery(`DELETE FROM ${this._tabela}`, query)
         return this.runQuery(q.sql, q.valores)
     }
 
-    async busca(query){
+    async busca(query) {
         const q = await this.gerarQuery(`SELECT * FROM ${this._tabela}`, query)
         return this.allQuery(q.sql, q.valores)
     }
 
-    async gerarQuery(sql, query){
-        if(query){
+    async gerarQuery(sql, query) {
+        if (query) {
             const q = JSON.parse(JSON.stringify(query))
 
             let sqlOrdem = ""
-            if(q.ordem && q.ordenarPor){
+            if (q.ordem && q.ordenarPor) {
                 sqlOrdem = ` ORDER BY ${q.ordenarPor} ${q.ordem}`
                 delete q.ordenarPor
                 delete q.ordem
             }
 
             let sqlLimite = ""
-            if(q.limite){
+            if (q.limite) {
                 sqlLimite = ` LIMIT ${q.limite}`
                 delete q.limite
             }
 
             let sqlWhere = ""
             const keys = Object.keys(q)
-            if(keys.length > 0){
+            if (keys.length > 0) {
                 sqlWhere = ` WHERE ${keys.map(k => `${k} = ?`).join(" AND ")}`
             }
-            
+
             return {
                 sql: `${sql}${sqlWhere}${sqlOrdem}${sqlLimite}`,
-                valores: Object.values(q) 
+                valores: Object.values(q)
             }
         }
         return {

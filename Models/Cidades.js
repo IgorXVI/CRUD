@@ -1,32 +1,49 @@
 const Model = require("./Model")
 
-module.exports = class Cidades extends Model{
-    constructor(){
-        super("cidade", "cidades", ["nome", "pais", "latitude", "longitude"])
+module.exports = class Cidades extends Model {
+    constructor() {
+        super("cidade", "cidades")
+
+        Object.assign(this.attrsValidacao, {
+            nome: {
+                validacao: this._validaNome,
+                sql: `VARCHAR(30) NOT NULL`
+            },
+            pais: {
+                validacao: this._validaPais,
+                sql: `VARCHAR(2) NOT NULL`
+            },
+            latitude: {
+                validacao: this._validaLatitude,
+                sql: `REAL NOT NULL`
+            },
+            longitude: {
+                validacao: this._validaLongitude,
+                sql: `REAL NOT NULL`
+            }
+        })
+
+        this._gerarSchema()
     }
 
-    async nomeAttr(novoNome, local){
+    async _validaNome(novoNome, local) {
         await this._validaNotNull("nome", novoNome, local)
-        await this._validaMinMaxChars("nome", novoNome, 1, 100, local)
-        return novoNome
+        await this._validaMinMaxChars("nome", novoNome, 1, 30, local)
     }
 
-    async paisAttr(novoPais, local) {
+    async _validaPais(novoPais, local) {
         await this._validaNotNull("pais", novoPais, local)
         await this._validaFixoChars("pais", novoPais, 2, local)
-        return novoPais
     }
 
-    async latitudeAttr(novaLatitude, local){
+    async _validaLatitude(novaLatitude, local) {
         await this._validaNotNull("latitude", novaLatitude, local)
         await this._validaDecimal("latitude", novaLatitude, -90, 90, local)
-        return novaLatitude
     }
 
-    async longitudeAttr(novaLongitude, local){
+    async _validaLongitude(novaLongitude, local) {
         await this._validaNotNull("longitude", novaLongitude, local)
         await this._validaDecimal("longitude", novaLongitude, -180, 180, local)
-        return novaLongitude
     }
 
 }

@@ -6,8 +6,8 @@ const db = new Database('data.db',  { verbose: log })
 log("Conectado ao banco de dados SQLite data.db")
 console.log("Conectado ao banco de dados SQLite data.db")
 
-const migration = fs.readFileSync('database/migrate-schema.sql', 'utf8')
-db.exec(migration)
+// const migration = fs.readFileSync('database/migrate-schema.sql', 'utf8')
+// db.exec(migration)
 
 process.on('exit', () =>{
     db.close()
