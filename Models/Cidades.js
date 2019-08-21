@@ -7,7 +7,7 @@ module.exports = class Cidades extends Model {
         Object.assign(this.attrs, {
             nome: {
                 validacao: this._validaNome,
-                sql: `VARCHAR(30) NOT NULL`
+                sql: `TEXT NOT NULL`
             },
             pais: {
                 validacao: this._validaPais,

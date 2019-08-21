@@ -25,25 +25,25 @@ module.exports = class Model {
 
         Object.assign(this.attrs, {
             id: {
-                validacao: this._validaId,
+                validacaoQuery: this._validaId,
                 sql: `INTEGER PRIMARY KEY AUTOINCREMENT`
             },
             dataAlteracao: {
-                validacao: this._validaDataAlteracao,
+                validacaoQuery: this._validaDataAlteracao,
                 sql: `VARCHAR(24) NOT NULL`
             },
             dataCriacao: {
-                validacao: this._validaDataCriacao,
+                validacaoQuery: this._validaDataCriacao,
                 sql: `VARCHAR(24) NOT NULL`
             },
             ordem: {
-                validacao: this._validaOrdem
+                validacaoQuery: this._validaOrdem
             },
             ordenarPor: {
-                validacao: this._validaOrdenarPor
+                validacaoQuery: this._validaOrdenarPor
             },
             limite: {
-                validacao: this._validaLimite
+                validacaoQuery: this._validaLimite
             }
         })
 
@@ -59,8 +59,13 @@ module.exports = class Model {
         return r
     }
 
-    async busca(query) {
-        const q = await this._gerarAtributosJSON(query, "query")
+    async umErroValidacao(param, value, msg, location) {
+        await this._adicionaErroValidacao(param, value, msg, location)
+        throw new Error("Erro de validação.")
+    }
+
+    async busca(query, local) {
+        const q = await this._gerarQueryJSON(query, local)
         let arr = await this._DAO.busca(q)
         for (let i = 0; i < arr.length; i++) {
             arr[i] = this._converterForeignKeyEmJSON(arr[i])
@@ -68,18 +73,18 @@ module.exports = class Model {
         return Promise.all(arr)
     }
 
-    async buscaUm(id) {
+    async buscaUm(id, local) {
         const resultado = (await this.busca({
             id
-        }))[0]
+        }, local))[0]
         if (!resultado) {
             return {}
         }
         return resultado
     }
 
-    async deleta(query) {
-        const q = await this._gerarAtributosJSON(query, "query")
+    async deleta(query, local) {
+        const q = await this._gerarQueryJSON(query, local)
         const changes = (await this._DAO.deleta(q)).changes
         return {
             changes
@@ -92,31 +97,33 @@ module.exports = class Model {
         })
     }
 
-    async atualiza(objeto, query) {
-        const o = await this._gerarAtributosJSON(objeto, "attrs")
-        const q = await this._gerarAtributosJSON(query, "query")
+    async atualiza(objeto, query, localObjeto, localQuery) {
+        const o = await this._gerarAtributosJSON(objeto, localObjeto)
+        const q = await this._gerarQueryJSON(query, localQuery)
         const changes = (await this._DAO.atualiza(o, q)).changes
         return {
             changes
         }
     }
 
-    async atualizaUm(objeto, id) {
+    async atualizaUm(objeto, id, localObjeto, localId) {
         return this.atualiza(objeto, {
             id
-        })
+        }, localObjeto, localId)
     }
 
-    async adiciona(listaObjetos) {
+    async adiciona(listaObjetos, local) {
         let l = []
         for (let i = 0; i < listaObjetos.length; i++) {
-            l.push(this.adicionaUm(listaObjetos[i]))
+            l.push(this.adicionaUm(listaObjetos[i], local))
         }
         return Promise.all(l)
     }
 
-    async adicionaUm(objeto) {
-        let o = await this._gerarAtributosJSON(objeto, "attrs")
+    async adicionaUm(objeto, local) {
+        let o = await this._gerarAtributosJSON(objeto, local)
+        o.dataCriacao = (new Date()).toISOString()
+
         const id = (await this._DAO.adiciona(o)).lastInsertRowid
         o.id = id
         return this._converterForeignKeyEmJSON(o)
@@ -124,25 +131,55 @@ module.exports = class Model {
 
     async _gerarSchema() {
         try {
-            await this._DAO.criarSchema(this.attrs)
+            let attrsSchema = {}
+            const keys = Object.keys(this.attrs)
+            for (let i = 0; i < keys.length; i++) {
+                const k = keys[i]
+
+                if (this.attrs[k].sql) {
+                    attrsSchema[k] = this.attrs[k]
+                }
+            }
+
+            await this._DAO.criarSchema(attrsSchema)
         } catch (e) {
             log(e)
             console.log(e)
         }
     }
 
-    async _gerarAtributosJSON(objeto, local) {
-        const keys = Object.keys(this.attrs)
+    async _gerarJSON(objeto, local, nomeAtributoDeValidacao) {
         let o = {}
+
+        const keys = Object.keys(this.attrs)
         for (let i = 0; i < keys.length; i++) {
             const k = keys[i]
-            await this.attrs[k].validacao(objeto[k], local)
-            o[k] = objeto[k]
-            o[k] = sanitizer.sanitize(o[k])
+
+            if (this.attrs[k][nomeAtributoDeValidacao]) {
+                await this.attrs[k][nomeAtributoDeValidacao](objeto[k], local)
+                o[k] = objeto[k]
+                o[k] = sanitizer.sanitize(o[k])
+            } else if (this.attrs[k].validacao) {
+                await this.attrs[k].validacao(objeto[k], local)
+                o[k] = objeto[k]
+                o[k] = sanitizer.sanitize(o[k])
+            }
         }
+
         if (this.errosValidacao.errors.length > 0) {
             throw new Error("Erros de validação.")
         }
+    }
+
+    async _gerarQueryJSON(query, local) {
+        return this._gerarJSON(query, local, "validacaoQuery")
+    }
+
+    async _gerarAtributosJSON(objeto, local) {
+        let o = await this._gerarJSON(objeto, local, "validacaoAttr")
+
+        o.dataAlteracao = (new Date()).toISOString()
+
         return o
     }
 
@@ -172,91 +209,64 @@ module.exports = class Model {
     }
 
     async _validaId(novoId, local) {
-        if (local !== "query" && novoId) {
-            await this._adicionaErroValidacao("id", novoId, "Parâmetro inválido.", local)
-        } else {
-            await this._validaNotNull("id", novoId, local)
-            await this._validaInteiro(`id`, novoId, 1, undefined, local)
-        }
+        await this._validaPK("id", novoId, local)
     }
 
     async _validaDataAlteracao(data, local) {
-        if (local !== "query" && data) {
-            await this._adicionaErroValidacao("dataAlteracao", data, "Parâmetro inválido.", local)
-        } else {
-            await this._validaDataISO8601("dataAlteracao", data, "query")
-        }
+        await this._validaDataISO8601("dataAlteracao", data, local)
     }
 
     async _validaDataCriacao(data, local) {
-        if (local !== "query" && data) {
-            await this._adicionaErroValidacao("dataCriacao", data, "Parâmetro inválido.", local)
-        } else {
-            await this._validaDataISO8601("dataCriacao", data, "query")
-        }
+        await this._validaDataISO8601("dataCriacao", data, local)
     }
 
     async _validaOrdem(ordem, local) {
-        if (local !== "query" && ordem) {
-            await this._adicionaErroValidacao("ordem", ordem, "Parâmetro inválido.", local)
-        } else {
-            if (ordem !== "ASC" && ordem !== "DESC") {
-                await this._adicionaErroValidacao("ordem", ordem, "A ordem deve ser ASC ou DESC", "query")
-            }
+        if (ordem !== "ASC" && ordem !== "DESC") {
+            await this._adicionaErroValidacao("ordem", ordem, "A ordem deve ser ASC ou DESC", local)
         }
     }
 
     async _validaOrdenarPor(ordenarPor, local) {
-        if (local !== "query" && ordenarPor) {
+        if (!Object.keys(this.attrs).includes(ordenarPor)) {
             await this._adicionaErroValidacao("ordenarPor", ordenarPor, "Parâmetro inválido.", local)
-        } else {
-            if (!Object.keys(this.attrs).includes(ordenarPor)) {
-                await this._adicionaErroValidacao("ordenarPor", ordenarPor, "Parâmetro inválido.", "query")
-            }
         }
     }
 
     async _validaLimite(limite, local) {
-        if (local !== "query" && limite) {
-            await this._adicionaErroValidacao("limite", limite, "Parâmetro inválido.", local)
-        } else {
-            await this._validaNotNull("limite", limite, "query")
-            await this._validaInteiro("limite", limite, 1, undefined, "query")
-        }
+        await this._validaNotNull("limite", limite, local)
+        await this._validaInteiro("limite", limite, 1, undefined, local)
+    }
+
+    async _validaPK(nomeSingular, PK, local) {
+        await this._validaNotNull(nomeSingular, PK, local)
+        await this._validaInteiro(nomeSingular, PK, 1, undefined, local)
     }
 
     async _validaFK(nomeSingular, nomePlural, FK, local) {
-        if (local === "attrs") {
-            await this._validaNotNull(nomeSingular, FK, local)
-            await this._validaInteiro(nomeSingular, FK, 1, local)
+        await this._validaPK(nomeSingular, FK, local)
 
-            const DAOFK = new DAO(nomePlural)
-            const objeto = await DAOFK.busca({
-                id: FK
-            })
-            if (objeto.length === 0) {
-                await this._adicionaErroValidacao(nomeSingular, FK, "O valor informado não está cadastrado", local)
-            }
+        const DAOFK = new DAO(nomePlural)
+        const objeto = await DAOFK.busca({
+            id: FK
+        })
+        if (objeto.length === 0) {
+            await this._adicionaErroValidacao(nomeSingular, FK, "O valor informado não está cadastrado", local)
         }
     }
 
     async _validaCombinacaoUnica(query, local) {
-        if (local === "attrs") {
-            const objeto = await this._DAO.busca(query)
-            if (objeto.length > 0) {
-                await this._adicionaErroValidacao(Object.keys(query), Object.values(query), "Não podem existir dois atributos com os valores iguais paras os atributos.", local)
-            }
+        const objeto = await this._DAO.busca(query)
+        if (objeto.length > 0) {
+            await this._adicionaErroValidacao(Object.keys(query), Object.values(query), "Não podem existir dois atributos com os valores iguais paras os atributos.", local)
         }
     }
 
     async _validaCampoUnico(atributo, valor, local) {
-        if (local === "attrs") {
-            let query = {}
-            query[atributo] = valor
-            const objeto = await this._DAO.busca(query)
-            if (objeto.length > 0) {
-                await this._adicionaErroValidacao(atributo, valor, "O valor informado já está cadastrado.", local)
-            }
+        let query = {}
+        query[atributo] = valor
+        const objeto = await this._DAO.busca(query)
+        if (objeto.length > 0) {
+            await this._adicionaErroValidacao(atributo, valor, "O valor informado já está cadastrado.", local)
         }
     }
 

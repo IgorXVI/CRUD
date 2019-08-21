@@ -10,7 +10,8 @@ module.exports = class Vendas extends Model {
                 sql: `REAL NOT NULL`
             },
             cliente: {
-                validacao: this._validaCliente,
+                validacaoQuery: this._validaClienteQuery,
+                validacaoAttr: this._validaClienteAttr,
                 sql: `INTEGER NOT NULL`,
                 fk: {
                     tabela: `clientes`,
@@ -27,7 +28,11 @@ module.exports = class Vendas extends Model {
         await this._validaDecimal("valorTotal", novoValorTotal, 0, undefined, local)
     }
 
-    async _validaCliente(novoCliente, local) {
+    async _validaClienteQuery(novoCliente, local) {
+        await this._validaPK("cliente", novoCliente, local)
+    }
+
+    async _validaClienteAttr(novoCliente, local) {
         await this._validaFK("cliente", "clientes", novoCliente, local)
     }
 

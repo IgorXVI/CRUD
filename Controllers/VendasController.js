@@ -87,13 +87,18 @@ module.exports = class VendasController extends Controller {
         let i = JSON.parse(JSON.stringify(item))
 
         const produto = await this.produtos.buscaUm(i.produto)
+
+        if(produto.quantidadeNoEstoque < i.quantidade){
+            await this.itensVenda.umErroValidacao(["produto", "quantidade"], [i.produto, i.quantidade], "Não existem produtos suficientes estocados para realizar essa venda.", "req.body")
+        }
+
         i.valorTotal = produto.precoUnidade * i.quantidade
         i.venda = idVenda
 
         return i
     }
 
-    validaItensVenda(itens){
+    async validaItensVenda(itens){
         let novosItensVenda2 = []
         let valorTotal = 0
         let estLista = []

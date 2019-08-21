@@ -9,7 +9,8 @@ module.exports = class Estoque extends Model {
                 sql: `INTEGER NOT NULL`
             },
             produto: {
-                validacao: this._validaProduto,
+                validacaoQuery:  this._validaProdutoQuery,
+                validacaoAttr:  this._validaProdutoAttr,
                 sql: `INTEGER NOT NULL`,
                 fk: {
                     tabela: `produtos`,
@@ -17,7 +18,8 @@ module.exports = class Estoque extends Model {
                 }
             },
             armazem: {
-                validacao: this._validaArmazem,
+                validacaoQuery:  this._validaArmazemQuery,
+                validacaoAttr:  this._validaArmazemAttr,
                 sql: `INTEGER NOT NULL`,
                 fk: {
                     tabela: `armazens`,
@@ -45,11 +47,19 @@ module.exports = class Estoque extends Model {
         await this._validaInteiro("quantidade", novaQuantidade, 0, undefined, local)
     }
 
-    async _validaProduto(novoProduto, local) {
+    async _validaProdutoQuery(novoProduto, local) {
+        await this._validaPK("produto", novoProduto, local)
+    }
+
+    async _validaProdutoAttr(novoProduto, local) {
         await this._validaFK("produto", "produtos", novoProduto, local)
     }
 
-    async _validaArmazem(novoArmazem, local) {
+    async _validaArmazemQuery(novoArmazem, local) {
+        await this._validaPK("armazem", novoArmazem, local)
+    }
+
+    async _validaArmazemAttr(novoArmazem, local) {
         await this._validaFK("armazem", "armazens", novoArmazem, local)
     }
 

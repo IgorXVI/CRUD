@@ -1,4 +1,5 @@
 const Model = require("./Model")
+const DAO = require("../database/DAO")
 
 module.exports = class Produtos extends Model {
     constructor() {
@@ -7,11 +8,11 @@ module.exports = class Produtos extends Model {
         Object.assign(this.attrs, {
             nome: {
                 validacao: this._validaNome,
-                sql: `VARCHAR(100) NOT NULL UNIQUE`
+                sql: `TEXT NOT NULL UNIQUE`
             },
             categoria: {
                 validacao: this._validaCategoria,
-                sql: `VARCHAR(100) NOT NULL`
+                sql: `TEXT NOT NULL`
             },
             precoUnidade: {
                 validacao: this._validaPrecoUnidade,
@@ -34,7 +35,8 @@ module.exports = class Produtos extends Model {
                 sql: `VARCHAR(10) NOT NULL`
             },
             fornecedor: {
-                validacao: this._validaFornecedor,
+                validacaoQuery: this._validaFornecedorQuery,
+                validacaoAttr: this._validaFornecedorAttr,
                 sql: `INTEGER NOT NULL`,
                 fk: {
                     tabela: `fornecedores`,
@@ -43,7 +45,23 @@ module.exports = class Produtos extends Model {
             }
         })
 
+        this._converterForeignKeyEmJSON = this._converterForeignKeyEmJSON.bind(this)
+
         this._gerarSchema()
+    }
+
+    async _converterForeignKeyEmJSON(objeto) {
+        let o = await super._converterForeignKeyEmJSON(objeto)
+
+        const estoqueDAO = new DAO("estoque")
+        const listaEstoque = estoqueDAO.busca({
+            produto: o.id
+        })
+        o.quantidadeNoEstoque = listaEstoque.reduce((acumulador, valorAtual) => {
+            acumulador + valorAtual.quantidade
+        }, 0)
+
+        return o
     }
 
     async _validaNome(novoNome, local) {
@@ -82,7 +100,11 @@ module.exports = class Produtos extends Model {
         await this._validaDataISO8601("dataValidade", novaDataValidade, local)
     }
 
-    async _validaFornecedor(novoFornecedor, local) {
+    async _validaFornecedorQuery(novoFornecedor, local) {
+        await this._validaPK("fornecedor", novoFornecedor, local)
+    }
+
+    async _validaFornecedorAttr(novoFornecedor, local) {
         await this._validaFK("fornecedor", "fornecedores", novoFornecedor, local)
     }
 

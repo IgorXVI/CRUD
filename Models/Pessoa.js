@@ -7,11 +7,12 @@ module.exports = class Pessoa extends AlgoComEndereco {
         Object.assign(this.attrs, {
             nome: {
                 validacao: this._validaNome,
-                sql: `VARCHAR(30) NOT NULL`
+                sql: `TEXT NOT NULL`
             },
             email: {
-                validacao: this._validaEmail,
-                sql: `VARCHAR(255) NOT NULL UNIQUE`
+                validacaoAttr: this._validaEmailAttr,
+                validacaoQuery: this._validaEmail,
+                sql: `TEXT NOT NULL UNIQUE`
             }
         })
     }
@@ -24,8 +25,12 @@ module.exports = class Pessoa extends AlgoComEndereco {
     async _validaEmail(novoEmail, local) {
         await this._validaNotNull("email", novoEmail, local)
         await this._validaMaxChars("email", novoEmail, 255, local)
-        await this._validaCampoUnico("email", novoEmail, local)
         await this._validaRegex("email", novoEmail, /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/, local)
+    }
+
+    async _validaEmailAttr(novoEmail, local) {
+        await this._validaEmail(novoEmail, local)
+        await this._validaCampoUnico("email", novoEmail, local)
     }
 
 }

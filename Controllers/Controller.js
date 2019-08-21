@@ -26,7 +26,7 @@ module.exports = class Controller {
         this.router.get(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
                 this.inicio(req, res, `Buscando ${this.nomePlural}...`)
-                const resultado = await this.model.busca(req.query)
+                const resultado = await this.model.busca(req.query, "req.query")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -39,7 +39,7 @@ module.exports = class Controller {
         this.router.get(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 this.inicio(req, res, `Buscando ${this.nomeSingular} com id = ${req.params.id}...`)
-                const resultado = await this.model.buscaUm(req.params.id)
+                const resultado = await this.model.buscaUm(req.params.id, "req.params.id")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -52,7 +52,7 @@ module.exports = class Controller {
         this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
                 this.inicio(req, res, `Adicionando ${this.nomePlural}...`)
-                const resultado = await this.model.adiciona(req.body)
+                const resultado = await this.model.adiciona(req.body, "req.body")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -65,7 +65,7 @@ module.exports = class Controller {
         this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
             try {
                 this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-                const resultado = await this.model.adicionaUm(req.body)
+                const resultado = await this.model.adicionaUm(req.body, "req.body")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -78,7 +78,7 @@ module.exports = class Controller {
         this.router.delete(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
                 this.inicio(req, res, `Deletando ${this.nomePlural}...`)
-                const resultado = await this.model.deleta(req.query)
+                const resultado = await this.model.deleta(req.query, "req.query")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -91,7 +91,7 @@ module.exports = class Controller {
         this.router.delete(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 this.inicio(req, res, `Deletando ${this.nomeSingular} com id = ${req.params.id}...`)
-                const resultado = await this.model.deletaUm(req.params.id)
+                const resultado = await this.model.deletaUm(req.params.id, "req.params.id")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -104,7 +104,7 @@ module.exports = class Controller {
         this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
             try {
                 this.inicio(req, res, `Atualizando ${this.nomePlural}...`)
-                const resultado = await this.model.atualiza(req.body, req.query)
+                const resultado = await this.model.atualiza(req.body, req.query, "req.body", "req.query")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {
@@ -117,7 +117,7 @@ module.exports = class Controller {
         this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}/:id`, async (req, res) => {
             try {
                 this.inicio(req, res, `Atualizando ${this.nomeSingular} com id = ${req.params.id}...`)
-                const resultado = await this.model.atualizaUm(req.body, req.params.id)
+                const resultado = await this.model.atualizaUm(req.body, req.params.id, "req.body", "req.params.id")
                 res.status(200).json(resultado)
                 this.fim(req, res)
             } catch (erro) {

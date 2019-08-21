@@ -9,7 +9,7 @@ module.exports = class Ususarios extends PessoaFisica {
         Object.assign(this.attrs, {
             senha: {
                 validacao: this._validaSenha,
-                sql: `VARCHAR(8) NOT NULL`
+                sql: `TEXT NOT NULL`
             },
             nivelAcesso: {
                 validacao: this._validaNivelAcesso,
@@ -28,18 +28,18 @@ module.exports = class Ususarios extends PessoaFisica {
         return o
     }
 
-    async gerarJWT(objeto) {
-        await this._gerarAtributosJSON(objeto, "attrs")
+    async gerarJWT(objeto, local) {
+        await this._gerarAtributosJSON(objeto, local)
         const dadosBanco = await this._DAO.busca({
             email: objeto.email
         })
         if (!dadosBanco) {
-            await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", "attrs")
+            await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", local)
             throw new Error("Erros de validação.")
         }
         const senhaEhValida = await bcrypt.compare(objeto.senha, dadosBanco.senha)
         if (!senhaEhValida) {
-            await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", "attrs")
+            await this.adicionaErroValidacao("email ou senha", `${objeto.email} ou ${objeto.senha}`, "Email ou senha incorretos.", local)
             throw new Error("Erros de validação.")
         }
         const token = jwt.sign({

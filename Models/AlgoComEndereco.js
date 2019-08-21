@@ -6,7 +6,8 @@ module.exports = class AlgoComEndereco extends Model {
 
         Object.assign(this.attrs, {
             cidade: {
-                validacao: this._validaCidade,
+                validacaoQuery: this._validaCidadeQuery,
+                validacaoAttr: this._validaCidadeAttr,
                 sql: `INTEGER NOT NULL`,
                 fk: {
                     tabela: `cidades`,
@@ -15,11 +16,11 @@ module.exports = class AlgoComEndereco extends Model {
             },
             bairro: {
                 validacao: this._validaBairro,
-                sql: `VARCHAR(25) NOT NULL`
+                sql: `TEXT NOT NULL`
             },
             rua: {
                 validacao: this._validaRua,
-                sql: `VARCHAR(25) NOT NULL`
+                sql: `TEXT NOT NULL`
             },
             numeroCasa: {
                 validacao: this._validaNumeroCasa,
@@ -31,12 +32,16 @@ module.exports = class AlgoComEndereco extends Model {
             },
             complemento: {
                 validacao: this._validaComplemento,
-                sql: `VARCHAR(255)`
+                sql: `TEXT`
             }
         })
     }
 
-    async _validaCidade(novaCidade, local) {
+    async _validaCidadeQuery(novaCidade, local){
+        await this._validaPK("cidade", novaCidade, local)
+    }
+
+    async _validaCidadeAttr(novaCidade, local) {
         await this._validaFK("cidade", "cidades", novaCidade, local)
     }
 

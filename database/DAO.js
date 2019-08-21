@@ -48,16 +48,14 @@ module.exports = class DAO {
         for (let i = 0; i < keys.length; i++) {
             const k = keys[i]
 
-            if (attrs[k].sql) {
-                sql += `${k} ${attrs[k].sql}`
+            sql += `${k} ${attrs[k].sql}`
 
-                if (attrs[k].fk) {
-                    listaFKs.push(`FOREIGN KEY (${k}) REFERENCES ${attrs[k].fk.tabela}(${attrs[k].fk.attr})`)
-                }
+            if (attrs[k].fk) {
+                listaFKs.push(`FOREIGN KEY (${k}) REFERENCES ${attrs[k].fk.tabela}(${attrs[k].fk.attr})`)
+            }
 
-                if (i != keys.length - 1 || listaFKs.length > 0) {
-                    sql += `,\n`
-                }
+            if (i != keys.length - 1 || listaFKs.length > 0) {
+                sql += `,\n`
             }
         }
 
@@ -77,9 +75,6 @@ module.exports = class DAO {
     }
 
     async adiciona(objeto) {
-        objeto.dataAlteracao = await this.dataDeHoje()
-        objeto.dataCriacao = await this.dataDeHoje()
-
         let colunas = Object.keys(objeto).join(',')
 
         const valores = Object.values(objeto)
@@ -92,8 +87,6 @@ module.exports = class DAO {
     }
 
     async atualiza(objeto, query) {
-        objeto.dataAlteracao = await this.dataDeHoje()
-
         let colunas = Object.keys(objeto).join(',')
 
         let valores = Object.values(objeto)
@@ -148,10 +141,6 @@ module.exports = class DAO {
         return {
             sql
         }
-    }
-
-    async dataDeHoje() {
-        return new Date().toISOString()
     }
 
 }

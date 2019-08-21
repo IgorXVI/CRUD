@@ -6,7 +6,8 @@ module.exports = class PessoaFisica extends Pessoa {
 
         Object.assign(this.attrs, {
             CPF: {
-                validacao: this._validaCPF,
+                validacaoAttr: this._validaCPFAttr,
+                validacaoQuery: this._validaCPF,
                 sql: `VARCHAR(14) NOT NULL UNIQUE`
             },
             dataNascimento: {
@@ -19,8 +20,12 @@ module.exports = class PessoaFisica extends Pessoa {
     async _validaCPF(novoCPF, local) {
         await this._validaNotNull("CPF", novoCPF, local)
         await this._validaFixoChars("CPF", novoCPF, 14, local)
-        await this._validaCampoUnico("CPF", novoCPF, local)
         await this._validaRegex("CPF", novoCPF, /^[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}$/, local)
+    }
+
+    async _validaCPFAttr(novoCPF, local){
+        await this._validaCPF(novoCPF, local)
+        await this._validaCampoUnico("CPF", novoCPF, local)
     }
 
     async _validaDataNascimento(novaDataNascimento, local) {

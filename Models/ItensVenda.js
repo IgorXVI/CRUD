@@ -14,7 +14,8 @@ module.exports = class ItensVenda extends Model {
                 sql: `INTEGER NOT NULL`
             },
             produto: {
-                validacao: this._validaProduto,
+                validacaoQuery: this._validaProdutoQuery,
+                validacaoAttr: this._validaProdutoAttr,
                 sql: `INTEGER NOT NULL`,
                 fk: {
                     tabela: `produtos`,
@@ -22,7 +23,8 @@ module.exports = class ItensVenda extends Model {
                 }
             },
             venda: {
-                validacao: this._validaVenda,
+                validacaoQuery: this._validaVendaQuery,
+                validacaoAttr: this._validaVendaAttr,
                 sql: `INTEGER NOT NULL`,
                 fk: {
                     tabela: `vendas`,
@@ -55,11 +57,19 @@ module.exports = class ItensVenda extends Model {
         await this._validaInteiro("quantidade", novaQuantidade, 1, undefined, local)
     }
 
-    async _validaProduto(novoProduto, local) {
+    async _validaProdutoQuery(novoProduto, local) {
+        await this._validaPK("produto", novoProduto, local)
+    }
+
+    async _validaProdutoAttr(novoProduto, local) {
         await this._validaFK("produto", "produtos", novoProduto, local)
     }
 
-    async _validaVenda(novaVenda, local) {
+    async _validaVendaQuery(novaVenda, local) {
+        await this._validaPK("venda", novaVenda, local)
+    }
+
+    async _validaVendaAttr(novaVenda, local) {
         await this._validaFK("venda", "vendas", novaVenda, local)
     }
 
