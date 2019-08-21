@@ -1,8 +1,8 @@
 module.exports = class ErrorHelper {
-    async formatError(param, value, msg, location){
+    async formatError(attr, value, msg, location){
         let erroFormatado = {
             msg,
-            param,
+            attr,
             value,
             location
         }

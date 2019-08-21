@@ -26,7 +26,18 @@ module.exports = class Estoque extends Model {
             }
         })
 
+        this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
+
         this._gerarSchema()
+    }
+
+    async _gerarAtributosJSON(objeto, local) {
+        const o = await super._gerarAtributosJSON(objeto, local)
+        await this._validaCombinacaoUnica({armazem: o.armazem, produto: o.produto}, local)
+        if (this.errosValidacao.errors.length > 0) {
+            throw new Error("Erros de validação.")
+        }
+        return o
     }
 
     async _validaQuantidade(novaQuantidade, local) {

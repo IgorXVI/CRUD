@@ -3,12 +3,16 @@ const sanitizer = require('sanitizer')
 const ErrorHelper = require("../Helpers/ErrorHelper")
 const log = require('log-to-file')
 
+const nomesPlural = require("./nomesPlural")
+
 module.exports = class Model {
     constructor(nomeSingular, nomePlural) {
         this.nomeSingular = nomeSingular
         this.nomePlural = nomePlural
 
         this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
+
+        nomesPlural[nomeSingular] = nomePlural
 
         this._DAO = new DAO(nomePlural)
 
@@ -147,14 +151,16 @@ module.exports = class Model {
         const keys = Object.keys(o)
 
         for (let i = 0; i < keys.length; i++) {
-            const k = keys[i]
-            if (this.attrs[k].fk) {
-                let query = {}
-                query[this.attrs[k].fk.attr] = o[k]
+            if (Object.keys(nomesPlural).includes(keys[i])) {
+                let nomeSingular = keys[i]
+                let nomePlural = nomesPlural[nomeSingular]
 
-                let resultado = await (new DAO(this.attrs[k].fk.tabela)).busca(query)
+                let resultado = await (new DAO(nomePlural)).busca({
+                    id: o[nomeSingular]
+                })
                 resultado = await this._converterForeignKeyEmJSON(resultado)
-                o[k] = resultado
+
+                o[nomeSingular] = resultado
             }
         }
         return o
@@ -166,8 +172,12 @@ module.exports = class Model {
     }
 
     async _validaId(novoId, local) {
-        await this._validaNotNull("id", novoId, local)
-        await this._validaInteiro(`id`, novoId, 1, undefined, local)
+        if (local !== "query" && novoId) {
+            await this._adicionaErroValidacao("id", novoId, "Parâmetro inválido.", local)
+        } else {
+            await this._validaNotNull("id", novoId, local)
+            await this._validaInteiro(`id`, novoId, 1, undefined, local)
+        }
     }
 
     async _validaDataAlteracao(data, local) {
@@ -226,6 +236,15 @@ module.exports = class Model {
             })
             if (objeto.length === 0) {
                 await this._adicionaErroValidacao(nomeSingular, FK, "O valor informado não está cadastrado", local)
+            }
+        }
+    }
+
+    async _validaCombinacaoUnica(query, local) {
+        if (local === "attrs") {
+            const objeto = await this._DAO.busca(query)
+            if (objeto.length > 0) {
+                await this._adicionaErroValidacao(Object.keys(query), Object.values(query), "Não podem existir dois atributos com os valores iguais paras os atributos.", local)
             }
         }
     }
