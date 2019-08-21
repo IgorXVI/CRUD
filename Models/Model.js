@@ -59,11 +59,6 @@ module.exports = class Model {
         return r
     }
 
-    async umErroValidacao(param, value, msg, location) {
-        await this._adicionaErroValidacao(param, value, msg, location)
-        throw new Error("Erro de validação.")
-    }
-
     async busca(query, local) {
         const q = await this._gerarQueryJSON(query, local)
         let arr = await this._DAO.busca(q)
@@ -91,10 +86,10 @@ module.exports = class Model {
         }
     }
 
-    async deletaUm(id) {
+    async deletaUm(id, local) {
         return this.deleta({
             id
-        })
+        }, local)
     }
 
     async atualiza(objeto, query, localObjeto, localQuery) {
@@ -121,7 +116,7 @@ module.exports = class Model {
     }
 
     async adicionaUm(objeto, local) {
-        let o = await this._gerarAtributosJSON(objeto, local)
+        let o = await this._gerarAtributosJSON(objeto, local, true)
         o.dataCriacao = (new Date()).toISOString()
 
         const id = (await this._DAO.adiciona(o)).lastInsertRowid
@@ -148,12 +143,17 @@ module.exports = class Model {
         }
     }
 
-    async _gerarJSON(objeto, local, nomeAtributoDeValidacao) {
+    async _gerarJSON(objeto, local, nomeAtributoDeValidacao, todosObrigatorios) {
         let o = {}
 
         const keys = Object.keys(this.attrs)
         for (let i = 0; i < keys.length; i++) {
             const k = keys[i]
+
+            if(todosObrigatorios && !objeto[k]){
+                await this._adicionaErroValidacao(k, undefined, "O atributo deve ser informado", local)
+                break
+            }
 
             if (this.attrs[k][nomeAtributoDeValidacao]) {
                 await this.attrs[k][nomeAtributoDeValidacao](objeto[k], local)
@@ -175,8 +175,8 @@ module.exports = class Model {
         return this._gerarJSON(query, local, "validacaoQuery")
     }
 
-    async _gerarAtributosJSON(objeto, local) {
-        let o = await this._gerarJSON(objeto, local, "validacaoAttr")
+    async _gerarAtributosJSON(objeto, local, todosObrigatorios) {
+        let o = await this._gerarJSON(objeto, local, "validacaoAttr", todosObrigatorios)
 
         o.dataAlteracao = (new Date()).toISOString()
 
@@ -203,9 +203,9 @@ module.exports = class Model {
         return o
     }
 
-    async _adicionaErroValidacao(param, value, msg, location) {
+    async _adicionaErroValidacao(attr, value, msg, location) {
         const errorHelper = new ErrorHelper()
-        this.errosValidacao.errors.push(await errorHelper.formataErro(param, value, msg, location))
+        this.errosValidacao.errors.push(await errorHelper.formataErro(attr, value, msg, location))
     }
 
     async _validaId(novoId, local) {
