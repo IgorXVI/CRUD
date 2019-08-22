@@ -19,47 +19,11 @@ module.exports = class VendasController extends Controller {
         this.gerarRotaBusca()
         this.gerarRotaDeletaUm()
         this.gerarRotaDeleta()
-
-        this.gerarRotaAdiciona()
         this.gerarRotaAdicionaUm()
 
         this.gerarRotaBuscaItens()
         this.gerarRotaAdicionaUmItem()
         this.gerarRotaDeletaUmItem()
-    }
-
-    gerarRotaAdiciona() {
-        this.router.post(`${this.proxy}/${this.nomePlural}`, async (req, res) => {
-            try {
-                this.inicio(req, res, `Adicionando ${this.nomePlural}...`)
-
-                for(let i = 0; i < req.body.length; i++){
-                    req.body[i].valorTotal = 0
-                }
-
-                const resultado = await this.model.adiciona(req.body, "req.body")
-                res.status(200).json(resultado)
-                this.fim(req, res)
-            } catch (erro) {
-                await this.lidarComErro(erro, req, res)
-            }
-        })
-    }
-
-    gerarRotaAdicionaUm() {
-        this.router.post(`${this.proxy}/${this.nomePlural}/${this.nomeSingular}`, async (req, res) => {
-            try {
-                this.inicio(req, res, `Adicionando ${this.nomeSingular}...`)
-
-                req.body.valorTotal = 0
-                const resultado = await this.model.adicionaUm(req.body, "req.body")
-                res.status(200).json(resultado)
-
-                this.fim(req, res)
-            } catch (erro) {
-                await this.lidarComErro(erro, req, res)
-            }
-        })
     }
 
     gerarRotaBuscaItens(){

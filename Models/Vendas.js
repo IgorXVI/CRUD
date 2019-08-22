@@ -20,7 +20,19 @@ module.exports = class Vendas extends Model {
             }
         })
 
+        this.adicionaUm = this.adicionaUm.bind(this)
+
         this._gerarSchema()
+    }
+
+    async adicionaUm(objeto, local) {
+        let o = await this._gerarAtributosJSON(objeto, local, true)
+        o.dataCriacao = (new Date()).toISOString()
+        o.valorTotal = 0
+
+        const id = (await this._DAO.adiciona(o)).lastInsertRowid
+        o.id = id
+        return this._converterForeignKeyEmJSON(o)
     }
 
     async _validaValorTotal(novoValorTotal, local) {

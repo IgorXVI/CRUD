@@ -1,5 +1,4 @@
 const Model = require("./Model")
-const DAO = require("../database/DAO")
 
 module.exports = class Produtos extends Model {
     constructor() {
@@ -45,23 +44,7 @@ module.exports = class Produtos extends Model {
             }
         })
 
-        this._converterForeignKeyEmJSON = this._converterForeignKeyEmJSON.bind(this)
-
         this._gerarSchema()
-    }
-
-    async _converterForeignKeyEmJSON(objeto) {
-        let o = await super._converterForeignKeyEmJSON(objeto)
-
-        const estoqueDAO = new DAO("estoque")
-        const listaEstoque = estoqueDAO.busca({
-            produto: o.id
-        })
-        o.quantidadeNoEstoque = listaEstoque.reduce((acumulador, valorAtual) => {
-            acumulador + valorAtual.quantidade
-        }, 0)
-
-        return o
     }
 
     async _validaNome(novoNome, local) {

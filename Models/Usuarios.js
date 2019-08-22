@@ -20,8 +20,8 @@ module.exports = class Ususarios extends PessoaFisica {
         this._gerarAtributosJSON = this._gerarAtributosJSON.bind(this)
     }
 
-    async _gerarAtributosJSON(objeto, local) {
-        let o = await super._gerarAtributosJSON(objeto, local)
+    async _gerarAtributosJSON(objeto, local, todosObrigatorios) {
+        let o = await super._gerarAtributosJSON(objeto, local, todosObrigatorios)
         if (o.senha && local === "attrs") {
             o.senha = await bcrypt.hash(o.senha, 10)
         }

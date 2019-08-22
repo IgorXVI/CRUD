@@ -1,5 +1,4 @@
 const Model = require("./Model")
-const DAO = require("../database/DAO")
 
 module.exports = class ItensVenda extends Model {
     constructor() {
@@ -39,19 +38,8 @@ module.exports = class ItensVenda extends Model {
         this._gerarSchema()
     }
 
-    async _gerarAtributosJSON(objeto, local) {
-        const o = await super._gerarAtributosJSON(objeto, local)
-
-        const estoqueDAO = new DAO("estoque")
-        const listaEstoque = estoqueDAO.busca({
-            produto: o.produto
-        })
-        const quantidadeNoEstoque = listaEstoque.reduce((acumulador, valorAtual) => {
-            acumulador + valorAtual.quantidade
-        }, 0)
-        if (quantidadeNoEstoque < o.quantiade) {
-            await this._adicionaErroValidacao(["produto", "quantidade"], [o.produto, o.quantidade], "Não existem produtos suficientes estocados para realizar essa venda.", local)
-        }
+    async _gerarAtributosJSON(objeto, local, todosObrigatorios) {
+        const o = await super._gerarAtributosJSON(objeto, local, todosObrigatorios)
 
         await this._validaCombinacaoUnica({
             venda: o.venda,
@@ -61,12 +49,6 @@ module.exports = class ItensVenda extends Model {
         if (this.errosValidacao.errors.length > 0) {
             throw new Error("Erros de validação.")
         }
-
-        const produtosDAO = new DAO("produtos")
-        const produtoPrecoUnidade = ( produtosDAO.busca({
-            id: o.produto
-        }) )[0].precoUnidade
-        o.valorTotal = produtoPrecoUnidade * o.quantiade
 
         return o
     }

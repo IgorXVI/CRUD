@@ -33,8 +33,8 @@ module.exports = class Estoque extends Model {
         this._gerarSchema()
     }
 
-    async _gerarAtributosJSON(objeto, local) {
-        const o = await super._gerarAtributosJSON(objeto, local)
+    async _gerarAtributosJSON(objeto, local, todosObrigatorios) {
+        const o = await super._gerarAtributosJSON(objeto, local, todosObrigatorios)
         await this._validaCombinacaoUnica({armazem: o.armazem, produto: o.produto}, local)
         if (this.errosValidacao.errors.length > 0) {
             throw new Error("Erros de validação.")
