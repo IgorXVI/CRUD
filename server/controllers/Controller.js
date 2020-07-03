@@ -272,11 +272,10 @@ module.exports = class Controller {
 
     erroServidor(erro, res) {
         console.error(erro)
-        const erro = [{
-            msg: "Erro no servidor."
-        }]
         res.status(500).json({
-            erro
+            erro: [{
+                msg: "Erro no servidor."
+            }]
         })
         this.fim()
     }
@@ -631,7 +630,7 @@ module.exports = class Controller {
         return validacoes
     }
 
-    validaCampoUnico(DAO, campo){
+    validaCampoUnico(DAO, campo) {
         return body(campo).custom(valor => {
             return DAO.buscaPorColuna(valor, campo).then(objeto => {
                 if (objeto) {
